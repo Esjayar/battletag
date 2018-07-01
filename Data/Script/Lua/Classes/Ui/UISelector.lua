@@ -19,6 +19,9 @@ require "UI/UIMenuWindow"
 
     require "UI/UIArrowDown"
     require "UI/UIArrowUp"
+	require "Ui/UIPicture"
+	require "Ui/UIComponent"
+	require "UI/UIScrollBar"
 
 --[[ Class -----------------------------------------------------------------]]
 
@@ -29,6 +32,18 @@ UISelector = UTClass(UIMenuWindow)
 -- defaults
 
 UISelector.capacity = 6
+
+UISelector.iconType = {
+    [1] = "title012",
+    [2] = "title009",
+    [3] = "title010"
+}
+
+UISelector.iconTypeColor = {
+    [1] = UIComponent.colors.blue,
+    [2] = UIComponent.colors.green,
+    [3] = UIComponent.colors.yellow
+}
 
 -- __ctor --------------------------------------------------------------------
 
@@ -46,7 +61,7 @@ function UISelector:__ctor(...)
     -- left panel
 
     self.uiSelector = self.uiPanel:AddComponent(UITitledPanel:New(), "uiSelector")
-    self.uiSelector.rectangle = { 20, 20, 300, 435 }
+    self.uiSelector.rectangle = { 20, 20, 315, 435 }
     self.uiSelector.title = "Selector"
 
         -- !! ADD SUPPORT FOR SCROLLBAR & FILTER
@@ -73,11 +88,21 @@ function UISelector:__ctor(...)
 
     -- right windows
 
-    self.uiPanel.clientRectangle = { 320, 20, 695, 435 }
+    self.uiPanel.clientRectangle = { 330, 20, 695, 445 }
 
     self.uiWindows = self.uiPanel:AddComponent(UIMultiComponent:New(), "uiWindows")
     self.uiWindows.rectangle = self.uiPanel.clientRectangle
     self.uiWindows.clientRectangle = { 0, 0, self.uiPanel.clientRectangle[3] - self.uiPanel.clientRectangle[1], self.uiPanel.clientRectangle[4] - self.uiPanel.clientRectangle[2] }
+
+	-- selected item
+
+	self.selectedItem = nil	
+
+	-- scroll bar
+
+	self.uiScrollBar = self:AddComponent(UIScrollBar:New({ 415, 200 }, 350), "uiScrollBar")
+	self.uiScrollBar.OnActionUp = function(_self) self:Scroll(-1) end
+	self.uiScrollBar.OnActionDown = function(_self)	self:Scroll(1) end
 
 end
 
@@ -94,6 +119,9 @@ function UISelector:AddItem(properties)
     item.color = properties and properties.color
     item.text = properties and properties.text or "text"
     item.userData = properties and properties.userData
+    item.iconCategory = properties and properties.iconCategory
+    item.iconText = properties and properties.iconText
+    item.iconColor = properties and properties.iconColor
 
     -- insert
 
@@ -101,6 +129,10 @@ function UISelector:AddItem(properties)
     item.index = #self.items
 
     self.index = self.index or item.index
+
+	-- scroll bar
+
+	self.uiScrollBar:SetSize(#self.items, #self.uiItems)
 
     return item
 
@@ -158,6 +190,7 @@ function UISelector:Reserve(capacity, iconType)
 
             if (uiItem.item and uiItem.item.Action) then
                 uiItem.item:Action()
+                self.selectedItem = uiItem.item
             end
 
             -- the indexed item appears differently ...
@@ -170,6 +203,7 @@ function UISelector:Reserve(capacity, iconType)
 
                 self.indexed = uiItem
                 self.indexed.indexed = true
+
             end
 
         end
@@ -191,9 +225,24 @@ function UISelector:Scroll(number)
 
     elseif (self.index + #self.uiItems - 1 > #self.items) then
 
-        self.index = math.max(1, #self.items - #self.uiItems)
+		self.index = math.max(1, #self.items - #self.uiItems + 1)
 
     end
+
+	-- no selection yet ? so give one
+
+	local selectedIndex = nil
+	if (not self.selectedItem) then 
+		self.selectedItem = self.items[1]
+	end
+
+	-- reinit selection
+
+	if (self.indexed) then self.indexed.indexed = false
+	end
+	self.indexed = nil		
+
+	-- scroll
 
     for index = 1, #self.uiItems do
 
@@ -210,8 +259,18 @@ function UISelector:Scroll(number)
             uiItem.header = item.header
             uiItem.text = item.text
             uiItem.tip = item.tip
+            uiItem.iconCategory = item.iconCategory
+            uiItem.iconText = item.iconText
+            uiItem.iconColor = item.iconColor            
 
-            --uiItem.color = item.color or UIComponent.colors.red
+			-- selection
+
+			if (item == self.selectedItem) then
+				self.indexed = self.uiItems[index]
+				self.indexed.indexed = true
+			end
+
+			--uiItem.color = item.color or UIComponent.colors.red
             --uiItem.pictogram = (item.pictogram  and ("base:texture/ui/pictograms/32x/" .. item.pictogram)) or "base:texture/ui/pictograms/32x/empty.tga"
             --uiItem.text = item.name or item.__directory
 
@@ -223,11 +282,18 @@ function UISelector:Scroll(number)
 
     end
 
-    -- the indexed item appears differently ...
+end
 
-    if (not self.indexed) then
-        self.indexed = self.uiItems[1]
-        self.indexed.indexed = true
-    end
+
+-- Update --------------------------------------------------------------------
+
+function UISelector:Update()
+
+	UIMenuWindow.Update(self)
+
+	-- update 
+
+	if (self.uiScrollBar) then self.uiScrollBar:Update()
+	end
 
 end

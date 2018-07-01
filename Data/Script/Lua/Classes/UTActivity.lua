@@ -15,6 +15,8 @@
 
 --[[ Dependencies ----------------------------------------------------------]]
 
+	require "Ui/UIPlayerSlot"
+
 --[[ Class -----------------------------------------------------------------]]
 
 UTClass.UTActivity(UTProcess)
@@ -39,6 +41,14 @@ UTActivity.minNumberOfPlayer = 2
 UTActivity.bytecodePath = nil
 
 UTActivity.countdownDuration = 10
+
+UTActivity.gameoverTexture = "base:texture/ui/text_gameover.tga"
+
+UTActivity.gameoverSound = {"base:audio/gamemaster/DLG_GM_GLOBAL_50.wav", 
+							 "base:audio/gamemaster/DLG_GM_GLOBAL_51.wav", 
+							 "base:audio/gamemaster/DLG_GM_GLOBAL_52.wav"}
+
+UTActivity.playerSlot = UIPlayerSlot
 
 -- SD16 snd
 UTActivity.gameoverSnd = { 0x53, 0x44, 0x31, 0x36 }
@@ -114,12 +124,8 @@ function UTActivity:__ctor(...)
     self.textScoring = "Default scoring for standard activity"
 
     -- settings
-
+    
     self.settings = {}
-
-    self.settings.numberOfTeams = nil
-    self.settings.assist = 0
-    self.settings.beamPower = 1
 
     -- gameplay data send
 
@@ -146,6 +152,14 @@ function UTActivity:__dtor()
     if (engine and engine.libraries.usb.proxy) then
         engine.libraries.usb.proxy._DeviceRemoved:Remove(self, self.OnDeviceRemoved)
     end
+
+end
+
+-- Check ---------------------------------------------------------------------
+
+function UTActivity:Check()
+
+	return true
 
 end
 
@@ -206,6 +220,30 @@ end
         playerEntity.data.heap.disconnected = true
 
     end
+
+end
+
+-- PostStateChange -----------------------------------------------------------
+
+function UTActivity:PostStateChange(transition, ...)
+
+	local args = {...}
+
+    local delegate = function ()
+        UTProcess.PostStateChange(self, transition, unpack(args))
+    end
+
+	if (UIMenuManager and UIMenuManager.stack.top and UIMenuManager.stack.top.slideEnd) then
+
+		self.mvtFx = UIManager:AddFx("position", { duration = 0.75, __self = UIMenuManager.stack.top, from = {0, UIMenuManager.stack.top.rectangle[2]}, to = { -1100, UIMenuManager.stack.top.rectangle[2] }, type = "accelerate" })
+		self.postChangeFx = UIManager:AddFx("callback", { timeOffset = 0.75, __function = delegate })
+		UIMenuManager.stack.top.closingMvt = true
+		
+	else
+
+		delegate()
+
+	end
 
 end
 

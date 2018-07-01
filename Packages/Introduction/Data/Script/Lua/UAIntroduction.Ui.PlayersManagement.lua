@@ -62,7 +62,7 @@ function UAIntroduction.Ui.PlayersManagement:__ctor(...)
     self.uiPlayersPanel = self.uiContents:AddComponent(UIPanel:New(), "uiPanel")
     self.uiPlayersPanel.rectangle = { 335, UITitledPanel.headerSize + 25, 655, 320 }
 
-	self.uiPlayerSlotGrid = self.uiPlayersPanel:AddComponent(UIPlayerSlotGrid:New(4, 0), "uiPlayerSlotGrid")
+	self.uiPlayerSlotGrid = self.uiPlayersPanel:AddComponent(UIPlayerSlotGrid:New(5, 0), "uiPlayerSlotGrid")
 	self.uiPlayerSlotGrid:MoveTo( 10, 20 )
 
     -- buttons,
@@ -202,7 +202,7 @@ end
     -- gm lock
     
     self.gmLocked = true
-    if (self.uiButton1) then self.uiButton4.enabled = false end
+    if (self.uiButton1) then self.uiButton1.enabled = false end
     self.uiButton4.enabled = false
 
 end
@@ -337,6 +337,7 @@ function UAIntroduction.Ui.PlayersManagement:Update()
             self.gmLocked = false
             if (self.uiButton1) then self.uiButton1.enabled = true end
             self.uiButton4.enabled = activity.players and (0 < #activity.players)
+			-- self.uiButton1.enabled = true
 
         end
 

@@ -66,15 +66,15 @@ function UAOldFashionDuel.Ui.RoundLoop:__ctor(...)
 			self.uiRightHud.texture = "base:texture/ui/pictograms/128x/Hud_1.tga"
 		end
 		self.uiRightHud.rectangle = {
-			490,
-			0,
-			490 + 64,
-			0 + 64,
+			-35 + 490,
+			-20,
+			-35 + 490 + 64,
+			-20 + 64,
 		}
 		
 		self.uiMainPanel.uiRightIcon = self.uiMainPanel:AddComponent(UIPicture:New(), "uiRightIcon")
 		self.uiMainPanel.uiRightIcon.texture = "base:texture/Avatars/256x/" .. self.player[2].profile.icon
-		self.uiMainPanel.uiRightIcon.rectangle = { 405 - 4, -70, 405 + 124, -70 + 128 }	
+		self.uiMainPanel.uiRightIcon.rectangle = { 405 - 40, -70, 405 - 40 + 128, -70 + 128 }	
 
 			
 		-- left player
@@ -92,21 +92,21 @@ function UAOldFashionDuel.Ui.RoundLoop:__ctor(...)
 		
 		self.uiLeftHud = self.uiMainPanel:AddComponent(UIPicture:New(), "uiLeftHud")
 		self.uiLeftHud.color = UIComponent.colors.white
-		if (self.player[2].rfGunDevice) then
+		if (self.player[1].rfGunDevice) then
 			self.uiLeftHud.texture = "base:texture/ui/pictograms/128x/Hud_" .. self.player[1].rfGunDevice.classId .. ".tga"
 		else
 			self.uiLeftHud.texture = "base:texture/ui/pictograms/128x/Hud_1.tga"
 		end
 		self.uiLeftHud.rectangle = {
-			205,
-			0,
-			205 + 64,
-			0 + 64,
+			230,
+			-20,
+			230 + 64,
+			-20 + 64,
 		}
 
 		self.uiMainPanel.uiLeftIcon = self.uiMainPanel:AddComponent(UIPicture:New(), "uiLeftIcon")
 		self.uiMainPanel.uiLeftIcon.texture = "base:texture/Avatars/256x/" .. self.player[1].profile.icon
-		self.uiMainPanel.uiLeftIcon.rectangle = { 355 - 124, -70, 355 + 4, -70 + 128 }
+		self.uiMainPanel.uiLeftIcon.rectangle = { 355 + 30 - 128, -70, 355 + 30, -70 + 128 }
 
 		-- all rounds 
 
@@ -124,10 +124,6 @@ function UAOldFashionDuel.Ui.RoundLoop:__ctor(...)
 			self.uiRoundLeftPanel[i].background = "base:texture/ui/Duel_Border.tga"
 			self.uiRoundLeftPanel[i].rectangle = { (660 * 0.5) - 128 - 164, 58 + (85 * (i - 1)), (660 * 0.5) - 128, 60 + (85 * (i - 1)) + 72}
 
-			self.uiRoundCenterPanel[i] = self.uiMainPanel:AddComponent(UIPanel:New(), "uiRoundCenterPanel" .. i)
-			self.uiRoundCenterPanel[i].background = "base:texture/ui/Duel_RoundBackgroundGrey.tga"
-			self.uiRoundCenterPanel[i].rectangle = { (660 * 0.5) - 0, 60 + (85 * (i - 1)), (660 * 0.5) + 100, 60 + (85 * (i - 1)) + 68 }
-
 			self.uiRoundArrowLeft[i] = self.uiMainPanel:AddComponent(UIPicture:New(), "uiRoundCenterPanel" .. i)
 			self.uiRoundArrowLeft[i].texture = "base:texture/ui/Duel_Arrow_Left.tga"
 			self.uiRoundArrowLeft[i].rectangle = { (660 * 0.5) - 128, 60 + (85 * (i - 1)), (660 * 0.5), 60 + (85 * (i - 1)) + 68 }
@@ -140,21 +136,25 @@ function UAOldFashionDuel.Ui.RoundLoop:__ctor(...)
 			self.uiRoundRightPanel[i].background = "base:texture/ui/Duel_Border.tga"
 			self.uiRoundRightPanel[i].rectangle = { (660 * 0.5) + 100 + 128, 58 + (85 * (i - 1)), (660 * 0.5) + 100 + 128 + 164, 60 + (85 * (i - 1)) + 72}
 
+			self.uiRoundCenterPanel[i] = self.uiMainPanel:AddComponent(UIPanel:New(), "uiRoundCenterPanel" .. i)
+			self.uiRoundCenterPanel[i].background = "base:texture/ui/Duel_RoundBackgroundGrey.tga"
+			self.uiRoundCenterPanel[i].rectangle = { (660 * 0.5) - 14, 60 + (85 * (i - 1)), (660 * 0.5) + 114, 60 + (85 * (i - 1)) + 68 }
+
 			-- text
 
 			self.uiRoundNumber[i] = self.uiRoundCenterPanel[i]:AddComponent(UILabel:New(), "uiRoundNumber" .. i)
-			self.uiRoundNumber[i].font = UIComponent.fonts.header
+			self.uiRoundNumber[i].font = UIComponent.fonts.larger
 			self.uiRoundNumber[i].fontColor = UIComponent.colors.white
 			self.uiRoundNumber[i].fontJustification = quartz.system.drawing.justification.center
 			self.uiRoundNumber[i].text = i
-			self.uiRoundNumber[i].rectangle = { 0, 30, 100, 68}
+			self.uiRoundNumber[i].rectangle = { 0, 20, 128, 68}
 
 			self.uiRoundText[i] = self.uiRoundCenterPanel[i]:AddComponent(UILabel:New(), "uiRoundText" .. i)
 			self.uiRoundText[i].font = UIComponent.fonts.header
 			self.uiRoundText[i].fontColor = UIComponent.colors.darkgray
 			self.uiRoundText[i].fontJustification = quartz.system.drawing.justification.center
 			self.uiRoundText[i].text = l"oth001"
-			self.uiRoundText[i].rectangle = { 0, 2, 100, 30}
+			self.uiRoundText[i].rectangle = { 0, 4, 128, 30}
 
 		end
 
@@ -169,12 +169,20 @@ function UAOldFashionDuel.Ui.RoundLoop:__ctor(...)
 		self.uiButton1.text = l"but016"
 		self.uiButton1.tip = l"tip066"
 
-		self.uiButton1.OnAction = function (self) UIManager.stack:Push(UTActivity.Ui.Menu) end
+		self.uiButton1.OnAction = function (self) 
+
+			if (not activity.mainMenu) then
+				activity.mainMenu = UTActivity.Ui.Menu:New()
+				UIManager.stack:Push(activity.mainMenu) 
+			end
+
+		end
 
 	-- round
 
 	self.round = 0
 	self:AdvanceRound()
+	self.finished = false
 
 end
 
@@ -186,31 +194,36 @@ end
 -- AdvanceRound -------------------------------------------------------------
 
 function UAOldFashionDuel.Ui.RoundLoop:AdvanceRound()
-
-	if (5 <= self.round) then
-		return
-	end
-
-	if (0 < self.round) then
+	
+	if ((0 < self.round) and (5 >= self.round)) then
 
 		self.uiRoundCenterPanel[self.round].background = "base:texture/ui/Duel_RoundBackgroundGrey.tga"
 		self.uiRoundArrowLeft[self.round].color = UIComponent.colors.white
 		self.uiRoundArrowRight[self.round].color = UIComponent.colors.white
+		self.uiRoundNumber[self.round].text = self.round
 
 	end
 
-	self.round = self.round + 1
+	if (self.round < activity.settings.numberOfRound) then
 
-	self.uiRoundCenterPanel[self.round].background = "base:texture/ui/Duel_RoundBackgroundOrange.tga"
-	self.uiRoundArrowLeft[self.round].color = UIComponent.colors.orange
-	self.uiRoundArrowRight[self.round].color = UIComponent.colors.orange
+		self.round = self.round + 1
+
+		self.uiRoundCenterPanel[self.round].background = "base:texture/ui/Duel_RoundBackgroundOrange.tga"
+		self.uiRoundNumber[self.round].text = self.round
+		self.blinkTimer = 0
+
+	else
+
+		self.finished = true
+
+	end
 
 end
 
 
 -- Onclose --------------------------------------------------------------------
 
-function UAOldFashionDuel.Ui.RoundLoop:Onclose()
+function UAOldFashionDuel.Ui.RoundLoop:OnClose()
 
 	for i = 1, activity.minNumberOfPlayer  do
 		self.player[i]._DataChanged:Remove(self, self.OnDataChanged)
@@ -233,7 +246,7 @@ end
 
 function UAOldFashionDuel.Ui.RoundLoop:OnDataChanged(_entity, _key, _value)
 
-	if (("score" == _key) and (self.round <= 5)) then
+	if (("score" == _key) and (self.round <= activity.settings.numberOfRound) and not self.finished) then
 
 		-- a player has scored ... so display scores
 
@@ -263,11 +276,32 @@ function UAOldFashionDuel.Ui.RoundLoop:OnDataChanged(_entity, _key, _value)
 
 end
 
+-- UpdateState ---------------------------------------------------------------
+
+function UAOldFashionDuel.Ui.RoundLoop:UpdateState(txt, blink)
+
+	if ((0 < self.round) and (activity.settings.numberOfRound >= self.round) and not self.finished) then
+
+		self.uiRoundNumber[self.round].text = txt or self.round
+		if (txt) then
+			self.uiRoundNumber[self.round].font = UIComponent.fonts.header
+			self.uiRoundNumber[self.round].rectangle = { 0, 30, 128, 68}
+		else
+			self.uiRoundNumber[self.round].font = UIComponent.fonts.larger
+			self.uiRoundNumber[self.round].rectangle = { 0, 20, 128, 68}
+		end
+
+	end
+
+	self.blink = blink
+
+end
+
 -- Update -------------------------------------------------------------------
 
 function UAOldFashionDuel.Ui.RoundLoop:Update()
 
-	if (activity.states["roundloop"].draw) then
+	if (activity.states["roundloop"].draw and not self.finished) then
 
 		activity.states["roundloop"].draw = false
 		self.uiStar = self.uiRoundRightPanel[self.round]:AddComponent(UIPicture:New(), "uiStar")
@@ -277,7 +311,28 @@ function UAOldFashionDuel.Ui.RoundLoop:Update()
 		self.uiStar.texture = "base:texture/ui/icons/64x/Cross.tga"
 		self.uiStar.rectangle = { 50, 0, 50 + 64, 0 + 64}			
 		self:AdvanceRound()
-		
+
+	end
+
+	if (self.blink) then
+        if ((0 < self.round) and (activity.settings.numberOfRound >= self.round) and not self.finished) then
+
+		    local elapsedTime = quartz.system.time.gettimemicroseconds() - (self.time or 0)
+		    self.time = quartz.system.time.gettimemicroseconds()
+		    self.blinkTimer = (self.blinkTimer or 0) + elapsedTime
+
+		    if (self.blinkTimer > 500000) then
+			    self.uiRoundArrowLeft[self.round].color = UIComponent.colors.white
+			    self.uiRoundArrowRight[self.round].color = UIComponent.colors.white
+		    else
+			    self.uiRoundArrowLeft[self.round].color = UIComponent.colors.orange
+			    self.uiRoundArrowRight[self.round].color = UIComponent.colors.orange
+		    end
+
+		    if (self.blinkTimer > 1000000) then self.blinkTimer = 0
+		    end
+
+        end
 	end
 
 end

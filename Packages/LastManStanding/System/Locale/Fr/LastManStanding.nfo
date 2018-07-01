@@ -4,8 +4,10 @@ local nfo = {
     class = "UALastManStanding",
 
     ["name"] = "Le Survivant",
-    ["description"] = "Jouez jusqu'à ce qu'il n'y ait plus\nqu'un seul survivant.",
+    ["description"] = "Jouez jusqu'à ce qu'il n'y ait plus qu'un seul joueur en jeu.",
     ["pictogram"] = "LastManStanding.tga",
+    ["category"] = 3,
+
 
     ["difficulty"] = 40,
     ["flags"] = { "2-8 joueurs",},

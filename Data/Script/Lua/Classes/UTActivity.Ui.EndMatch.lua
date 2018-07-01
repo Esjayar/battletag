@@ -135,7 +135,7 @@ function UTActivity.Ui.EndMatch:Draw()
 	if (self.displayGameover) then
 
 	    quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
-        quartz.system.drawing.loadtexture("base:texture/ui/text_gameover.tga")
+        quartz.system.drawing.loadtexture(activity.gameoverTexture)
         quartz.system.drawing.drawtexture(180, 333)
         
 	end

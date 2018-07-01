@@ -31,12 +31,17 @@ function UTTeam:__ctor(...)
 
 	UTTeam.profiles = UTTeam.profiles or {
 
-    [1] = { icon = "base:texture/ui/leaderboard_redteam.tga", name = l"oth033", teamColor = "red", color = { 0.85, 0.15, 0.04 } },
-    [2] = { icon = "base:texture/ui/leaderboard_blueteam.tga", name = l"oth034", teamColor = "blue", color = { 0.05, 0.53, 0.84 } },
-    [3] = { icon = "base:texture/ui/leaderboard_yellowteam.tga", name = l"oth035", teamColor = "yellow", color = { 0.95, 0.72, 0.00 } },
-    [4] = { icon = "base:texture/ui/leaderboard_greenteam.tga", name = l"oth036", teamColor = "green", color = { 0.05, 0.64, 0.08 } },
+    [1] = { icon = "base:texture/ui/leaderboard_redteam.tga", name = l"oth033", teamColor = "red", color = { 0.85, 0.15, 0.04 }, 
+		details = "base:texture/ui/Detail_LineRedTeam.tga", detailsHeader = "base:texture/ui/Detail_HeaderRed.tga" },
+    [2] = { icon = "base:texture/ui/leaderboard_blueteam.tga", name = l"oth034", teamColor = "blue", color = { 0.05, 0.53, 0.84 }, 
+		details = "base:texture/ui/Detail_LineBlueTeam.tga", detailsHeader = "base:texture/ui/Detail_HeaderBlue.tga" },
+    [3] = { icon = "base:texture/ui/leaderboard_yellowteam.tga", name = l"oth035", teamColor = "yellow", color = { 0.95, 0.72, 0.00 }, 
+		details = "base:texture/ui/Detail_LineYellowTeam.tga", detailsHeader = "base:texture/ui/Detail_HeaderYellow.tga" },
+    [4] = { icon = "base:texture/ui/leaderboard_greenteam.tga", name = l"oth036", teamColor = "green", color = { 0.05, 0.64, 0.08 }, 
+		details = "base:texture/ui/Detail_LineGreenTeam.tga", detailsHeader = "base:texture/ui/Detail_HeaderGreen.tga" },
     
-    default = { icon = "base:texture/ui/leaderboard_redteam.tga", name = "UTTeam", teamColor = "red", color = { 0.85, 0.15, 0.04 } },
+    default = { icon = "base:texture/ui/leaderboard_redteam.tga", name = "UTTeam", teamColor = "red", color = { 0.85, 0.15, 0.04 },
+		details = "base:texture/ui/Detail_LineRedTeam.tga", detailsHeader = "base:texture/ui/Detail_HeaderRed.tga" },
 	}
     -- profile
 

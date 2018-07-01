@@ -42,11 +42,18 @@ UTActivity.Ui.Title.textScoring = {
     rectangle = { 20, 70, 640, 210 },
 }
 
+UTActivity.Ui.Title.scoringOffset = 0
+
 -- __ctor --------------------------------------------------------------------
 
 function UTActivity.Ui.Title:__ctor(...)
 
     assert(activity)
+    
+	-- animate	
+	
+	self.slideBegin = true
+	self.slideEnd = true
 
 	-- window settings
 
@@ -61,12 +68,36 @@ function UTActivity.Ui.Title:__ctor(...)
 	self.uiPanel.rectangle[2] = self.uiPanel.rectangle[2] + UIComponent.metrics.windowMargin.top
 	self.uiPanel.rectangle[3] = self.uiPanel.rectangle[3] - UIComponent.metrics.windowMargin.right
 	self.uiPanel.rectangle[4] = self.uiPanel.rectangle[4] - UIComponent.metrics.windowMargin.bottom
-	
+
 	-- first panel : rules description
 
     self.uiRulesPanel = self.uiPanel:AddComponent(UITitledPanel:New(), "uiRulesPanel")
     self.uiRulesPanel.title = activity.name
     self.uiRulesPanel.rectangle = { 30, 30, 685, 280 }
+
+    if (activity.bitmap) then
+
+        local background = self.uiRulesPanel:AddComponent(UIBitmap:New(activity.bitmap))
+        local scale = (self.uiRulesPanel.rectangle[4] - self.uiRulesPanel.rectangle[2]) / background.rectangle[4]
+
+        background.rectangle = {
+
+            0.5 * (self.uiRulesPanel.rectangle[3] - self.uiRulesPanel.rectangle[1] - background.rectangle[3] * scale),
+            self.uiRulesPanel.rectangle[2],
+            self.uiRulesPanel.rectangle[3] - 0.5 * (self.uiRulesPanel.rectangle[3] - self.uiRulesPanel.rectangle[1] - background.rectangle[3] * scale),
+            self.uiRulesPanel.rectangle[4],
+
+        }
+
+        background.Draw = function (self)
+
+	        quartz.system.drawing.loadcolor4f(1.0, 1.0, 1.0, 0.125)
+            quartz.system.drawing.loadtexture(self.bitmap)
+            quartz.system.drawing.drawtexture(unpack(self.rectangle))
+
+        end
+
+    end
 
     -- second panel : rules description
 
@@ -84,16 +115,15 @@ function UTActivity.Ui.Title:__ctor(...)
 	self.uiButton1.text = l"but003"
     self.uiButton1.tip = l"tip006"
 
-	self.uiButton1.OnAction = function (self) 
-	
-		quartz.framework.audio.loadsound("base:audio/ui/back.wav")
-		quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
-		quartz.framework.audio.playsound()
-	
-	    if (activity.advertised) then game:PostStateChange("title") 
-	    else game:PostStateChange("selector") 
-		end
-	
+
+	self.uiButton1.OnAction = function (_self) 
+			quartz.framework.audio.loadsound("base:audio/ui/back.wav")
+			quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
+			quartz.framework.audio.playsound()
+		
+			if (activity.advertised) then game:PostStateChange("title") 
+			else game:PostStateChange("selector") 
+			end			
 	end
 
     -- uiButton4:
@@ -135,6 +165,7 @@ function UTActivity.Ui.Title:Draw()
 	    if (self.rectangle) then
 	    
 	        quartz.system.drawing.pushcontext()
+			quartz.system.drawing.loadtranslation(self.rectangle[1], self.rectangle[2])
 	        quartz.system.drawing.loadtranslation(self.uiPanel.rectangle[1] + self.uiWindow.rectangle[1], self.uiPanel.rectangle[2] + self.uiWindow.rectangle[2])
 
             if (activity.textRules) then
@@ -152,7 +183,7 @@ function UTActivity.Ui.Title:Draw()
 				
 					local baseY = 132
 					local offsetY = 0
-					local rectangleIcon = {self.textRules.rectangle[1] + 80, baseY + 8, self.textRules.rectangle[3] + 80 , baseY + 48}
+					local rectangleIcon = {self.textRules.rectangle[1] + 80, baseY + 8 + self.scoringOffset, self.textRules.rectangle[3] + 80 , baseY + 48 + self.scoringOffset}
 					
 					--table.foreachi(self.uiLeaderboard.fields, function(index, field)
 					for i, field in ipairs(activity.scoringField) do
@@ -161,7 +192,7 @@ function UTActivity.Ui.Title:Draw()
 
 							quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
 							quartz.system.drawing.loadtexture(field[2])
-							quartz.system.drawing.drawtexture(40, baseY + offsetY)
+							quartz.system.drawing.drawtexture(40, baseY + offsetY + self.scoringOffset)
 
 						end			
 						

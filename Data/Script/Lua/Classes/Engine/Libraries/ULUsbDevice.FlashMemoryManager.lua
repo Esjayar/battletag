@@ -54,10 +54,12 @@ function ULUsbDevice.FlashMemoryManager:__ctor(proxy)
     self.handlers[2] = ULUsbDevice.FlashMemoryManager.Stage2_Erase
     self.handlers[3] = ULUsbDevice.FlashMemoryManager.Stage3_WriteRequest
     self.handlers[4] = ULUsbDevice.FlashMemoryManager.Stage4_Write
+    self.handlers[5] = ULUsbDevice.FlashMemoryManager.Stage5_Lock
 
-    self.handlers[5] = ULUsbDevice.FlashMemoryManager.Stage5_WriteRequest
-    self.handlers[6] = ULUsbDevice.FlashMemoryManager.Stage6_Write
-    self.handlers[7] = ULUsbDevice.FlashMemoryManager.Stage7_Boot
+    self.handlers[6] = ULUsbDevice.FlashMemoryManager.Stage6_Unlock
+    self.handlers[7] = ULUsbDevice.FlashMemoryManager.Stage7_WriteRequest
+    self.handlers[8] = ULUsbDevice.FlashMemoryManager.Stage8_Write
+    self.handlers[9] = ULUsbDevice.FlashMemoryManager.Stage9_Boot
 
 end
 
@@ -95,8 +97,13 @@ function ULUsbDevice.FlashMemoryManager:NextStage(stage)
 	else
 
 		-- !! device number may be used ... not task client
-		self.usbUpdateFrameRate = 14 - #engine.libraries.usb.proxy.devices.byClass[0x02000020]
-		--self.usbUpdateFrameRate = 14 - #self.task.clients
+		-- self.usbUpdateFrameRate = 14 - #self.task.clients
+
+		local devices = engine.libraries.usb.proxy.devices.byClass[0x02000020]
+		if (not devices) then
+		    return self:Pop("fail") -- disconnected devices
+		end
+		self.usbUpdateFrameRate = 14 - #devices
 
 	end
 	self.pingInterval = self.usbUpdateFrameRate * 5
@@ -282,6 +289,8 @@ function ULUsbDevice.FlashMemoryManager:Restart(front)
     else return self:Suspend()
     end
 
+    print("upload: " .. self.task.path)
+
     -- prepare host
 
     assert(self.task.address)
@@ -320,13 +329,15 @@ end
 
 function ULUsbDevice.FlashMemoryManager:Stage1_Unlock()
 
+    print("Stage1_Unlock")
+
     assert(self.task)
     assert(self.task.stage == 1)
 
     -- unlock the flash memory access,
     -- it is locked by default to prevent accidental protected op. calls
 
-    self.task.text = l"oth045" -- "Unlocking ..."
+    self.task.text = l "oth045" -- "Unlocking ..."
     self.task.progress = 0
 
     -- setup
@@ -352,6 +363,8 @@ function ULUsbDevice.FlashMemoryManager:Stage1_Unlock()
                 return false
 
             end
+
+            print("device was unlocked: " .. tostring(client.device.reference))
 
             self.task.progress = self.task.progress + 1
             self.task.progress = (self.task.progress / #self.task.clients) * 100
@@ -380,13 +393,15 @@ end
 
 function ULUsbDevice.FlashMemoryManager:Stage2_Erase(client)
 
+    print("Stage2_Erase")
+
     assert(self.task)
     assert(self.task.stage == 2)
 
     -- erase number of pages,
     -- pages starting at input address and offset by 'pageSize' each
 
-    self.task.text = l"oth046" -- "Erasing ..."
+    self.task.text = l "oth046" -- "Erasing ..."
     self.task.progress = 0
 
     -- setup
@@ -445,10 +460,12 @@ end
 
 function ULUsbDevice.FlashMemoryManager:Stage3_WriteRequest(client)
 
+    print("Stage3_WriteRequest")
+    
     assert(self.task)
     assert(self.task.stage == 3)
 
-    self.task.text = l"oth047" -- "Copying ..."
+    self.task.text = l "oth047" -- "Copying ..."
     self.task.progress = 0
 
     -- setup
@@ -498,13 +515,15 @@ end
 
 function ULUsbDevice.FlashMemoryManager:Stage4_Write(client)
 
+    print("Stage4_Write")
+    
     assert(self.task)
     assert(self.task.stage == 4)
 
     -- erase number of pages,
     -- pages starting at input address and offset by 'pageSize' each
 
-    self.task.text = l"oth048" -- "Copying ..."
+    self.task.text = l "oth048" -- "Copying ..."
     self.task.progress = 0
 
     -- setup
@@ -568,12 +587,150 @@ function ULUsbDevice.FlashMemoryManager:Stage4_Write(client)
 
 end
 
--- Stage5_WriteRequest --------------------------------------------------------
+-- Stage5_Lock ---------------------------------------------------------------
 
-function ULUsbDevice.FlashMemoryManager:Stage5_WriteRequest(client)
+function ULUsbDevice.FlashMemoryManager:Stage5_Lock()
+
+    print("Stage5_Lock")
 
     assert(self.task)
     assert(self.task.stage == 5)
+
+    -- lock the flash memory access,
+    -- it is locked by default to prevent accidental protected op. calls
+
+    self.task.text = l "oth045" -- "Unlocking ..."
+    self.task.progress = 0
+
+    -- setup
+
+    for _, client in pairs(self.task.clients) do
+        client.flashMemoryLocked = false
+    end
+
+    local message = { 0x01, 0xff, 0x86, 0x01 }
+
+    -- update delegate
+
+    self.task.delegate = function ()
+
+        self.task.progress = 0
+
+        for _, client in pairs(self.task.clients) do
+            if (not client.flashMemoryLocked) then
+
+                message[2] = client.device.radioProtocolId
+                quartz.system.usb.sendmessage(self.handle, message)
+
+                return false
+
+            end
+
+            print("device was locked: " .. tostring(client.device.reference))
+
+            self.task.progress = self.task.progress + 1
+            self.task.progress = (self.task.progress / #self.task.clients) * 100
+
+        end
+
+        self.task.progress = 100
+        return true
+
+    end
+
+    -- acknowledge delegate
+
+    self.task.acknowledge = function (addressee, command, arg)
+        --print(addressee, command, unpack(arg))
+        if (command == 0x86) then
+            local client = self.task.clients[addressee]
+            if (client) then client.flashMemoryLocked = (arg[1] == 0x01)
+            end
+        end
+    end
+
+end
+
+-- Stage6_Unlock -------------------------------------------------------------
+
+function ULUsbDevice.FlashMemoryManager:Stage6_Unlock()
+
+    print("Stage6_Unlock")
+
+    assert(self.task)
+    assert(self.task.stage == 6)
+
+    -- only firmware updates need a software reboot,
+    -- initiated by yet another write request ...
+    -- initiated by yet another flash memory unlock request ...
+
+    if not (self.task.address == 0x78000) then
+        return self:NextStage(-1)
+    end
+
+    -- unlock the flash memory access,
+    -- it is locked by default to prevent accidental protected op. calls
+
+    self.task.text = l "oth045" -- "Unlocking ..."
+    self.task.progress = 0
+
+    -- setup
+
+    for _, client in pairs(self.task.clients) do
+        client.flashMemoryLocked = true
+    end
+
+    local message = { 0x01, 0xff, 0x86, 0x00 }
+
+    -- update delegate
+
+    self.task.delegate = function ()
+
+        self.task.progress = 0
+
+        for _, client in pairs(self.task.clients) do
+            if (client.flashMemoryLocked) then
+
+                message[2] = client.device.radioProtocolId
+                quartz.system.usb.sendmessage(self.handle, message)
+
+                return false
+
+            end
+
+            print("device was unlocked: " .. tostring(client.device.reference))
+
+            self.task.progress = self.task.progress + 1
+            self.task.progress = (self.task.progress / #self.task.clients) * 100
+
+        end
+
+        self.task.progress = 100
+        return true
+
+    end
+
+    -- acknowledge delegate
+
+    self.task.acknowledge = function (addressee, command, arg)
+        --print(addressee, command, unpack(arg))
+        if (command == 0x86) then
+            local client = self.task.clients[addressee]
+            if (client) then client.flashMemoryLocked = not (arg[1] == 0x00)
+            end
+        end
+    end
+
+end
+
+-- Stage7_WriteRequest --------------------------------------------------------
+
+function ULUsbDevice.FlashMemoryManager:Stage7_WriteRequest(client)
+
+    print("Stage7_WriteRequest")
+
+    assert(self.task)
+    assert(self.task.stage == 7)
 
     -- only firmware updates need a software reboot,
     -- initiated by yet another write request ...
@@ -582,7 +739,7 @@ function ULUsbDevice.FlashMemoryManager:Stage5_WriteRequest(client)
         return self:NextStage(-1)
     end
 
-    self.task.text = l"oth049" -- "Rebooting ..."
+    self.task.text = l "oth049" -- "Rebooting ..."
     self.task.progress = 0
 
     -- setup
@@ -628,12 +785,14 @@ function ULUsbDevice.FlashMemoryManager:Stage5_WriteRequest(client)
 
 end
 
--- Stage6_Write ---------------------------------------------------------------
+-- Stage8_Write ---------------------------------------------------------------
 
-function ULUsbDevice.FlashMemoryManager:Stage6_Write(client)
+function ULUsbDevice.FlashMemoryManager:Stage8_Write(client)
 
+    print("Stage8_Write")
+    
     assert(self.task)
-    assert(self.task.stage == 6)
+    assert(self.task.stage == 8)
 
     -- only firmware updates need a software reboot,
     -- initiated by yet another write request ...
@@ -642,7 +801,7 @@ function ULUsbDevice.FlashMemoryManager:Stage6_Write(client)
         return self:NextStage(-1)
     end
 
-    self.task.text = l"oth050" -- "Rebooting ..."
+    self.task.text = l "oth050" -- "Rebooting ..."
     self.task.progress = 20
 
     -- setup
@@ -687,12 +846,14 @@ function ULUsbDevice.FlashMemoryManager:Stage6_Write(client)
 
 end
 
--- Stage7_Boot ---------------------------------------------------------------
+-- Stage9_Boot ---------------------------------------------------------------
 
-function ULUsbDevice.FlashMemoryManager:Stage7_Boot(client)
+function ULUsbDevice.FlashMemoryManager:Stage9_Boot(client)
 
+    print("Stage9_Boot")
+    
     assert(self.task)
-    assert(self.task.stage == 7)
+    assert(self.task.stage == 9)
 
     -- only firmware updates need a software reboot,
     -- initiated by yet another write request ...
@@ -701,7 +862,7 @@ function ULUsbDevice.FlashMemoryManager:Stage7_Boot(client)
         return self:NextStage(-1)
     end
 
-    self.task.text = l"oth051" -- "Rebooting ..."
+    self.task.text = l "oth051" -- "Rebooting ..."
     self.task.progress = 50
 
     -- setup

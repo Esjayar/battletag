@@ -57,6 +57,7 @@ function UAIntroduction.Ui.Seq_Ready:__ctor(...)
     self.uiButton4.rectangle = { UIMenuWindow.buttonRectangles[4][1] - 10, UIMenuWindow.buttonRectangles[4][2], UIMenuWindow.buttonRectangles[4][3], UIMenuWindow.buttonRectangles[4][4], }
 	self.uiButton4.text = l"but020"
 	self.uiButton4.tip = l"tip007"
+	self.uiButton4.direction = DIR_HORIZONTAL
 	self.uiButton4.enabled = false
 
 	self.uiButton4.OnAction = function ()

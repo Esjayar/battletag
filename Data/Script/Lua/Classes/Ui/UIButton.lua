@@ -25,6 +25,8 @@ UTClass.UIButton(UIComponent)
 
 ST_DISABLED, ST_ENABLED, ST_FOCUSED, ST_CLICKED = 0, 1, 2, 4
 
+DIR_NONE, DIR_HORIZONTAL, DIR_VERTICAL = 0, 1, 2
+
 UIButton.states = {
 
     [ST_DISABLED] = { texture = "base:texture/ui/components/uibutton_menu_disabled.tga" },
@@ -37,6 +39,8 @@ UIButton.states = {
     [ST_DISABLED + ST_FOCUSED + ST_CLICKED] = { texture = "base:texture/ui/components/uibutton_menu_disabled.tga" },
 
 }
+
+UIButton.direction = DIR_NONE
 
 UIButton.rectangle = { 0, 0, 137, 34 }
 UIButton.text = nil
@@ -88,7 +92,13 @@ function UIButton:Draw()
                 
 	            quartz.system.drawing.loadcolor3f(unpack(color))
 	            quartz.system.drawing.loadtexture(self.states[index].texture)
-		        quartz.system.drawing.drawtexture(unpack(self.rectangle))
+	            if (self.direction == DIR_NONE) then
+					quartz.system.drawing.drawtexture(unpack(self.rectangle))
+		        elseif (self.direction == DIR_HORIZONTAL) then
+					quartz.system.drawing.drawtextureh(unpack(self.rectangle))
+				elseif (self.direction == DIR_VERTICAL) then
+					quartz.system.drawing.drawtexturev(unpack(self.rectangle))
+				end
 
 		    end
 
@@ -112,14 +122,22 @@ end
 
 function UIButton:RegisterPickRegions(regions, left, top)
 
-	if (self.sensitive and self.rectangle) then
+	-- if my parent is a moving page then disable button
 
-		local region = {
-			component = self,
-			rectangle = { self.rectangle[1] + left, self.rectangle[2] + top, self.rectangle[3] + left, self.rectangle[4] + top }
-		}
+	if (self.parent and self.parent.closingMvt) then
 
-		table.insert(regions, region)
+	else
+ 
+		if (self.sensitive and self.rectangle) then
+
+			local region = {
+				component = self,
+				rectangle = { self.rectangle[1] + left, self.rectangle[2] + top, self.rectangle[3] + left, self.rectangle[4] + top }
+			}
+
+			table.insert(regions, region)
+
+		end
 
 	end
 

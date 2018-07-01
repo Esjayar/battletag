@@ -27,7 +27,7 @@ UTClass.UIManager(UTProcess)
 
 UIManager.stack = UIStack:New()
 
-UIManager.translation = {0, 0} 
+UIManager.translation = { 0, 0 } 
 UIManager.scale = 0
 
 -- defaults
@@ -39,6 +39,7 @@ UIManager.fxFonction = {}
 
 UIManager.updateFrameRate = 60
 UIManager.activeBackgroundBanner = false
+UIManager.alphaBackgroundBanner = 0.0
 UIManager.uiBackgroundBanner = nil
 UIManager.drawBackground = false
 
@@ -133,13 +134,16 @@ function UIManager:Draw()
 
 		quartz.system.drawing.pop()	
 	end
-    
-    if (UIManager.activeBackgroundBanner == true and self.uiBackgroundBanner) then
+
+    if (self.uiBackgroundBanner) then
+
+		quartz.system.drawing.loadalpha(UIManager.alphaBackgroundBanner)
 		self.uiBackgroundBanner:Draw()
+		quartz.system.drawing.loadalpha(1)
+
     end
 
     UIManager.stack:Draw()
-    
 
     if (self.tip and self.drawTips.enabled) then
 
@@ -366,25 +370,23 @@ function UIManager:OnUpdate()
 	UIManager.uiBackgroundBanner = UIManager.uiBackgroundBanner or UIBackgroundBanner:New()
 
     for index, fx in pairs(self.fxs) do
-        
+
 		if (UIManager.fxUpdate[fx.typefx](self, fx)) then
-		
 			self.fxs[fx] = nil
-			
 		end
-        
+
     end
-    
-    if (not activity and UIManager.activeBackgroundBanner == true) then
+
+    if ((not activity) and (UIManager.activeBackgroundBanner == true)) then
 		UIManager:StopBackgroundBanner()
-	elseif(activity and UIManager.activeBackgroundBanner == false) then
+	elseif (activity and (UIManager.activeBackgroundBanner == false)) then
 		UIManager:StartBackgroundBanner()
 	end
-	
-    if (UIManager.activeBackgroundBanner == true and self.uiBackgroundBanner) then
+
+    if (self.uiBackgroundBanner) then
 		self.uiBackgroundBanner:Update()
 	end
-	
+
     UIManager.stack:Update()
 
 end
@@ -393,10 +395,25 @@ end
 
 function UIManager:StartBackgroundBanner()
 
+	if (self.alphaFx) then
+
+		UIManager:RemoveFx(self.alphaFx)
+
+	end
+
 	UIManager.uiBackgroundBanner = UIManager.uiBackgroundBanner or UIBackgroundBanner:New()	
 	UIManager.uiBackgroundBanner.positionBanner = {self.viewportWidth or 1600, 100}
 	UIManager.uiBackgroundBanner.timer = quartz.system.time.gettimemicroseconds()
+	
+	if (activity) then
+	
+		UIManager.uiBackgroundBanner:SetText(activity.name)
+		UIManager.uiBackgroundBanner.iconBanner = activity.iconBanner
+		
+	end
+	
 	UIManager.activeBackgroundBanner = true
+	UIManager.alphaBackgroundBanner = 1
 
 end
 
@@ -404,8 +421,8 @@ end
 
 function UIManager:StopBackgroundBanner()
 
-	UIManager.uiBackgroundBanner = UIManager.uiBackgroundBanner or UIBackgroundBanner:New()
 	UIManager.activeBackgroundBanner = false
+	self.alphaFx = UIManager:AddFx("value", { duration = 1, __self = self, value = "alphaBackgroundBanner", from = 1, to = 0, })
 
 end
 

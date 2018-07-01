@@ -6,6 +6,8 @@ local nfo = {
     ["name"] = "Match en équipe",
     ["description"] = "Les équipes s'affrontent pour marquer des points en tirant sur leurs adversaires.",
     ["pictogram"] = "TeamFrag.tga",
+    ["category"] = 3,
+
 
     ["difficulty"] = 50,
     ["flags"] = { "2-8 joueurs", "2-4 équipes",},

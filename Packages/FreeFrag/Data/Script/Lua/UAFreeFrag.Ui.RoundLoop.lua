@@ -36,10 +36,18 @@ function UAFreeFrag.Ui.RoundLoop:__ctor(...)
     -- self.uiLabel.text = "Default game loop for " .. activity.name
 
     ------------------------------------------------
-    -- LEADERBOARD TEST
+    -- Afp
+    ------------------------------------------------
+
+    activity.uiAFP = self:AddComponent(UIAFP:New(), "uiAFP")
+    activity.uiAFP:MoveTo(50, 40)
+
+    ------------------------------------------------
+    -- Leaderboard
     ------------------------------------------------
 
     self.uiLeaderboard = self:AddComponent(UILeaderboard:New(), "uiLeaderboardTest")
+    self.uiLeaderboard.showSlotEmpty = true
     self.uiLeaderboard:MoveTo(520, 40)
 
     -- key / icon / position / justification
@@ -51,13 +59,6 @@ function UAFreeFrag.Ui.RoundLoop:__ctor(...)
 	end
 
     self.uiLeaderboard:Build(activity.match.challengers)
-
-    ------------------------------------------------
-    -- AFP TEST
-    ------------------------------------------------
-
-    activity.uiAFP = self:AddComponent(UIAFP:New(), "uiAFP")
-    activity.uiAFP:MoveTo(50, 40)
 
 end
 

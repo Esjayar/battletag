@@ -38,6 +38,8 @@ function UTActivity.State.Revision:Begin(arg)
 
     self.arg = arg
 
+print("0000000000")
+
     assert(engine.libraries.usb)
     assert(engine.libraries.usb.proxy)
 
@@ -71,7 +73,7 @@ function UTActivity.State.Revision:Begin(arg)
                 local masterRevision = string.format("0x%04x0000", REG_MAJORREVISION)
                 local deviceRevision = string.format("0x%04x0000", quartz.system.bitwise.rshift(device.revisionNumber, 16))
 
-                if not (masterRevision == deviceRevision) then
+                if not (masterRevision == deviceRevision) or REG_FORCEREVISION then
 
                     print("major revision detected for device " .. tostring(device.reference))
 
@@ -103,7 +105,7 @@ function UTActivity.State.Revision:Begin(arg)
 
         -- check for major revisions,
         -- we check for data updates only when we have major revisions
-
+print("1111111111")
         local uiRevisionCheck = UTActivity.Ui.RevisionCheck:New(self)
         UIMenuManager.stack:Push(uiRevisionCheck)
 

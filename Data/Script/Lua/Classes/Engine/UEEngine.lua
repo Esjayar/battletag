@@ -24,6 +24,7 @@ require "Engine/UELibrary"
 require "Engine/Libraries/ULAudio"
 require "Engine/Libraries/ULDrawing"
 require "Engine/Libraries/ULUsb"
+require "Engine/Libraries/ULTracking"
 
 --[[ Class -----------------------------------------------------------------]]
 

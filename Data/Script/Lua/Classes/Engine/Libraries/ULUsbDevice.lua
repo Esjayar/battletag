@@ -200,6 +200,14 @@ function ULUsbDevice:ProcessMessage0x04(arg)
                             print(self.revisionCandidate.path)
                         end
 
+                    elseif REG_FORCEREVISION and (class == 0x02000020) then
+
+                        if (not self.revisionCandidate or (self.revisionCandidate.revision < revision)) then
+                            self.revisionCandidate = { revision = revision, path = path }
+                            print("we have a *FORCED* revision candidate here " .. self.revisionCandidate.revision)
+                            print(self.revisionCandidate.path)
+                        end
+
                     end
                 else
                     print("revision discarded : " .. revision)

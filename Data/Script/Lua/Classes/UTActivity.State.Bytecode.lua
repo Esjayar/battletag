@@ -82,7 +82,8 @@ function UTActivity.State.Bytecode:Begin()
     -- so that we can detect device deconnections a little bit faster
 
     assert(engine.libraries.usb.proxy.processes.devicePinger)
-    engine.libraries.usb.proxy.processes.devicePinger:Reset(2000000, 4000000, 500000)
+    --engine.libraries.usb.proxy.processes.devicePinger:Reset(2000000, 4000000, 500000)
+    engine.libraries.usb.proxy.processes.devicePinger:Reset(4000000, 8000000, 500000)
 
 	-- event from proxy
 
@@ -193,7 +194,7 @@ function UTActivity.State.Bytecode:OnDeviceRemoved(device)
 					self.uiPopup = UIPopupWindow:New()
 
 					self.uiPopup.title = l"con046"
-					self.uiPopup.text = l"con045"
+					self.uiPopup.text = l"con048"
 
 					-- buttons
 
@@ -204,8 +205,10 @@ function UTActivity.State.Bytecode:OnDeviceRemoved(device)
 					self.uiPopup.uiButton2.OnAction = function ()
 
 						UIManager.stack:Pop()
-						activity:PostStateChange("end") 
-						game:PostStateChange("title")
+						UIMenuManager.stack:Pop()
+						activity.matches = nil
+						activity:PostStateChange("playersmanagement")
+						self.enabled = false
 
 					end
 
@@ -313,8 +316,13 @@ function UTActivity.State.Bytecode:Update()
 
 	-- send msg each 250ms
 
+	local interval = 250000
+	if (#activity.players > 8) then
+		interval = 350000
+	end
+
     local elapsedTime = quartz.system.time.gettimemicroseconds() - self.timer
-    if (elapsedTime > 250000) then
+    if (elapsedTime > interval) then
 
 		-- send current msg
 

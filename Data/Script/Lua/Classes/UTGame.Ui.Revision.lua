@@ -56,7 +56,7 @@ function UTGame.Ui.Revision:__ctor(...)
     -- progress
 
     self.uiProgress = self.uiContents:AddComponent(UIProgress:New(), "uiProgress")
-    self.uiProgress.rectangle = { 20, 20 + 25, 655, 48 + 25 }
+    self.uiProgress.rectangle = { 20, self.uiContents.rectangle[4] - 28 - 30, 655, self.uiContents.rectangle[4] - 30 }
 
     assert(engine.libraries.usb)
     assert(engine.libraries.usb.proxy)
@@ -96,10 +96,16 @@ function UTGame.Ui.Revision:Draw()
     --quartz.system.drawing.loadtexture("base:texture/ui/connection_plugin.tga")
     --quartz.system.drawing.drawtexture(82, 0)
 
+	-- logo
+
+    quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
+    quartz.system.drawing.loadtexture("base:texture/ui/Loading_Logo.tga")
+    quartz.system.drawing.drawtexture(120, 0, 120 + 433, 250)
+
     -- text
 
-    local fontJustification = quartz.system.drawing.justification.bottomleft + quartz.system.drawing.justification.wordbreak
-    local rectangle = { 40, 320, 675 - 40, 390 - 20 }
+    local fontJustification = quartz.system.drawing.justification.center + quartz.system.drawing.justification.wordbreak
+    local rectangle = { 40, 220, 675 - 40, 220 + 140 }
 
     quartz.system.drawing.loadcolor3f(unpack(self.fontColor))
     quartz.system.drawing.loadfont(UIComponent.fonts.default)

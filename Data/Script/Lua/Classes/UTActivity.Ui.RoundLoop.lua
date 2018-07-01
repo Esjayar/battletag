@@ -40,29 +40,16 @@ function UTActivity.Ui.RoundLoop:__ctor(...)
     local theAFP = self.uiAFP
     local count = 0
 
-    -- Leaderboard
-
-    self.uiLeaderboard = self:AddComponent(UILeaderboard:New(), "uiLeaderboardTest")
-    self.uiLeaderboard.showItemsHeader = (0 < #activity.teams)
-    self.uiLeaderboard:MoveTo(520, 50)
-
-    self.uiLeaderboard:RegisterField("icon", UIGridLine.IconCellStyle:New(32, 32), 40)
-    self.uiLeaderboard:RegisterField("name", UIGridLine.RowTitleCellStyle:New(), 150)
-    self.uiLeaderboard:RegisterField("ammunitions")
-    self.uiLeaderboard:RegisterField("hit")
-    self.uiLeaderboard:RegisterField("death")
-    self.uiLeaderboard:RegisterField("life")
-    self.uiLeaderboard:RegisterField("score", UIGridLine.RightCellStyle:New(), 50)
-
-    self.uiLeaderboard:SetFieldHeader("life", UIGridLine.DefaultCellStyle, "vie")
-    
-    self.uiLeaderboard:Build(activity.match.challengers)
 end
 
 -- OnClose -------------------------------------------------------------------
 
 function UTActivity.Ui.RoundLoop:OnClose()
 
-    self.uiLeaderboard:RemoveDataChangedEvents()
+	if (self.uiLeaderboard) then
+	
+		self.uiLeaderboard:RemoveDataChangedEvents()
+	
+	end
 
 end

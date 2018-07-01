@@ -78,7 +78,8 @@ function UATagThenShoot.Ui.RoundLoop:__ctor(...)
 
 				local label = slot:AddComponent(UILabel:New(), "uiLabel" .. index)
 				label.fontColor = UIComponent.colors.black
-				label.rectangle = { 270, 8, 290, 45 }
+				label.fontJustification = quartz.system.drawing.justification.center
+				label.rectangle = { 255, 8, 295, 45 }
 				label.text = player.data.baked.score 
 				
 				index = index + 1
@@ -136,7 +137,7 @@ function UATagThenShoot.Ui.RoundLoop:__ctor(...)
 			self.uiPlayerPanel.uiPlayerScore.fontColor = UIComponent.colors.orange
 			self.uiPlayerPanel.uiPlayerScore.font = UIComponent.fonts.header
 			self.uiPlayerPanel.uiPlayerScore.text = activity.match.challengers[1].data.heap.score
-			self.uiPlayerPanel.uiPlayerScore.rectangle = { 260, 0 }
+			self.uiPlayerPanel.uiPlayerScore.rectangle = { 255, 0 }
 
 	-- bases
 
@@ -216,7 +217,7 @@ end
 
 -- Onclose --------------------------------------------------------------------
 
-function UATagThenShoot.Ui.RoundLoop:Onclose()
+function UATagThenShoot.Ui.RoundLoop:OnClose()
 
 	self.player._DataChanged:Remove(self, self.OnDataChanged)
 

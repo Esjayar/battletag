@@ -54,7 +54,6 @@ function UTGame.Ui.Title:__ctor(...)
 	self.spotLight = 0
 	self.spotLightX = 1300
 	
-	
 	if (self.backvideo) then
 
 	    local scale, translation = 1.0, { 0.0, 0.0 }
@@ -95,10 +94,10 @@ function UTGame.Ui.Title:__ctor(...)
 
     -- optionSystem
 
-    self.uiButtonSettings = self.uiMultiComponent:AddComponent(UIAnimatedButton:New(self.buttonSize, "base:/video/uianimatedbutton_settings.avi", self.videosSize, "base:texture/ui/mainmenu_settings.tga"), "uiButtonSettings")
+    self.uiButtonSettings = self.uiMultiComponent:AddComponent(UIAnimatedButton:New(self.buttonSize, "base:video/uianimatedbutton_settings.avi", self.videosSize, "base:texture/ui/mainmenu_settings.tga"), "uiButtonSettings")
     self.uiButtonSettings:MoveTo(194 - self.uiMultiComponent.rectangle[1], 515 - self.uiMultiComponent.rectangle[2])
-    self.uiButtonSettings.text = l"menu03"
-    self.uiButtonSettings.tip = l"tip011"
+    self.uiButtonSettings.text = l "menu03"
+    self.uiButtonSettings.tip = l "tip011"
 
     self.uiButtonSettings.OnAction = function (self)
 
@@ -112,10 +111,10 @@ function UTGame.Ui.Title:__ctor(...)
 
     -- tutorial  
 
-    self.uiButtonProfile = self.uiMultiComponent:AddComponent(UIAnimatedButton:New(self.buttonSize, "base:/video/uianimatedbutton_profile.avi", self.videosSize, "base:texture/ui/mainmenu_profiles.tga"), "uiButtonSettings")
+    self.uiButtonProfile = self.uiMultiComponent:AddComponent(UIAnimatedButton:New(self.buttonSize, "base:video/uianimatedbutton_profile.avi", self.videosSize, "base:texture/ui/mainmenu_profiles.tga"), "uiButtonSettings")
     self.uiButtonProfile:MoveTo(320 - self.uiMultiComponent.rectangle[1], 515 - self.uiMultiComponent.rectangle[2])
-    self.uiButtonProfile.text = l"menu04"
-    self.uiButtonProfile.tip = l"tip008"
+    self.uiButtonProfile.text = l "menu04"
+    self.uiButtonProfile.tip = l "tip008"
 
     self.uiButtonProfile.OnAction = function (self)
 
@@ -136,10 +135,10 @@ function UTGame.Ui.Title:__ctor(...)
 
     -- activity selector
 
-    self.uiButtonSelector = self.uiMultiComponent:AddComponent(UIAnimatedButton:New(self.buttonSize, "base:/video/uianimatedbutton_games.avi", self.videosSize, "base:texture/ui/mainmenu_games.tga"), "uiButtonSelector")
+    self.uiButtonSelector = self.uiMultiComponent:AddComponent(UIAnimatedButton:New(self.buttonSize, "base:video/uianimatedbutton_games.avi", self.videosSize, "base:texture/ui/mainmenu_games.tga"), "uiButtonSelector")
     self.uiButtonSelector:MoveTo(446 - self.uiMultiComponent.rectangle[1], 515 - self.uiMultiComponent.rectangle[2])
-    self.uiButtonSelector.text = l"menu02"
-    self.uiButtonSelector.tip = l"tip010"
+    self.uiButtonSelector.text = l "menu02"
+    self.uiButtonSelector.tip = l "tip010"
 
     self.uiButtonSelector.OnAction = function (self) 
 
@@ -153,10 +152,10 @@ function UTGame.Ui.Title:__ctor(...)
 
     -- Play!   
 
-    self.uiButtonPlay = self.uiMultiComponent:AddComponent(UIAnimatedButton:New(self.buttonSize, "base:/video/uianimatedbutton_playnow.avi", self.videosSize, "base:texture/ui/mainmenu_play.tga"), "uiButtonSettings")
+    self.uiButtonPlay = self.uiMultiComponent:AddComponent(UIAnimatedButton:New(self.buttonSize, "base:video/uianimatedbutton_playnow.avi", self.videosSize, "base:texture/ui/mainmenu_play.tga"), "uiButtonSettings")
     self.uiButtonPlay:MoveTo(446 - self.uiMultiComponent.rectangle[1], 371 - self.uiMultiComponent.rectangle[2])
-    self.uiButtonPlay.text = l"menu01"
-    self.uiButtonPlay.tip = l"tip009"
+    self.uiButtonPlay.text = l "menu01"
+    self.uiButtonPlay.tip = l "tip009"
 
     self.uiButtonPlay.OnAction = function ()
 
@@ -173,10 +172,10 @@ function UTGame.Ui.Title:__ctor(...)
 
     -- basics
 
-    self.uiButtonBasics = self.uiMultiComponent:AddComponent(UIAnimatedButton:New(self.buttonSize, "base:/video/uianimatedbutton_basics.avi", self.videosSize, "base:texture/ui/mainmenu_basics.tga"), "uiButtonSelector")
+    self.uiButtonBasics = self.uiMultiComponent:AddComponent(UIAnimatedButton:New(self.buttonSize, "base:video/uianimatedbutton_basics.avi", self.videosSize, "base:texture/ui/mainmenu_basics.tga"), "uiButtonSelector")
     self.uiButtonBasics:MoveTo(572 - self.uiMultiComponent.rectangle[1], 515 - self.uiMultiComponent.rectangle[2])
-    self.uiButtonBasics.text = l"menu05"
-    self.uiButtonBasics.tip = l"tip012"
+    self.uiButtonBasics.text = l "menu05"
+    self.uiButtonBasics.tip = l "tip012"
 
     self.uiButtonBasics.OnAction = function (self) 
 
@@ -190,10 +189,10 @@ function UTGame.Ui.Title:__ctor(...)
 
     -- exit  
 
-    self.uiButtonQuit = self.uiMultiComponent:AddComponent(UIAnimatedButton:New(self.buttonSize, "base:/video/uianimatedbutton_quit.avi", self.videosSize, "base:texture/ui/mainmenu_quit.tga"), "uiButtonSelector")
+    self.uiButtonQuit = self.uiMultiComponent:AddComponent(UIAnimatedButton:New(self.buttonSize, "base:video/uianimatedbutton_quit.avi", self.videosSize, "base:texture/ui/mainmenu_quit.tga"), "uiButtonSelector")
     self.uiButtonQuit:MoveTo(698 - self.uiMultiComponent.rectangle[1], 515 - self.uiMultiComponent.rectangle[2])
-    self.uiButtonQuit.text = l"menu06"
-    self.uiButtonQuit.tip = l"tip013"
+    self.uiButtonQuit.text = l "menu06"
+    self.uiButtonQuit.tip = l "tip013"
 
     self.uiButtonQuit.OnAction = function (self) 
 
@@ -204,12 +203,12 @@ function UTGame.Ui.Title:__ctor(...)
 		local uiPopup = UIPopupWindow:New()
 		uiPopup.icon = "base:/video/uianimatedbutton_quit.avi"
 
-        uiPopup.title = l"menu06"
-        uiPopup.text = string.format(l"menu06pop")
+        uiPopup.title = l "menu06"
+        uiPopup.text = string.format(l "menu06pop")
         
         local uiButtonYes = uiPopup:AddComponent(UIButton:New(), "uiButtonYes")
-        uiButtonYes.text = l"but001"
-		uiButtonYes.tip = l"tip013"
+        uiButtonYes.text = l "but001"
+		uiButtonYes.tip = l "tip013"
         uiButtonYes.rectangle = uiPopup.buttonRectangles[1]
         uiButtonYes.OnAction = function (self) 
 			
@@ -218,8 +217,8 @@ function UTGame.Ui.Title:__ctor(...)
         end
 
         local uiButtonNo = uiPopup:AddComponent(UIButton:New(), "uiButtonNo")
-        uiButtonNo.text = l"but002"
-		uiButtonNo.tip = l"tip006"
+        uiButtonNo.text = l "but002"
+		uiButtonNo.tip = l "tip006"
         uiButtonNo.rectangle = uiPopup.buttonRectangles[2]
         uiButtonNo.OnAction = function (self) 
 		UTGame.Ui.Title.hasPopup = false
@@ -241,7 +240,7 @@ function UTGame.Ui.Title:__ctor(...)
     label:MoveTo(- self.foregroundRectangle[1], -24)
     label.fontcolor = UIComponent.colors.red
     label.fontJustification = quartz.system.drawing.justification.bottomright
-    label.text = string.format("%d.%d.%03d", REG_MAJORREVISION or 1, REG_MINORREVISION or 0, REG_BUILD or 0)
+    label.text = string.format("%d.%d.%03d", IS_MAJORREVISION or 1, IS_MINORREVISION or 0, REG_BUILD or 0)
 
 end
 

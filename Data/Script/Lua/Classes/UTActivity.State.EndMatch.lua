@@ -34,13 +34,8 @@ end
 function UTActivity.State.EndMatch:Begin()
 	
 	game.gameMaster:Begin()
+	game.gameMaster:RegisterSound({ paths = activity.gameoverSound, probas = {0.8, 0.1, 0.1}, offset = 0.4, })
 	
-	game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_50.wav", 
-											 "base:audio/gamemaster/DLG_GM_GLOBAL_51.wav", 
-											 "base:audio/gamemaster/DLG_GM_GLOBAL_52.wav"},
-									probas = {0.8, 0.1, 0.1}, offset = 0.4,})
-	
-
 	-- broadcast a gameover message to all devices : wait for an acknowledge before enable continue button in ui
 
     self.timer = quartz.system.time.gettimemicroseconds()
@@ -54,14 +49,34 @@ function UTActivity.State.EndMatch:Begin()
 
 	-- intermediate or final ranking ?
 	
-	activity.finalRanking = true;
-	if ((activity.category ~= UTActivity.categories.closed) and (0 < #activity.matches))then
-		activity.finalRanking = false;
+	activity.finalRanking = true
+	if ((activity.category ~= UTActivity.categories.closed) and (0 < #activity.matches)) then
+		activity.finalRanking = false
 	end	
+
+	-- if the main menu is opened, then close it
+
+	if (activity.mainMenu) then 
+		UIManager.stack:Pop()
+		activity.mainMenu = nil
+	end
 
     -- ui
 
 	UIManager.stack:Push(UTActivity.Ui.EndMatch)
+
+    -- tracking
+
+if (REG_TRACKING) then
+
+    if (activity.matches and (0 == #activity.matches)) then
+        local delegate = engine.libraries.tracking.delegates["FPSCLIENT_STOP"]
+        if (delegate) then
+            delegate()
+        end
+    end
+
+end
 
 end
 

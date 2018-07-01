@@ -89,7 +89,7 @@ function UIGridLine:Draw()
                     
                     local cellRectangle = { column.offset, 0, column.width + column.offset, self.height or UIGridLine.height }
                     local cellStyle = column.style or UIGridLine.cellStyles.default
-                    cellStyle:Draw(self.content[column.key], cellRectangle, column.preferredHeight)
+                    cellStyle:Draw(self.content[column.key], cellRectangle, column.preferredHeight, column.preferredWidth)
 
                 end )
                 

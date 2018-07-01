@@ -89,7 +89,11 @@ function UTGame:__ctor(...)
 
     self.settings.registers = {
     
-        ["firstTime"] = true, -- the first time the application gets launched
+        ["firstTime"] = false, -- the first time the application gets launched
+    }
+    
+    self.settings.activities = {
+    
     }
 
     -- states
@@ -293,6 +297,29 @@ local settings = {
     -- lua script returns the settings table
 
     settingsString = settingsString .. [[
+	}, 
+	activities = {
+]]
+
+    if (not self.settings.activities) then
+        self.settings.activities = {}
+    end
+
+	for key, value in pairs(self.settings.activities) do
+
+		settingsString = settingsString .. '        ["' .. key  .. '"] = {'
+
+		for key, value in pairs(self.settings.activities[key]) do
+			settingsString = settingsString .. '        ["' .. key  .. '"] = ' .. tostring(value) .. ','
+		end
+
+	    settingsString = settingsString .. '},\n'
+
+	end
+
+	-- registers
+
+    settingsString = settingsString .. [[
 	},
 }
 return settings
@@ -331,6 +358,30 @@ end
 function UTGame:Pause(paused)
 
     self._Pause:Invoke(paused)
+
+end
+
+-- PostStateChange -----------------------------------------------------------
+
+function UTGame:PostStateChange(transition, ...)
+
+	local args = {...}
+
+    local delegate = function ()
+        UTProcess.PostStateChange(self, transition, unpack(args))
+    end
+
+	if (UIMenuManager and UIMenuManager.stack.top and UIMenuManager.stack.top.slideEnd) then
+
+		self.mvtFx = UIManager:AddFx("position", { duration = 0.75, __self = UIMenuManager.stack.top, from = {0, UIMenuManager.stack.top.rectangle[2]}, to = { -1100, UIMenuManager.stack.top.rectangle[2] }, type = "accelerate" })
+		self.postChangeFx = UIManager:AddFx("callback", { timeOffset = 0.75, __function = delegate })
+		UIMenuManager.stack.top.closingMvt = true
+
+	else
+
+		delegate()
+
+	end
 
 end
 

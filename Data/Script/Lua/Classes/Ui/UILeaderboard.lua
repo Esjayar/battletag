@@ -16,6 +16,7 @@
 --[[ Dependencies ----------------------------------------------------------]]
 
 require "Ui/UILeaderboardItem"
+require "Ui/UILeaderboardEmptySlot"
 
 --[[ Class -----------------------------------------------------------------]]
 
@@ -24,6 +25,8 @@ UTClass.UILeaderboard(UIMultiComponent)
 UILeaderboard.showRanking = true
 UILeaderboard.smallPanel = false
 UILeaderboard.largePanel = true
+
+UILeaderboard.uiItem = UILeaderboardItem
 
 -- sort mode 
 
@@ -42,6 +45,7 @@ UILeaderboard.TeamColor =
 function UILeaderboard:__ctor()
 
     self.rectangle = { 0, 0, 400, 0 }
+    self.showSlotEmpty = false
 
 end
 
@@ -63,19 +67,19 @@ function UILeaderboard:Build(challengers, data)
 
 	-- ranking
 
-	self.uiRankingPicture = {}
+	self.uiRankingbitmap = {}
     table.foreachi(challengers, function(index, challenger) 
 
 		if (self.showRanking  and (index <= 3)) then
 
-			self.uiRankingPicture[index] = self:AddComponent(UIPicture:New(), "uiRankingPicture" .. index)
-			self.uiRankingPicture[index].color = UIComponent.colors.white
-			self.uiRankingPicture[index].texture = "base:texture/ui/afp_number_" .. index .. ".tga"
+			self.uiRankingbitmap[index] = self:AddComponent(UIPicture:New(), "uiRankingbitmap" .. index)
+			self.uiRankingbitmap[index].color = UIComponent.colors.white
+			self.uiRankingbitmap[index].texture = "base:texture/ui/afp_number_" .. index .. ".tga"
 
 		end
 
 	end)
-
+	
 	-- data used on challenger (baked or heap)
 
 	self.data = data or "heap"
@@ -83,17 +87,62 @@ function UILeaderboard:Build(challengers, data)
 	-- create an item for each challenger 
 
     self.rankedList = {}
-    table.foreachi(challengers, function(index, challenger) 
+    table.foreachi(challengers, function (index, challenger) 
 
-        local uiLeaderboardItem = self:AddComponent(UILeaderboardItem:New(self, challenger), "uiLeaderboardItem" .. #self.rankedList + 1)
+        local uiLeaderboardItem = self:AddComponent(self.uiItem:New(self, challenger), "uiLeaderboardItem" .. #self.rankedList + 1)
         uiLeaderboardItem.ranking = index
         uiLeaderboardItem:BuildItem()
 		table.insert(self.rankedList, uiLeaderboardItem)
 
 	end )
-	
+
 	self:Sort(true)
-	
+
+	self.uiSlotEmpty = {}
+
+	if (self.showSlotEmpty == true) then
+		self.uiSlotEmpty = self:AddComponent(UILeaderboardEmptySlot:New(self), "uiSlotEmpty")
+	end
+
+    -- leadership
+
+    self.uiLeadership = UIMultiComponent:New()
+
+    self.uiLeadership.background = self.uiLeadership:AddComponent(UIBitmap:New("base:texture/ui/leaderboard_blueleader.tga"))
+    self.uiLeadership.rectangle = self.uiLeadership.background.rectangle
+
+    self.uiLeadership.title = self.uiLeadership:AddComponent(UILabel:New({ 10, 32, 354, 69 }, "The Blue Team"))
+    self.uiLeadership.title.font = UIComponent.fonts.title
+    self.uiLeadership.title.fontJustification = quartz.system.drawing.justification.right + quartz.system.drawing.justification.singlelineverticalcenter
+
+    self.uiLeadership.bitmap = self.uiLeadership:AddComponent(UIBitmap:New("base:texture/ui/leaderboard_blueteam.tga"))
+    self.uiLeadership.bitmap.rectangle = { 58 - self.uiLeadership.bitmap.rectangle[3] * 0.5, self.uiLeadership.rectangle[4] * 0.5 - self.uiLeadership.bitmap.rectangle[4] * 0.5, 58 + self.uiLeadership.bitmap.rectangle[3] * 0.5, self.uiLeadership.rectangle[4] * 0.5 + self.uiLeadership.bitmap.rectangle[4] * 0.5 }
+
+    self.uiLeadership.text = self.uiLeadership:AddComponent(UILabel:New({ 4, 76, 408, 96 }, "takes the lead"))
+    self.uiLeadership.fontColor = UIComponent.colors.black
+    self.uiLeadership.text.fontJustification = quartz.system.drawing.justification.right + quartz.system.drawing.justification.singlelineverticalcenter
+
+    self.uiLeadership.visible = false
+
+end
+
+-- Build ---------------------------------------------------------------------
+
+function UILeaderboard:Draw()
+
+    UIMultiComponent.Draw(self)
+    
+    if (self.uiLeadership.visible) then
+
+        quartz.system.drawing.pushcontext()
+        quartz.system.drawing.loadidentity()
+
+        self.uiLeadership:Draw()
+
+        quartz.system.drawing.pop()
+
+    end
+
 end
 
 -- RegisterFields ------------------------------------------------------------
@@ -120,7 +169,7 @@ function UILeaderboard:RemoveDataChangedEvents()
 
 end
 
--- Sort --------------------------------------------------------------------
+-- Sort ----------------------------------------------------------------------
 
 function UILeaderboard:Sort(init)
 
@@ -153,17 +202,28 @@ function UILeaderboard:Sort(init)
 			if (item.ranking ~= index) then
 
 				item.ranking = index
+
 				if (item.mvtFx) then
 
 					UIManager:RemoveFx(item.mvtFx)
 					item.mvtFx = nil
 
 				end
-				if (item.challenger:IsKindOf(UTTeam) and game and game.gameMaster and game.gameMaster.ingame == true and itemOffset == 0 and item.rectangle[2] ~= 0) then
-				
-					game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_FRAG_TEAM_0" .. UILeaderboard.TeamColor[item.challenger.profile.teamColor] ..".wav"}, priority = 2})
-				
+
+				if (activity.uiAFP and (#activity.teams <= 0) and (itemOffset == 0) and (item.rectangle[2] ~= 0)) then
+
+					activity.uiAFP:PushLine(item.challenger.profile.name .. " " .. l"ingame001", UIComponent.colors.orange, "base:texture/Ui/Icons/16x/Star.tga")
+
 				end
+
+				if (activity.uiAFP and item.challenger:IsKindOf(UTTeam) and game and game.gameMaster and (game.gameMaster.ingame == true) and (itemOffset == 0) and (item.rectangle[2] ~= 0)) then
+
+					activity.uiAFP:PushLine(l("ingame0" .. (15 + UILeaderboard.TeamColor[item.challenger.profile.teamColor])), UIComponent.colors[item.challenger.profile.teamColor], "base:texture/Ui/Icons/16x/Star" .. item.challenger.profile.teamColor .. ".tga")
+					game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_FRAG_TEAM_0" .. UILeaderboard.TeamColor[item.challenger.profile.teamColor] ..".wav"}, priority = 2})
+					self:UpdateLeadership(item.challenger)
+
+				end
+
 				item.mvtFx = UIManager:AddFx("position", { duration = 0.8, __self = item, from = {0, item.rectangle[2]}, to = { 0, itemOffset }, type = "descelerate" })
 
 			end
@@ -175,14 +235,14 @@ function UILeaderboard:Sort(init)
 		if (self.showRanking and (index <= 3)) then
 
 			if (item.challenger:IsKindOf(UTTeam)) then
-				self.uiRankingPicture[index].rectangle = {
+				self.uiRankingbitmap[index].rectangle = {
 					-140,
 					itemOffset,
 					-140 + 50,
 					itemOffset + 50,
 				}	
 			else
-				self.uiRankingPicture[index].rectangle = {
+				self.uiRankingbitmap[index].rectangle = {
 					-60,
 					itemOffset,
 					-60 + 50,
@@ -195,7 +255,15 @@ function UILeaderboard:Sort(init)
 		-- next one
 
         if (item.challenger:IsKindOf(UTTeam)) then
-			itemOffset = itemOffset + 30 + (64 * #item.challenger.players)
+			if (#activity.players > 8) then
+				if (#activity.teams <= 2) then
+					itemOffset = itemOffset + 45 + (35 * #item.challenger.players)
+				else
+					itemOffset = itemOffset + 18 + (35 * #item.challenger.players)
+				end
+			else
+				itemOffset = itemOffset + 30 + (64 * #item.challenger.players)
+			end
 		else
 			if (self.largePanel) then
 				itemOffset = itemOffset + 80
@@ -205,5 +273,86 @@ function UILeaderboard:Sort(init)
 		end
 
 	end
+
+end
+
+-- UpdateLeadership ----------------------------------------------------------
+
+function UILeaderboard:UpdateLeadership(challenger)
+
+    self.leader = challenger
+
+    if (challenger and challenger:IsKindOf(UTTeam)) then
+        if (not self.uiLeadership.visible) then
+
+            local viewportWidth, viewportHeight, inverseScale = quartz.system.drawing.getviewportdimensions()
+            local viewportAspectRatio = viewportHeight / viewportWidth
+
+	        local textureAspectRatio = 720 / 960
+	        if (viewportAspectRatio > textureAspectRatio) then inverseScale = viewportWidth / 960
+	        else inverseScale = viewportHeight / 720 end
+
+            --print("ççççççççççççççççççççççççççççççççççççççççççççççççççç")
+            --print("viewportWidth", viewportWidth)
+            --print("viewportHeight", viewportHeight)
+            --print("viewportAspectRatio", viewportAspectRatio)
+            --print("textureAspectRatio", textureAspectRatio)
+            --print("inverseScale", inverseScale)
+
+            self.uiLeadership.leader = challenger
+            self.uiLeadership.visible = true
+
+            self.uiLeadership.background.bitmap = "base:texture/ui/leaderboard_" .. challenger.profile.teamColor .. "leader.tga"
+            quartz.system.drawing.loadtexture(self.uiLeadership.background.bitmap)
+            local width, height = quartz.system.drawing.gettexturedimensions()
+                width, height = width * inverseScale, height * inverseScale
+            self.uiLeadership.background.rectangle = { 0, 0, width, height }
+            self.uiLeadership.rectangle = self.uiLeadership.background.rectangle
+
+            self.uiLeadership.title.text = challenger.profile.name
+            self.uiLeadership.title.font = UIComponent.fonts.title
+            self.uiLeadership.title.fontJustification = quartz.system.drawing.justification.right + quartz.system.drawing.justification.singlelineverticalcenter
+            self.uiLeadership.title.rectangle = { 10 * inverseScale, 32 * inverseScale, 354 * inverseScale, 69 * inverseScale }
+
+            self.uiLeadership.bitmap.bitmap = challenger.profile.icon
+            quartz.system.drawing.loadtexture(self.uiLeadership.bitmap.bitmap)
+            local _width, _height = quartz.system.drawing.gettexturedimensions()
+                _width, _height = _width * inverseScale, _height * inverseScale
+            local _scale = 1.5 * 0.5
+            self.uiLeadership.bitmap.rectangle = { 80 - _width * _scale, 110 - _height * _scale, 80 + _width * _scale, 110 + _height * _scale }
+            for i = 1, 4 do self.uiLeadership.bitmap.rectangle[i] = self.uiLeadership.bitmap.rectangle[i] * inverseScale end
+
+            self.uiLeadership.text.text = l "ingame001"
+            self.uiLeadership.text.font = UIComponent.fonts.header
+            self.uiLeadership.text.fontColor = UIComponent.colors.darkgray
+            self.uiLeadership.text.fontJustification = quartz.system.drawing.justification.right + quartz.system.drawing.justification.singlelineverticalcenter
+            self.uiLeadership.text.rectangle = { 4 * inverseScale, 76 * inverseScale, 408 * inverseScale, 96 * inverseScale }
+
+            self.uiLeadership:MoveTo((viewportWidth - width) * 0.5, (viewportHeight - height) * 0.5)
+
+            self.uiLeadership.delegate = function ()
+
+                self.uiLeadership.visible = false
+                self.uiLeadership.fx = nil
+
+                if (self.leader ~= self.uiLeadership.leader) then
+                    self:UpdateLeadership(self.leader)
+                end
+            end
+
+            local positions = {
+                { self.uiLeadership.rectangle[1] + viewportWidth, self.uiLeadership.rectangle[2] },
+                { self.uiLeadership.rectangle[1], self.uiLeadership.rectangle[2] },
+                { self.uiLeadership.rectangle[1] - viewportWidth, self.uiLeadership.rectangle[2] },
+            }
+
+            self.uiLeadership.fx = {
+                UIManager:AddFx("position", { duration = 1.0, __self = self.uiLeadership, from = positions[1], to = positions[2], type = "descelerate" }),
+                UIManager:AddFx("position", { duration = 1.0, __self = self.uiLeadership, from = positions[2], to = positions[3], type = "accelerate", timeOffset = 1.5 }),
+                UIManager:AddFx("callback", { timeOffset = 3.0, __function = self.uiLeadership.delegate })
+            }
+
+        end
+    end
 
 end

@@ -66,7 +66,7 @@ function UIContextualMenu:AddItem(item)
     item.panel.visible = false
     
     item.label = self.panel:AddComponent(UILabel:New(), "uiLabel")
-    item.label.fontColor = UIComponent.colors.black
+    item.label.fontColor = UIComponent.colors.darkgray
 	item.label.tip = item.tip
     item.label.font = UIComponent.font.default
     item.label.rectangle  = { 0, offset + self.defaultMargin , self.defaultWidth, offset + self.defaultMargin + self.defaultHeight }
@@ -77,10 +77,12 @@ function UIContextualMenu:AddItem(item)
 	item.parent = self
     item.label.OnFocus = function (self)
 		self.item.panel.visible = true
+		self.item.label.fontColor = UIComponent.colors.white
     end
 
     item.label.OnFocusLost = function (self)
 		self.item.panel.visible = false
+		self.item.label.fontColor = UIComponent.colors.darkgray
     end
 
     item.label.OnAction = function (self)
@@ -100,7 +102,7 @@ function UIContextualMenu:AddItem(item)
 
 end
 
--- OnAction -------------------------------------------------------------------
+-- OnAction ------------------------------------------------------------------
 
 function UIContextualMenu:OnAction()
 

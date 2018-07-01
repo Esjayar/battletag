@@ -33,28 +33,37 @@ end
 
 function UTActivity.State.BeginMatch:Begin()
 
-	if ((activity.category ~= UTActivity.categories.single) and activity.settings and (1 == activity.settings.gameLaunch)) then
-		activity.countdownDuration = activity.countdownDuration * 0.5
-	end
+	self.ui = UTActivity.Ui.BeginMatch:New()
+	UIManager.stack:Push(self.ui)
 
-
-	UIManager.stack:Push(UTActivity.Ui.BeginMatch)
-	
 	game.gameMaster:Begin()
-	
-	game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_01.wav", "base:audio/gamemaster/DLG_GM_GLOBAL_02.wav"},
-									probas = {0.9, 0.1}})
-	
-    for i = 1, activity.countdownDuration do
-    
+	game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_01.wav", "base:audio/gamemaster/DLG_GM_GLOBAL_02.wav"}, probas = {0.9, 0.1} })
+
+    for i = 1, self.ui.countdownDuration do
+
 		if (13 - i >= 10) then
 			game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_" ..  13 - i .. ".wav"}, offset = 0.8 + (activity.countdownDuration - i), })
 		else
 			game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_0" ..  13 - i .. ".wav"}, offset = 0.8 + (activity.countdownDuration - i), })
 		end
-   
+
     end
- 
+
+    -- tracking
+
+if (REG_TRACKING) then
+
+    if (activity.matches and activity.matches.startup) then
+
+        activity.matches.startup = false
+        local delegate = engine.libraries.tracking.delegates["FPSCLIENT_START"]
+        if (delegate) then
+            delegate()
+        end
+    end
+
+end
+
 end
 
 -- End -----------------------------------------------------------------------

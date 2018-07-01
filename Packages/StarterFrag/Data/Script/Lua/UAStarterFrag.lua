@@ -60,7 +60,7 @@ function UAStarterFrag:__ctor(...)
             [1] = { label = l "goption001", tip = l "tip001", choices = { { value = 5 } }, index = "playtime", },
             [2] = { label = l "goption002", tip = l "tip002", choices = { { value = 0, displayMode = "large", text = "Auto"}, { value = 1, displayMode = "large", text = l"oth032" } }, index = "gameLaunch" },
             [3] = { label = l "goption003", tip = l "tip003", choices = { { value = 1, icon = "base:texture/ui/components/uiradiobutton_house.tga" }, { value = 2 }, { value = 3}, { value = 4 }, { value = 5, icon = "base:texture/ui/components/uiradiobutton_sun.tga" } }, index = "beamPower" },
-            [4] = { label = l "goption014", tip = l "tip004", choices = { { value = 0, displayMode = "large", text = "Off"}, { value = 1, displayMode = "large", text = "On" } }, index = "assist" },
+            [4] = { label = l "goption014", tip = l "tip004", choices = { { value = 0, displayMode = "large", text = l"oth076"}, { value = 1, displayMode = "large", text = l"oth075" } }, index = "assist" },
 
             },
         },
@@ -94,8 +94,9 @@ function UAStarterFrag:__ctor(...)
 
         [1] = {
 
-            RF01 = { category = "Ammo", positions = { { 132, 150 }, }, title = l"goption010", text = string.format(l"psexp014"), },
-            RF02 = { category = "Ammo", positions = { { 397, 150 }, }, title = l"goption010", text = string.format(l"psexp014"), },
+            Arrows = { category = "Position", size = 256, positions = { { 265, 150 }, }, title = l"goption002", text = string.format(l"psexp016"), },
+            RF01 = { category = "Ammo", positions = { { 92, 150 }, }, title = l"goption010", text = string.format(l"psexp014"), condition = function (self) return (20 ~= activity.settings.ammunitions) end  },
+            RF02 = { category = "Ammo2", positions = { { 437, 150 }, }, title = l"goption010", text = string.format(l"psexp014"), condition = function (self) return (20 ~= activity.settings.ammunitions) end  },
 
         },
     }
@@ -112,12 +113,12 @@ function UAStarterFrag:__ctor(...)
 
 	self.detailsDescriptor = {
 		information = {
-			{key = "score", icon = "base:texture/ui/Icons/32x/Score.tga", tip = l"tip072" },
-			{key = "accuracy", icon = "base:texture/ui/Icons/32x/precision.tga", tip = l"tip073" }
+			{ key = "detailsScore", icon = "base:texture/ui/Icons/32x/score.tga", tip = l"tip072" },
+			{key = "detailAccuracy", icon = "base:texture/ui/Icons/32x/precision.tga", tip = l"tip073" }
 		},
 		details = {
 			{key = "name", width = 175, style = UIGridLine.RowTitleCellStyle},
-			{key = "hitByName", width = 75, style = UIGridLine.RowTitleCellStyle, icon = "base:texture/ui/Icons/32x/Hit.tga"},
+			{key = "hitByName", width = 75, style = UIGridLine.RowTitleCellStyle, icon = "base:texture/ui/Icons/32x/Hit.tga", tip = l"tip068"},
 		}
 	}
 
@@ -209,7 +210,8 @@ function UAStarterFrag:UpdateEntityBakedData(entity, ranking)
 	else
 		entity.data.baked.accuracy = 0
 	end
-	entity.data.baked.accuracy = string.format("%0.1f", entity.data.baked.accuracy) .. "%"
+	entity.data.baked.detailsScore = entity.data.baked.score .. " " .. l"oth068"
+	entity.data.baked.detailAccuracy = string.format("%0.1f", entity.data.baked.accuracy) .. "%"
 	entity.data.baked.nbAmmoPack = (entity.data.baked.nbAmmoPack or 0) + entity.data.heap.nbAmmoPack
 	
 	for player, value in pairs(entity.data.heap.hitByName) do

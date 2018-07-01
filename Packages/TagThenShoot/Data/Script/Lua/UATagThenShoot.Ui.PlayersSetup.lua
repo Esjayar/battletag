@@ -202,7 +202,7 @@ function UATagThenShoot.Ui.PlayersSetup:OnOpen()
 	self.uiMatchSlot = {}
 	for i = 1, math.min(#activity.matches, 3) do
 
-		local match = activity.matches[#activity.matches - (i - 1)]
+		local match = activity.matches[i]
 		local player = match.challengers[1]
 		self.uiMatchSlot[i] = self.uiMatchListPanel:AddComponent(UIPlayerSlot:New() ,"uiMatchSlot" .. i)
 		self.uiMatchSlot[i]:SetPlayer(player)

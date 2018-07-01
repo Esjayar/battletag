@@ -26,13 +26,16 @@ require "UTGame.Ui.Associate"
 UTActivity.Ui = UTActivity.Ui or {}
 UTActivity.Ui.PlayersManagement = UTClass(UIMenuWindow)
 
--- default
-
 -- __ctor -------------------------------------------------------------------
 
 function UTActivity.Ui.PlayersManagement:__ctor(...)
 
     assert(activity)
+    
+	-- animate	
+	
+	self.slideBegin = true
+	self.slideEnd = true	
 
 	-- window settings
 
@@ -40,7 +43,7 @@ function UTActivity.Ui.PlayersManagement:__ctor(...)
 
     -- panel 
 
-		self.uiPanel = self.uiWindow:AddComponent(UIPanel:New(), "uiPanel")
+		self.uiPanel = self.uiWindow:AddComponent(UIPanel:New(), "uiPanel ")
 		self.uiPanel.rectangle = self.clientRectangle
 
     -- picture and text on left
@@ -55,7 +58,7 @@ function UTActivity.Ui.PlayersManagement:__ctor(...)
 		self.uiLabel1.fontColor = UIComponent.colors.darkgray
 		self.uiLabel1.fontJustification = quartz.system.drawing.justification.topleft + quartz.system.drawing.justification.wordbreak
 		self.uiLabel1.rectangle = { 45, 15, 380, 55 }
-		self.uiLabel1.text = l"oth023"
+		self.uiLabel1.text = l "oth023"
 
     	self.uiPicture2 = self.uiPanel:AddComponent(UIPicture:New(), "uiPicture2")
 		self.uiPicture2.color = UIComponent.colors.white
@@ -67,7 +70,7 @@ function UTActivity.Ui.PlayersManagement:__ctor(...)
 		self.uiLabel2.fontColor = UIComponent.colors.orange
 		self.uiLabel2.fontJustification = quartz.system.drawing.justification.topleft + quartz.system.drawing.justification.wordbreak
 		self.uiLabel2.rectangle = { 155, 320, 335, 440 }
-		self.uiLabel2.text = l"oth063"
+		self.uiLabel2.text = l "oth063"
     
     -- my slot grid
 
@@ -79,8 +82,8 @@ function UTActivity.Ui.PlayersManagement:__ctor(...)
 
 		self.uiButton1 = self:AddComponent(UIButton:New(), "uiButton1")
 		self.uiButton1.rectangle = UIMenuWindow.buttonRectangles[1]
-		self.uiButton1.text = l"but003"
-		self.uiButton1.tip = l"tip006"
+		self.uiButton1.text = l "but003"
+		self.uiButton1.tip = l "tip006"
 		self.uiButton1.OnAction = function (self) 
 
 			quartz.framework.audio.loadsound("base:audio/ui/back.wav")
@@ -99,8 +102,8 @@ function UTActivity.Ui.PlayersManagement:__ctor(...)
 
 			self.uiButton3 = self:AddComponent(UIButton:New(), "uiButton3")
 			self.uiButton3.rectangle = UIMenuWindow.buttonRectangles[3]
-			self.uiButton3.text = l"but015"
-			self.uiButton3.tip = l"tip048"
+			self.uiButton3.text = l "but015"
+			self.uiButton3.tip = l "tip048"
 
 			self.uiButton3.OnAction = function (self) 
 				activity.states["playersmanagement"]:CreatePlayer() 
@@ -112,55 +115,62 @@ function UTActivity.Ui.PlayersManagement:__ctor(...)
 
 	    self.uiButton4 = self:AddComponent(UIButton:New(), "uiButton4")
 	    self.uiButton4.rectangle = UIMenuWindow.buttonRectangles[4]
-		self.uiButton4.text = l"but014"
-		self.uiButton4.tip = l"tip019"
+		self.uiButton4.text = l "but014"
+		self.uiButton4.tip = l "tip019"
 		
 		self.uiButton4.OnAction = function (self)
 
-			-- check whether any of the required gun devices needs to be updated
-			-- possible updates include: firmware, data banks
+			-- check if the activity can be launched
 
-			local updateRequired = false
+			if (activity:Check()) then
 
-			for _, player in pairs(activity.players) do
-				updateRequired = updateRequired or (player.rfGunDevice and player.rfGunDevice.updateRequired)
-			end
+				-- check whether any of the required gun devices needs to be updated
+				-- possible updates include: firmware, data banks
 
-			if (updateRequired) then
+				local updateRequired = false
 
-				-- lock the usb proxy so as to refuse any further connection requests
-
-				engine.libraries.usb.proxy:Lock()
-
-				-- create a popup to warn user(s) about the pending updates
-				-- the popup offers no other choice than to accept the updates
-
-				local uiPopup = UIPopupWindow:New()
-
-				uiPopup.title = ""
-				uiPopup.text = l"oth017"
-
-				-- buttons
-
-	            uiPopup.uiButton2 = uiPopup:AddComponent(UIButton:New(), "uiButton2")
-		        uiPopup.uiButton2.rectangle = UIPopupWindow.buttonRectangles[2]
-			    uiPopup.uiButton2.text = l"but019"
-
-				uiPopup.uiButton2.OnAction = function ()
-
-					UIManager.stack:Pop()
-					activity:PostStateChange("revision", "bytecode")
-
+				for _, player in pairs(activity.players) do
+					updateRequired = updateRequired or (player.rfGunDevice and player.rfGunDevice.updateRequired)
 				end
 
-				UIManager.stack:Push(uiPopup)
+				if (updateRequired) or REG_FORCEREVISION then
 
-			else
+					-- lock the usb proxy so as to refuse any further connection requests
 
-				quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
-				quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
-				quartz.framework.audio.playsound()
-				activity:PostStateChange("bytecode")
+					engine.libraries.usb.proxy:Lock()
+
+					-- create a popup to warn user(s) about the pending updates
+					-- the popup offers no other choice than to accept the updates
+
+					local uiPopup = UIPopupWindow:New()
+
+					uiPopup.title = ""
+					uiPopup.text = l "oth017"
+
+					-- buttons
+
+					uiPopup.uiButton2 = uiPopup:AddComponent(UIButton:New(), "uiButton2")
+					uiPopup.uiButton2.rectangle = UIPopupWindow.buttonRectangles[2]
+					uiPopup.uiButton2.text = l "but019"
+
+					uiPopup.uiButton2.OnAction = function ()
+
+						UIManager.stack:Pop()
+						activity:PostStateChange("revision", "bytecode")
+
+					end
+
+					UIManager.stack:Push(uiPopup)
+
+				else
+
+					quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
+					quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
+					quartz.framework.audio.playsound()
+
+					activity:PostStateChange("bytecode")
+
+				end
 
 			end
 
@@ -376,6 +386,10 @@ function UTActivity.Ui.PlayersManagement:Update()
 	-- check buttons !!!
 
 	self:CheckNumberOfPlayers()
+
+	-- update
+
+	self.slotGrid:Update()
 
 --[[
 

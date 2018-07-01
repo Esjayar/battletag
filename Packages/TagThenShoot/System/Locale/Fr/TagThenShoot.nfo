@@ -3,9 +3,10 @@ local nfo = {
 
     class = "UATagThenShoot",
 
-    ["name"] = "Tag et Tire!",
-    ["description"] = "Scanne et tire !",
+    ["name"] = "Tag et Tire !",
+    ["description"] = "Scanne et tire !",
     ["pictogram"] = "TagNShoot.tga",
+    ["category"] = 2,
 
     ["difficulty"] = 30,
     ["flags"] = { "1-8 joueurs", },

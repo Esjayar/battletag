@@ -28,6 +28,11 @@ UTActivity.Ui.Loading = UTClass(UTGame.Ui.Loading)
 
 function UTActivity.Ui.Loading:__ctor(...)
 
+	-- animate	
+	
+	self.slideBegin = true
+	self.slideEnd = true
+	
 
 end
 

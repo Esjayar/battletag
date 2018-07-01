@@ -74,15 +74,35 @@ end
     assert(class)
 
     activity = class:New()
-    -- activity = UAFreeForAll:New()
-    -- activity = UATeamFrag:New()
+
+    if (game and game.settings and game.settings.activities and game.settings.activities[activity.name]) then
+
+        for key, value in pairs(game.settings.activities[activity.name]) do
+
+			activity.settings[key] = value
+
+			if ((game.settings.addons.medkitPack == 0) and (key == "numberOfBase" or key == "numberOfTeams") and (value > 2)) then
+				activity.settings[key] = 2
+			end
+			
+			if ((game.settings.addons.medkitPack == 0) and (key == "medkit") and (value > 0)) then
+				activity.settings[key] = 0
+			end
+
+        end
+
+    end  
+
 
     assert(activity)
 
     if (activity) then
 
+        activity.nfo = self.nfo
+
         -- optional forward screen,
         -- skips title after loading
+
         if (arg[2] == "playersmanagement") then activity.forward = "playersmanagement"
             print("FORWARD")
         elseif (arg[2] == "advertised") then activity.advertised = true
@@ -90,6 +110,7 @@ end
         end
 
         -- register new process to game's listof<processes>
+
         table.insert(game.processes, activity)
 
     else

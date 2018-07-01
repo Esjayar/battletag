@@ -28,6 +28,7 @@ UIProgress.font = UIComponent.fonts.default
 UIProgress.fontJustification = quartz.system.drawing.justification.center + quartz.system.drawing.justification.singlelineverticalcenter
 
 UIProgress.rectangle = { 0, 0, 100, 24 }
+UIProgress.texture = "base:texture/ui/loadingorange.tga"
 
 -- __ctor -------------------------------------------------------------------
 
@@ -60,7 +61,7 @@ function UIProgress:Draw()
 	        quartz.system.drawing.loadtexture("base:texture/ui/loadinggrey.tga")
 	        quartz.system.drawing.drawwindow(self.rectangle[1] + decal, self.rectangle[2] + decal, self.rectangle[3] - decal, self.rectangle[4] - decal)
 
-	        if (self.color) then quartz.system.drawing.loadcolor3f(unpack(self.color))
+	        if (self.texture) then quartz.system.drawing.loadtexture(self.texture)
 	        else quartz.system.drawing.loadtexture("base:texture/ui/loadingorange.tga")
 	        end
 

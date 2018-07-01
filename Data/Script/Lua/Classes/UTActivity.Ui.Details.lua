@@ -20,11 +20,21 @@ require "UI/UISelector"
 	require "UI/UIButton"
 	require "UI/UIPicture"
 	require "UI/UILabel"
+	require "UI/UIScrollBar"
 
 --[[ Class -----------------------------------------------------------------]]
 
 UTActivity.Ui = UTActivity.Ui or {}
 UTActivity.Ui.Details = UTClass(UISelector)
+
+-- default
+
+UTActivity.Ui.Details.TeamDetails = {
+	"texture/ui/Detail_TeamRed.tga",
+	"texture/ui/Detail_TeamBlue.tga",
+	"texture/ui/Detail_TeamYellow.tga",
+	"texture/ui/Detail_TeamGreen.tga",
+}
 
 -- __ctor -------------------------------------------------------------------
 
@@ -41,36 +51,50 @@ function UTActivity.Ui.Details:__ctor(...)
 
     -- contents,
 
-    self:Reserve(#activity.players, --[[ --?? SCROLLBAR ]] false)
-
+    self:Reserve(8, --[[ --?? SCROLLBAR ]] true)
+    
     -- activity description on the right side,
 
     self.uiDetails = self.uiWindows:AddComponent(UITitledPanel:New(), "uiDetails")
     self.uiDetails.rectangle = self.uiWindows.clientRectangle
-    self.uiDetails.title = "-"
+    self.uiDetails.title = ""
     self.uiDetails.visible = false
 
-	-- grid label : frag and team frag
-	self.uiDetails.fragLabel = self.uiDetails:AddComponent(UILabel:New(), "uiDetailsFragLabel")
-	self.uiDetails.fragLabel.font = UIComponent.fonts.header
-	self.uiDetails.fragLabel.fontColor = UIComponent.colors.orange
-	self.uiDetails.fragLabel.text = l"oth021"
-	if (#activity.teams > 0) then
+	-- small panel for player's icon and name
 
-		self.uiDetails.teamfragLabel = self.uiDetails:AddComponent(UILabel:New(), "uiDetailsTeamFragLabel")
-		self.uiDetails.teamfragLabel.font = UIComponent.fonts.header
-		self.uiDetails.teamfragLabel.fontColor = UIComponent.colors.orange
-		self.uiDetails.teamfragLabel.text = l"oth022"
-
-	end
+    self.uiHeader = self.uiDetails:AddComponent(UIPanel:New(), "uiHeader")
+    self.uiHeader.color = UIComponent.colors.white
+    self.uiHeader.background = "base:texture/ui/Detail_HeaderOrange.tga"
+    self.uiHeader.rectangle = { 0, 0, self.uiDetails.rectangle[3] - self.uiDetails.rectangle[1], 25}
 
 	-- small panel for player's information
 
-    self.uiInformation = self.uiWindows:AddComponent(UIPanel:New(), "uiInformation")
-    self.uiInformation.color = UIComponent.colors.gray
-    self.uiInformation.background = "base:texture/ui/components/uipanel07.tga"
-    self.uiInformation.rectangle = { self.uiWindows.clientRectangle[1], self.uiWindows.clientRectangle[2] + 25, self.uiWindows.clientRectangle[3], 80}
-    
+    self.uiInformation = self.uiDetails:AddComponent(UIPicture:New(), "uiInformation")
+    self.uiInformation.color = UIComponent.colors.white
+    self.uiInformation.texture = "base:texture/ui/Detail_GreyBackground.tga"
+	self.uiInformation.rectangle = { 0, 25, self.uiDetails.rectangle[3] - self.uiDetails.rectangle[1], 80}
+
+	-- current player name
+
+	self.uiPlayerName = self.uiDetails:AddComponent(UILabel:New(), "uiPlayerName")
+	self.uiPlayerName.font = UIComponent.fonts.title
+	self.uiPlayerName.fontColor = UIComponent.colors.white
+	self.uiPlayerName.text = ""
+	self.uiPlayerName.rectangle = { 95, -2, 95 + 200, -2 + 40}
+
+	-- current player icon
+
+	self.uiPlayerIcon = self.uiWindows:AddComponent(UIPicture:New(), "uiPlayerIcon")
+	self.uiPlayerIcon.texture = ""
+	self.uiPlayerIcon.rectangle = { self.uiWindows.clientRectangle[1] - 40, self.uiWindows.clientRectangle[2] - 40, self.uiWindows.clientRectangle[1] - 40 + 128, self.uiWindows.clientRectangle[2] - 40 + 128}
+
+	-- grid label : frag and team frag
+
+	self.uiDetails.fragLabel = self.uiDetails:AddComponent(UILabel:New(), "uiDetailsFragLabel")
+	self.uiDetails.fragLabel.font = UIComponent.fonts.header
+	self.uiDetails.fragLabel.fontColor = UIComponent.colors.orange
+	self.uiDetails.fragLabel.text = l"oth067"
+
     -- buttons,
 
     -- uiButton1: back
@@ -108,26 +132,34 @@ function UTActivity.Ui.Details:__ctor(...)
 		activity:PostStateChange("playersmanagement") 
     end
 
+	-- a scroll bar may be necessary ...
+
+	self.uiScrollBarDetails = self:AddComponent(UIScrollBar:New({ 808, 300 }, 270), "uiScrollBarDetails")
+
+	self.uiScrollBarDetails.OnActionUp = function(_self)  self:ScrollDetails(-1) end
+	self.uiScrollBarDetails.OnActionDown = function(_self)	self:ScrollDetails(1) end
+
+	self.maxSlot = math.min(#activity.players - 1, 8)
+	self.uiScrollBarDetails:SetSize(#activity.players - 1, 8)
+	self.currentIndex = 1
+
 end
 
 -- DisplaySelectedPlayer -----------------------------------------------------
 
 function UTActivity.Ui.Details:DisplaySelectedPlayer(player)
 
+	-- information
+
     self.uiDetails.visible = true
-    self.uiDetails.title = player.profile.name
+    if (player.team) then
+		self.uiHeader.background = player.team.profile.detailsHeader
+	end
+    self.uiPlayerName.text = player.profile.name
+    self.uiPlayerIcon.texture = "base:texture/avatars/256x/" .. player.profile.icon 
     self.player = player
 
     -- remove old components
-
-    if (self.uiGridFrag) then
-		self.uiDetails:RemoveComponent(self.uiGridFrag)
-    end	
-	self.uiGridFrag = nil
-    if (self.uiGridTeamFrag) then
-		self.uiDetails:RemoveComponent(self.uiGridTeamFrag)
-    end	
-	self.uiGridTeamFrag = nil
 
 	if (self.uiInformation.data) then
 	
@@ -145,83 +177,77 @@ function UTActivity.Ui.Details:DisplaySelectedPlayer(player)
 
 	if (activity.detailsDescriptor) then
 
-		self.uiGridFrag = self.uiDetails:AddComponent(UIGrid:New(activity.detailsDescriptor.details), "uiGridFrag")
-		if (#activity.teams > 0) then
-			self.uiGridTeamFrag = self.uiDetails:AddComponent(UIGrid:New(activity.detailsDescriptor.details), "uiGridTeamFrag")
-		end
+		-- grid with scroll
 
-		local numFrag = 1
-		local index
-		local numTeamFrag = 1
-		for i, player in ipairs(activity.players) do
-
-			if (not (player == self.player)) then
-
-				if (player.team and (player.team.index == self.player.team.index)) then
-					index = 2 + math.mod(numFrag,2)
-					numFrag = numFrag + 1
-					self.uiGridTeamFrag:AddLine(self.player.data.details[player.nameId], 16, "base:texture/ui/components/uigridline_background0" .. index .. ".tga")								
-				else
-					index = 2 + math.mod(numTeamFrag,2)
-					numTeamFrag = numTeamFrag + 1
-					print("nameID : " .. player.nameId)
-					print("details : ")
-					print(self.player.data.details)
-					print(self.player.data.details[player.nameId])
-					self.uiGridFrag:AddLine(self.player.data.details[player.nameId], 16, "base:texture/ui/components/uigridline_background0" .. index .. ".tga")				
-				end
-
-			end
-
-		end
+		self:ScrollDetails(0)
 
 		-- pos and size and grid label !
 
-		self.uiDetails.fragLabel.rectangle = { 40, 110 }
-		self.uiGridFrag:MoveTo(40, 140)
-		self.uiGridFrag:SetRowsPadding(2)
-		if (self.uiGridTeamFrag) then
-
-			self.uiDetails.teamfragLabel.rectangle = { 40, 160 + (16 * #self.uiGridFrag.rows) }
-			self.uiGridTeamFrag:MoveTo(40, 185 + (16 * #self.uiGridFrag.rows))
-			self.uiGridTeamFrag:SetRowsPadding(2)
-
-		end
+		self.uiDetails.fragLabel.rectangle = { 40, 105 }
 
 		-- player's information: panel, icon and value for each information needed
 
 		self.uiInformation.data = {}
 		local location = self.uiInformation.rectangle[3] - self.uiInformation.rectangle[1] - 20
 		for i, info in ipairs(activity.detailsDescriptor.information) do
-
+		
 			self.uiInformation.data[i] = {}
 
 			-- panel
-			self.uiInformation.data[i].panel = self.uiInformation:AddComponent(UIPanel:New(), "uiInformationPanel")
+			self.uiInformation.data[i].panel = self.uiDetails:AddComponent(UIPanel:New(), "uiInformationPanel")
 			self.uiInformation.data[i].panel.color = UIComponent.colors.lightgray
 			self.uiInformation.data[i].panel.background = "base:texture/ui/components/uipanel01.tga"
-			self.uiInformation.data[i].panel.rectangle = { location - 120, 10, location, 50 }
+			self.uiInformation.data[i].panel.rectangle = { location - 120, 35, location, 35 + 40 }
 			self.uiInformation.data[i].panel.tip = info.tip
 			self.uiInformation.data[i].panel.RegisterPickRegions = UIButton.RegisterPickRegions
 			self.uiInformation.data[i].panel.sensitive = true
 
 			-- icon
-			self.uiInformation.data[i].icon = self.uiInformation:AddComponent(UIPicture:New(), "uiInformationIcon")
+			self.uiInformation.data[i].icon = self.uiDetails:AddComponent(UIPicture:New(), "uiInformationIcon")
 			self.uiInformation.data[i].icon.texture = info.icon
-			self.uiInformation.data[i].icon.rectangle = { location - 120, 15, location - 120 + 32, 47 }
+			self.uiInformation.data[i].icon.rectangle = { location - 120, 40, location - 120 + 32, 40 + 32 }
 
 			-- label
-			self.uiInformation.data[i].label = self.uiInformation:AddComponent(UILabel:New(), "uiInformationLabel")
+			self.uiInformation.data[i].label = self.uiDetails:AddComponent(UILabel:New(), "uiInformationLabel")
 			self.uiInformation.data[i].label.font = UIComponent.fonts.header
 			self.uiInformation.data[i].label.fontColor = UIComponent.colors.orange
 			self.uiInformation.data[i].label.fontJustification = quartz.system.drawing.justification.center
-			self.uiInformation.data[i].label.rectangle = { location - 90, 20, location, 40 }
+			self.uiInformation.data[i].label.rectangle = { location - 90, 45, location, 45 + 20 }
 			self.uiInformation.data[i].label.text = self.player.data.baked[info.key]
+
+			-- reflexion
+			self.uiInformation.data[i].reflexion = self.uiDetails:AddComponent(UIPicture:New(), "uiInformationReflexion")
+			self.uiInformation.data[i].reflexion.texture = "base:texture/ui/Detail_Reflection.tga"
+			self.uiInformation.data[i].reflexion.rectangle = { location - 120, 35, location, 35 + 40 }
+			
 
 			-- next one
 			location = location - (140 * i)
 
 		end
+		
+		self.uiInformation.details = {}
+		local rectangle = { 40 - 10, 75, 40 - 10 + 32, 75 + 32 }
+		for i, descriptor in ipairs(activity.detailsDescriptor.details) do
+
+			if (descriptor.icon) then
+			
+				-- icon
+				
+				self.uiInformation.details[i] = self.uiDetails:AddComponent(UIPicture:New(), "uiInformationIcon")
+				self.uiInformation.details[i].texture = descriptor.icon
+				self.uiInformation.details[i].rectangle = {rectangle[1], 25 + rectangle[2], rectangle[3], 25 + rectangle[4]}
+				if (descriptor.tip) then
+					self.uiInformation.details[i].tip = descriptor.tip
+					self.uiInformation.details[i].RegisterPickRegions = UIButton.RegisterPickRegions
+					self.uiInformation.details[i].sensitive = true
+				end
+			
+			end
+			rectangle[1] = rectangle[1] + descriptor.width
+			rectangle[3] = rectangle[3] + descriptor.width
+			
+		end		
 
 	end
 
@@ -254,7 +280,7 @@ function UTActivity.Ui.Details:Draw()
 		end
 
         -- all header icons
-
+--[[
 		if (activity.detailsDescriptor) then
 
 			local rectangle = { 40 - 10, 100, 40 - 10 + 32, 100 + 32 }
@@ -274,7 +300,7 @@ function UTActivity.Ui.Details:Draw()
 			end
 
 		end
-		
+	]]--	
         quartz.system.drawing.pop()
 
     end
@@ -287,7 +313,13 @@ function UTActivity.Ui.Details:OnOpen()
 
     for i, player in ipairs(activity.players) do
 
-        local properties = { headerText = i, text = player.profile.name, userData = player }
+		local properties
+		if (player.team) then
+			properties = { iconText = i, iconColor = UIComponent.colors.white, iconCategory = self.TeamDetails[player.team.index], headerIcon = "base:texture/avatars/64x/" .. player.profile.icon, text = player.profile.name, userData = player }
+		else
+			properties = { iconText = i, iconColor = UIComponent.colors.darkgray, headerIcon = "base:texture/avatars/64x/" .. player.profile.icon, text = player.profile.name, userData = player }
+		end
+
         local item = self:AddItem(properties)
 
         item.Action = function ()
@@ -306,14 +338,70 @@ function UTActivity.Ui.Details:OnOpen()
 
 end
 
+-- ScrollDetails -------------------------------------------------------------
+
+function UTActivity.Ui.Details:ScrollDetails(value)
+
+	-- scroll
+
+	self.currentIndex = self.currentIndex + value
+    if (self.currentIndex < 1) then
+	    self.currentIndex = 1
+	elseif (self.currentIndex > (#activity.players - 1 - self.maxSlot)) then
+		self.currentIndex = math.max(1, #activity.players - 1 - self.maxSlot + 1)
+	end
+
+	-- delete and recreate
+
+    if (self.uiGridFrag) then
+		self.uiDetails:RemoveComponent(self.uiGridFrag)
+    end	
+	self.uiGridFrag = self.uiDetails:AddComponent(UIGrid:New(activity.detailsDescriptor.details), "uiGridFrag")
+
+	-- add correct line
+
+	local number = 1
+	local numTeamFrag = 1	
+	local i = 0
+	while (number <= self.maxSlot) do
+		local player = activity.players[self.currentIndex + i]
+		i = i + 1
+		if (player) then
+
+			if (player ~= self.player) then
+
+				local index = 2 + math.mod(numTeamFrag,2)
+				numTeamFrag = numTeamFrag + 1
+				self.uiGridFrag:AddLine(self.player.data.details[player.nameId], 16, "base:texture/ui/components/uigridline_background0" .. index .. ".tga")				
+				number = number + 1
+
+			end
+
+		else
+			break
+		end
+
+	end
+
+	-- set padding
+
+	self.uiGridFrag:MoveTo(40, 140)
+	self.uiGridFrag:SetRowsPadding(20)
+
+end
+
 -- Update --------------------------------------------------------------------
 
 function UTActivity.Ui.Details:Update()
+
+	UISelector.Update(self)
 
 	if (activity.states["finalrankings"].isReady) then 
 
 		self.uiButton4.enabled = true
 
 	end
+
+	self.uiScrollBarDetails:Update()
 
 end

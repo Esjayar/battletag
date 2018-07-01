@@ -6,6 +6,8 @@ local nfo = {
     ["name"] = "Free For All",
     ["description"] = "Players fight each other to score frags.",
     ["pictogram"] = "freeforall.tga",
+    ["category"] = 3,
+
 
     ["difficulty"] = 40,
     ["flags"] = { "2-8 players",},

@@ -57,7 +57,7 @@ function UAIntroduction:__ctor(...)
 
 	-- activity name
 
-    self.name = "Introduction ..."
+    self.name = "Introduction"
     self.category = UTActivity.categories.closed
     self.iconBanner = "base:texture/ui/Ranking_Bg_Introduction.tga"
 

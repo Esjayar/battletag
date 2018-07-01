@@ -15,6 +15,7 @@
 
 --[[Dependencies -----------------------------------------------------------]]
 
+	require "UTTeam"
 	require "Ui/UIMoreButton"
     require "Ui/UIContextualMenu"
 
@@ -162,16 +163,30 @@ function UIPlayerSlot:DisplayButton()
 			end
 		}
 		menu:AddItem(item)
-		
+
+		-- change team
+
 		if ((0 < #activity.teams) and  (1 < #self.player.team.players)) then
-			item = {
-				text = l"pop002",
-				tip = l"tip049",
-				action = function (_self) activity.states["playersmanagement"]:ChangeTeam(self.player) end
-			}
-			menu:AddItem(item)
+
+			for i = 1, #activity.teams do
+
+				if (self.player.team.index ~= i) then
+
+					item = {
+						text = activity.teams[i].profile.name,
+						tip = l"tip126",
+						action = function (_self) activity.states["playersmanagement"]:ChangeTeam(self.player, i) end
+					}
+					menu:AddItem(item)
+
+				end
+
+			end
+
 		end
-		
+
+		-- profils
+
 		if (not self.player.rfGunDevice) then
 			item = {
 				text = l"pop003",

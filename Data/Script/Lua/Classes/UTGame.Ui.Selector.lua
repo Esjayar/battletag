@@ -43,6 +43,11 @@ UTGame.Ui.Selector.Materials = {
 
 function UTGame.Ui.Selector:__ctor(...)
 
+	-- animate	
+	
+	self.slideBegin = true
+	self.slideEnd   = true
+	
 	-- window settings
 
 	self.uiWindow.title = l "titlemen001"
@@ -50,7 +55,7 @@ function UTGame.Ui.Selector:__ctor(...)
 
     -- contents,
 
-    self:Reserve(8, --[[ --?? SCROLLBAR ]] false)
+    self:Reserve(8, --[[ --?? SCROLLBAR ]] true)
 
     -- activity description on the right side,
 
@@ -59,6 +64,8 @@ function UTGame.Ui.Selector:__ctor(...)
     self.uiDetails.title = "-"
 
     self.uiDetails.visible = false
+    
+    self.iconType = true
 
     -- buttons,
 
@@ -144,6 +151,7 @@ function UTGame.Ui.Selector:Draw()
 
         quartz.system.drawing.pushcontext()
 
+	    quartz.system.drawing.loadtranslation(self.rectangle[1], self.rectangle[2])
         quartz.system.drawing.loadtranslation(unpack(self.uiWindows.rectangle))
         quartz.system.drawing.loadtranslation(unpack(self.uiWindow.rectangle))
         quartz.system.drawing.loadtranslation(unpack(self.clientRectangle))
@@ -158,9 +166,9 @@ function UTGame.Ui.Selector:Draw()
 
         -- flags
 
-        if (self.nfo.flags) then
+        local offset = { rectangle[1] + 120, rectangle[2] }
 
-            local offset = { rectangle[1] + 120, rectangle[2] }
+        if (self.nfo.flags) then
 
             quartz.system.drawing.loadfont(UIComponent.fonts.default)
             quartz.system.drawing.loadtexture("base:texture/ui/icons/16x/bullet.tga")
@@ -177,17 +185,26 @@ function UTGame.Ui.Selector:Draw()
 
             end
         end
+        
+        if (self.nfo.category) then
+        
+            quartz.system.drawing.loadcolor3f(unpack(UISelector.iconTypeColor[self.nfo.category]))
+            quartz.system.drawing.drawtexture(offset[1], offset[2] + 1)
+			quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.darkgray))
+			quartz.system.drawing.drawtext(l(UISelector.iconType[self.nfo.category]), offset[1] + 24, offset[2])
+			
+        end
 
         -- description
 
         quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.orange))
         quartz.system.drawing.loadfont(UIComponent.fonts.header)
-        quartz.system.drawing.drawtext(l "oth026" .. " :", rectangle[1], rectangle[2] + 110)
+        quartz.system.drawing.drawtext(l "oth026", rectangle[1], rectangle[2] + 110)
 
         local text = self.nfo.description or l "oth038"
         local fontJustification = quartz.system.drawing.justification.topleft + quartz.system.drawing.justification.wordbreak
 
-        rectangle = { rectangle[1], rectangle[2] + 120 + 24, 355, rectangle[2] + 120 + 24 + 96 }
+        rectangle = { rectangle[1], rectangle[2] + 110 + 24, 355, rectangle[2] + 110 + 24 + 96 }
 
         quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.darkgray))
         quartz.system.drawing.loadfont(UIComponent.fonts.default)
@@ -201,7 +218,7 @@ function UTGame.Ui.Selector:Draw()
 	
 			quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.orange))
 			quartz.system.drawing.loadfont(UIComponent.fonts.header)
-			quartz.system.drawing.drawtext(l "titlemen008" .. ":", rectangle[1], rectangle[4] - 26)
+			quartz.system.drawing.drawtext(l "titlemen008" .. ":", rectangle[1] , rectangle[4] - 16)
 		
 			for index = 1, 12 do
 			
@@ -217,7 +234,7 @@ function UTGame.Ui.Selector:Draw()
             
             for index, material in ipairs(self.nfo.materials) do
             
-				local vectMaterial = {rectangle[1] + ((position - 1) % 6) * 60 - 15, rectangle[2] + 99 + math.floor((position - 1) / 6) * 70}
+				local vectMaterial = {rectangle[1] + ((position - 1) % 6) * 60 - 15, rectangle[2] + 109 + math.floor((position - 1) / 6) * 70}
 				
 				if (UTGame.Ui.Selector.Materials[material] and (game.settings.addons.medkitPack == 1 or (material ~= 0x03000030 and material ~= 0x03000031 and material ~= 0x03000052 and material ~= 0x03000053))) then
 				
@@ -241,6 +258,8 @@ end
 -- OnOpen --------------------------------------------------------------------
 
 function UTGame.Ui.Selector:Open()
+	
+	UIPage.Open(self)
 
     if (not game.nfos or (0 == #game.nfos)) then
 
@@ -273,14 +292,15 @@ function UTGame.Ui.Selector:Open()
 
         table.sort(game.nfos, sortByDifficulty)
 
-        for _, nfo in ipairs(game.nfos) do
+        for i, nfo in ipairs(game.nfos) do
 
-            local properties = { color = UIComponent.colors.red, headerIcon = "base:texture/ui/pictograms/32x/" .. nfo.pictogram, text = nfo.name or nfo.__directory, userData = nfo }
+            local properties = { iconCategory = "texture/Ui/Icons/32x/ArrowCategory_" .. nfo.category .. ".tga", color = UIComponent.colors.red, headerIcon = "base:texture/ui/pictograms/48x/" .. nfo.pictogram, text = nfo.name or nfo.__directory, userData = nfo }
             local item = self:AddItem(properties)
 
             item.Action = function ()
 
                 if (item.userData) then
+					self.currentSelectedIndex = i
                     self:DisplaySelectedNfo(item.userData)
                 end
             end

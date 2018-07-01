@@ -39,7 +39,7 @@ function UTGame.State.Video:Begin()
     if (quartz.system.drawing.loadvideo("base:video/ubisoft.avi")) then
 
         quartz.system.drawing.playvideo()
-        -- game.gameMaster:Play("base:audio/ubisoft.wav")
+        -- game.gameMaster:Play("base:audio/ubisoft.wav")	
 
         UIManager.stack:Push(UTGame.Ui.Video)
 

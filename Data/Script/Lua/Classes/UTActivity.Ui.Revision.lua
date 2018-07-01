@@ -31,6 +31,11 @@ UTActivity.Ui.Revision = UTClass(UIMenuWindow)
 
 function UTActivity.Ui.Revision:__ctor(...)
 
+	-- animate	
+	
+	self.slideBegin = true
+	self.slideEnd = true
+	
 	-- window settings
 
 	self.uiWindow.title = l"oth014"
@@ -57,9 +62,12 @@ function UTActivity.Ui.Revision:__ctor(...)
 
     self.uiProgress = self.uiContents:AddComponent(UIProgress:New(), "uiProgress")
     self.uiProgress.rectangle = { 20, 20 + 25, 655, 48 + 25 }
+    self.uiProgress.rectangle = { 20, self.uiContents.rectangle[4] - 28 - 30 - 60, 655, self.uiContents.rectangle[4] - 30 - 60}
 
     self.uiGlobalProgress = self.uiContents:AddComponent(UIProgress:New(), "uiProgress")
-    self.uiGlobalProgress.rectangle = { 20, 20 + 25 + 60, 655, 48 + 25 + 60 }
+    self.uiGlobalProgress.rectangle = { 20, self.uiContents.rectangle[4] - 28 - 30, 655, self.uiContents.rectangle[4] - 30 }
+	self.uiGlobalProgress.texture = "base:texture/ui/loadingred.tga"	
+
     self.uiGlobalProgress.color = UIComponent.colors.red
 
     assert(engine.libraries.usb)
@@ -91,13 +99,20 @@ function UTActivity.Ui.Revision:Draw()
     -- contents,
 
     quartz.system.drawing.pushcontext()
+	quartz.system.drawing.loadtranslation(self.rectangle[1], self.rectangle[2])
     quartz.system.drawing.loadtranslation(unpack(self.uiContents.clientRectangle))
     quartz.system.drawing.loadtranslation(0, UITitledPanel.headerSize)
+
+	-- logo
+
+    quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
+    quartz.system.drawing.loadtexture("base:texture/ui/Loading_Logo.tga")
+    quartz.system.drawing.drawtexture(120, 0, 120 + 433, 250)
     
     -- text
 
-    local fontJustification = quartz.system.drawing.justification.bottomleft + quartz.system.drawing.justification.wordbreak
-    local rectangle = { 40, 320, 675 - 40, 390 - 20 }
+    local fontJustification = quartz.system.drawing.justification.center + quartz.system.drawing.justification.wordbreak
+    local rectangle = { 40, 220, 675 - 40, 220 + 140 }
 
     quartz.system.drawing.loadcolor3f(unpack(self.fontColor))
     quartz.system.drawing.loadfont(UIComponent.fonts.default)

@@ -13,14 +13,20 @@
 --
 ----------------------------------------------------------------------------]]
 
+REG_FORCEREVISION = false -- set to true in order to force all banks + firmware revision updates on the guns
 REG_FIRSTTIME = false -- override (cf. UTGame.settings.registers.firstTime)
+REG_TRACKING = true
 
-REG_MAJORREVISION = 1
+REG_MAJORREVISION = 2 -- firmware revision, updates are forced when major revision is changed
 REG_MINORREVISION = 0
-REG_BUILD = 312 -- 101108
+REG_BUILD = 354 -- 101220
+
+IS_MAJORREVISION = 1 -- installshield revision
+IS_MINORREVISION = 1
 
 print("appdata: " .. REG_USERAPPFOLDER)
-print("revision: " .. REG_MAJORREVISION)
+print("installshield revision: " .. IS_MAJORREVISION .. "." .. IS_MINORREVISION)
+print("firmware revision: " .. REG_MAJORREVISION .. "." .. REG_MAJORREVISION)
 
 -- debug intel
 

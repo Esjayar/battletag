@@ -31,12 +31,20 @@ UTActivity.Ui.BeginMatch.transparent = true
 
 function UTActivity.Ui.BeginMatch:__ctor(...)
 
+    self.viewportWidth, self.viewportHeight = quartz.system.drawing.getviewportdimensions()
+
     -- countdown duration & timer
 
 	if (GEAR_CFG_COMPILE == GEAR_COMPILE_DEBUG) then
 		self.countdownDuration = 2
 	else
-		self.countdownDuration = activity.countdownDuration
+
+		if ((activity.category ~= UTActivity.categories.single) and activity.settings and (1 == activity.settings.gameLaunch)) then
+			self.countdownDuration = activity.countdownDuration * 0.5
+		else
+			self.countdownDuration = activity.countdownDuration
+		end
+
 	end
 
     self.timer = self.countdownDuration * 1000000
@@ -44,12 +52,12 @@ function UTActivity.Ui.BeginMatch:__ctor(...)
 	-- closing windows
 
 	self.countdownWindows = self:AddComponent(UIClosingWindow:New(), "uiClosingWindow")
-	self.countdownWindows:Build("base:texture/ui/Countdown_Top.tga", "base:texture/ui/Countdown_Bottom.tga")
+	self.countdownWindows:Build("base:texture/ui/countdown_top.tga", "base:texture/ui/countdown_bottom.tga", "base:texture/ui/countdown_mask.tga")
 	self.countdownWindows:CloseWindow()
 
 	-- countdown 
 
-	self.countDownPosition = { 480 - 66, 360 - 64}
+	self.countDownPosition = { 480 - 66, 360 - 64 }
 	self.displayCountdown = false
 	self.countdownMsg = self.countdownDuration + 1
 
@@ -60,6 +68,54 @@ function UTActivity.Ui.BeginMatch:__ctor(...)
 		end
 
 	end
+
+    self.numbers = {
+        font = UIComponent.fonts.backgroundBanner,
+        position = { self.viewportWidth , self.viewportHeight * 0.5 },
+        speed = self.viewportWidth,
+    }
+
+    quartz.system.drawing.loadfont(self.numbers.font)
+
+    for i = 1, self.countdownDuration, 1 do
+
+        local entry = {}
+
+        entry.text = l(string.format("cnt%03d", i))
+        entry.textWidth, entry.textHeight = quartz.system.drawing.gettextdimensions(entry.text)
+
+        if (entry.textWidth > self.numbers.speed) then self.numbers.speed = entry.textWidth + 200
+        end
+
+        self.numbers[i] = entry
+
+    end
+
+    self.countdownWindows.drawDelegate = function ()
+
+        if (self.displayCountdown and self.numbers) then
+
+            for i = self.countdown - 1, self.countdown + 1 do
+
+                local entry = self.numbers[i]
+                if (entry) then
+
+                    local offset = self.numbers.position[1] + ((self.timer / 1000000) - i) * self.numbers.speed
+
+                    quartz.system.drawing.loadcolor4f(1.00, 0.73, 0.00, 0.80)
+                    quartz.system.drawing.loadfont(self.numbers.font)
+
+                    local x, y = offset - entry.textWidth * 0.5, self.numbers.position[2] - entry.textHeight
+
+                    quartz.system.drawing.drawtext(entry.text, x, y)
+
+                end
+            end
+
+            return true
+
+        end
+    end
 
 end
 
@@ -78,21 +134,23 @@ function UTActivity.Ui.BeginMatch:Draw()
 
 	if (self.displayCountdown) then
 
+        -- countdown
+
 		quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.orange))
-		
+
 		local offset = 0
-		
-		if (math.floor(self.countdown/10) ~= 0) then
+
+		if (math.floor(self.countdown / 10) ~= 0) then
 
 			offset = 30
 			quartz.system.drawing.loadtexture("base:texture/ui/Countdown_" .. math.floor(self.countdown/10) .. ".tga")
 			quartz.system.drawing.drawtexture(self.countDownPosition[1] - 2 * offset, self.countDownPosition[2])
-			
+
 		end
- 
+
         quartz.system.drawing.loadtexture("base:texture/ui/Countdown_" .. (self.countdown%10) .. ".tga")
         quartz.system.drawing.drawtexture(self.countDownPosition[1] + offset, self.countDownPosition[2])
-            
+
 	end
 
 end

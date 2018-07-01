@@ -6,6 +6,8 @@ local nfo = {
     ["name"] = "Chacun pour soi",
     ["description"] = "Les joueurs s'affrontent pour marquer des points en tirant sur leurs adversaires.",
     ["pictogram"] = "freeforall.tga",
+    ["category"] = 3,
+
 
     ["difficulty"] = 40,
     ["flags"] = { "2-8 joueurs", },

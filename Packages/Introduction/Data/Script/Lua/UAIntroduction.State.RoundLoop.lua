@@ -237,7 +237,7 @@ function UAIntroduction.State.RoundLoop:OnDispatchMessage(device, addressee, com
 
                         -- the instigator scores the hit
 
-                        local device = engine.libraries.usb.proxy.devices.byRadioProtocolId[arg[5 + i]]
+                        local device = engine.libraries.usb.proxy.devices.byRadioProtocolId[arg[6 + difference - i]]
                         if (device) then
                             local player = device.owner
                             if (player) then

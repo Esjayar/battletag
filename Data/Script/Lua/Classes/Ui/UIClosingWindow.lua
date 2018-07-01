@@ -52,12 +52,13 @@ end
 
 -- build -------------------------------------------------------------------
 
-function UIClosingWindow:Build(topTexture, bottomTexture)
+function UIClosingWindow:Build(topTexture, bottomTexture, topMaskTexture)
 
 	-- windows texture
 
 	self.topTexture = topTexture
 	self.bottomTexture = bottomTexture
+	self.topMaskTexture = topMaskTexture
 
 	-- get texture dimension
 
@@ -70,7 +71,14 @@ function UIClosingWindow:Build(topTexture, bottomTexture)
 	self.topRectangle = { 0.0, -self.viewportHeight, textureWidth, 0}
     self.topRectangle[1] = (self.viewportWidth - self.scale * textureWidth) / 2.0
     self.topRectangle[3] = self.topRectangle[1] + textureWidth * self.scale
-	self.bottomRectangle = {self.topRectangle[1], 2.0 * self.viewportHeight, self.topRectangle[3], 3.0 * self.viewportHeight }
+	self.bottomRectangle = { self.topRectangle[1], 2.0 * self.viewportHeight, self.topRectangle[3], 3.0 * self.viewportHeight }
+
+    if (self.topMaskTexture) then
+        quartz.system.drawing.loadtexture(self.topMaskTexture)
+	    textureWidth, textureHeight = quartz.system.drawing.gettexturedimensions()
+	    self.topMaskDimensions = { textureWidth * self.scale, textureHeight * self.scale }
+	    self.topMaskRectangle = { (self.viewportWidth - self.topMaskDimensions[1]) * 0.5, (self.viewportHeight) - self.topMaskDimensions[2], (self.viewportWidth + self.topMaskDimensions[1]) * 0.5, (self.viewportHeight) }
+	end
 
 end
 
@@ -99,23 +107,47 @@ function UIClosingWindow:Draw()
 	-- MultiComponent draw
 
 	UIMultiComponent.Draw(self)	
-	
-	-- draw top
-	quartz.system.drawing.pushcontext()
 
+	-- draw top
+
+	quartz.system.drawing.pushcontext()
 	quartz.system.drawing.loadidentity()
 	
 	quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
 	quartz.system.drawing.loadtexture(self.topTexture )
 	quartz.system.drawing.drawtexture(unpack(self.topRectangle))
 
+    -- additional draw delegate to display something behind the mask
+    if (self.drawDelegate) then
+
+        --quartz.system.drawing.pop()
+
+        local result = self.drawDelegate()
+
+	    --quartz.system.drawing.pushcontext()
+	    --quartz.system.drawing.loadidentity()
+
+        if (result) then
+
+            -- draw mask
+
+            if (self.topMaskTexture) then
+	            quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
+	            quartz.system.drawing.loadtexture(self.topMaskTexture)
+	            quartz.system.drawing.drawtexture(unpack(self.topMaskRectangle))
+	        end
+
+	    end
+
+    end
+    
 	-- draw bottom
 
 	quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
 	quartz.system.drawing.loadtexture(self.bottomTexture )
 	quartz.system.drawing.drawtexture(unpack(self.bottomRectangle))
 
-	quartz.system.drawing.pop()		
+	quartz.system.drawing.pop()
 
 end
 

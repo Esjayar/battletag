@@ -4,8 +4,10 @@ local nfo = {
     class = "UATagThenShoot",
 
     ["name"] = "Tag'n Shoot",
-    ["description"] = "Tag and Shoot !",
+    ["description"] = "Tag and Shoot!",
     ["pictogram"] = "TagNShoot.tga",
+    ["category"] = 2,
+
 
     ["difficulty"] = 30,
     ["flags"] = { "1-8 players", },

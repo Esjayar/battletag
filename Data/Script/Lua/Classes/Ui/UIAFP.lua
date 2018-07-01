@@ -122,7 +122,14 @@ function UIAFP:__ctor(noTimer)
 	self.uiButton1.text = l"but016"
 	self.uiButton1.tip = l"tip066"
 
-	self.uiButton1.OnAction = function (self) UIManager.stack:Push(UTActivity.Ui.Menu) end
+	self.uiButton1.OnAction = function (self) 
+
+		if (not activity.mainMenu) then
+			activity.mainMenu = UTActivity.Ui.Menu:New()
+			UIManager.stack:Push(activity.mainMenu) 
+		end
+
+	end
 
 end
 
@@ -162,7 +169,7 @@ function UIAFP:Draw()
             quartz.system.drawing.drawtexture(unpack(self.timer.backgroundRectangle))
 
             font = UIComponent.fonts.header
-            color = UIComponent.colors.gray
+            color = UIComponent.colors.orange
             fontJustification = quartz.system.drawing.justification.left + quartz.system.drawing.justification.singlelineverticalcenter
 
             quartz.system.drawing.loadcolor3f(unpack(color))
@@ -209,7 +216,7 @@ function UIAFP:Draw()
         quartz.system.drawing.loadtexture(self.eventsBox.headerBackground)
         quartz.system.drawing.drawtexture(unpack(self.headerRectangle))
 
-        color = UIComponent.colors.gray
+        color = UIComponent.colors.orange
         font = UIComponent.fonts.default
         fontJustification = quartz.system.drawing.justification.left + quartz.system.drawing.justification.singlelineverticalcenter
 

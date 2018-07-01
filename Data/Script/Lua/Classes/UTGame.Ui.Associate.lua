@@ -335,7 +335,7 @@ function UTGame.Ui.Associate:OnOpen()
 
 	-- father
 
-	UIPopupLargeWindow:OnOpen()
+	UIPopupLargeWindow.OnOpen(self)
 
 	-- register	to proxy message received
 

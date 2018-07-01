@@ -181,7 +181,10 @@ function UTGameMaster:RegisterActivitySound()
 	self:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_32.wav",
 								  "base:audio/gamemaster/DLG_GM_GLOBAL_33.wav",
 								  "base:audio/gamemaster/DLG_GM_GLOBAL_34.wav", 
-								  "base:audio/gamemaster/DLG_GM_GLOBAL_35.wav"},
+								  "base:audio/gamemaster/DLG_GM_GLOBAL_35.wav",
+								  "base:audio/gamemaster/DLG_GM_GLOBAL_125.wav",
+								  "base:audio/gamemaster/DLG_GM_GLOBAL_126.wav",
+								  "base:audio/gamemaster/DLG_GM_GLOBAL_132.wav",},
 						 priority = 4,
 						 })
 

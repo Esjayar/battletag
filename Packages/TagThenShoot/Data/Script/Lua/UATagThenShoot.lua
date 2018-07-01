@@ -62,7 +62,7 @@ function UATagThenShoot:__ctor(...)
 
             [1] = { label = l"goption015", tip = l "tip029", choices = { { value = 2 }, { value = 4, conditional = true } }, index = "numberOfBase", condition = function (self) return (1 == game.settings.addons.medkitPack) end },
             [2] = { label = l"goption003", tip = l "tip026", choices = { { value = 1, icon = "base:texture/ui/components/uiradiobutton_house.tga" }, { value = 2 }, { value = 3}, { value = 4 }, { value = 5, icon = "base:texture/ui/components/uiradiobutton_sun.tga" } }, index = "beamPower" },
-            [3] = { label = l"goption014", tip = l "tip004", choices = { { value = 0, displayMode = "large", text = "Off"}, { value = 1, displayMode = "large", text = "On" } }, index = "assist" },
+            [3] = { label = l"goption014", tip = l "tip004", choices = { { value = 0, displayMode = "large", text = l"oth076"}, { value = 1, displayMode = "large", text = l"oth075" } }, index = "assist" },
 
             },
      --   },
@@ -176,8 +176,8 @@ function UATagThenShoot:InitEntityHeapData(entity, ranking)
 	-- init entity specific data
 
 	entity.data.heap.nbHit = 0
-	entity.data.heap.nbTag = 0
 	entity.data.heap.state = 0
+	entity.data.heap.tagging = 1
 	entity.data.heap.numberOfBase = activity.settings.numberOfBase
 	entity.data.heap.assist = activity.settings.assist
 

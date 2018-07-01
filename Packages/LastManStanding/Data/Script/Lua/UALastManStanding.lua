@@ -61,11 +61,12 @@ function UALastManStanding:__ctor(...)
 
         [1] = { title = l"titlemen006", options = {
 
-            [1] = { label = l"goption007", tip = l"tip040", choices = { { value = 0, displayMode = "large", text = "Off" }, { value = 1, displayMode = "large", text = "On"  } }, index = "swap", },
+            [1] = { label = l"goption007", tip = l"tip040", choices = { { value = 0, displayMode = "large", text = l"oth076" }, { value = 1, displayMode = "large", text = l"oth075"  } }, index = "swap", },
             [2] = { label = l"goption002", tip = l"tip025", choices = { { value = 0, displayMode = "large", text = "Auto"}, { value = 1, displayMode = "large", text = l"oth032" } }, index = "gameLaunch" },
             [3] = { label = l"goption003", tip = l"tip026", choices = { { value = 1, icon = "base:texture/ui/components/uiradiobutton_house.tga" }, { value = 2 }, { value = 3}, { value = 4 }, { value = 5, icon = "base:texture/ui/components/uiradiobutton_sun.tga" } }, index = "beamPower" },
-            [4] = { label = l"goption014", tip = l"tip004", choices = { { value = 0, displayMode = "large", text = "Off"}, { value = 1, displayMode = "large", text = "On" } }, index = "assist" },
-
+            [4] = { label = l"goption014", tip = l"tip004", choices = { { value = 0, displayMode = "large", text = l"oth076"}, { value = 1, displayMode = "large", text = l"oth075" } }, index = "assist" },
+            [5] = { displayMode = nil, label = l"goption009", tip = l"tip035", choices = { { value = 0, displayMode = "large", text = l"oth076" }, { value = 1, displayMode = "large", text = l"oth075", conditional = true } }, index = "medkit", condition = function (self) return (1 == game.settings.addons.medkitPack) end },
+            
             },
         },
         
@@ -90,6 +91,7 @@ function UALastManStanding:__ctor(...)
         respawnTime = 10,
         swap = 0,
         assist = 1,
+        medkit = 0,
 
 		-- no team
 
@@ -103,10 +105,9 @@ function UALastManStanding:__ctor(...)
 
         [1] = { 
 
-            RF01 = { category = "Ammo", positions = { { 132, 75 }, }, title = l"goption010", text = string.format(l"psexp014"), },
-            RF02 = { category = "Ammo", positions = { { 397, 225 }, }, title = l"goption010", text = string.format(l"psexp014"), },
-            RF07 = { category = "Med-Kit", positions = { { 132, 225 }, }, title = l"goption009", text = string.format(l"psexp015"), condition = function (self) return (1 == game.settings.addons.medkitPack) end },
-            RF08 = { category = "Med-Kit", positions = { { 397, 75 }, }, title = l"goption009", text = string.format(l"psexp015"), condition = function (self) return (1 == game.settings.addons.medkitPack) end },
+            Arrows = { category = "Position", size = 256, positions = { { 265, 150 }, }, title = l"goption002", text = string.format(l"psexp016"), },
+            RF01 = { category = "Ammo", positions = { { 92, 150 }, }, title = l"goption010", text = string.format(l"psexp014"), condition = function (self) return (20 ~= activity.settings.ammunitions) end  },
+            RF02 = { category = "Ammo2", positions = { { 437, 150 }, }, title = l"goption010", text = string.format(l"psexp014"), condition = function (self) return (20 ~= activity.settings.ammunitions) end  },
 
         },
     }
@@ -131,12 +132,12 @@ function UALastManStanding:__ctor(...)
 	self.detailsDescriptor = {
 		information = {
 			--{key = "score", icon = "base:texture/ui/Icons/32x/Score.tga"},
-			{key = "accuracy", icon = "base:texture/ui/Icons/32x/precision.tga", tip = l"tip073" }
+			{key = "detailAccuracy", icon = "base:texture/ui/Icons/32x/precision.tga", tip = l"tip073" }
 		},
 		details = {
 			{key = "name", width = 175, style = UIGridLine.RowTitleCellStyle},
-			{key = "hitByName", width = 75, style = UIGridLine.RowTitleCellStyle, icon = "base:texture/ui/Icons/32x/Hit.tga"},
-			{key = "killByName", width = 50, style = UIGridLine.RowTitleCellStyle, icon = "base:texture/ui/Icons/32x/Death.tga"},
+			{key = "hitByName", width = 75, style = UIGridLine.RowTitleCellStyle, icon = "base:texture/ui/Icons/32x/Hit.tga", tip = l"tip068"},
+			{key = "killByName", width = 50, style = UIGridLine.RowTitleCellStyle, icon = "base:texture/ui/Icons/32x/Death.tga", tip = l"tip070"},
 		}
 	}
 
@@ -198,7 +199,7 @@ function UALastManStanding:InitEntityHeapData(entity, ranking)
 	entity.data.heap.ammoPack = activity.settings.ammoPack
 	entity.data.heap.medikit = activity.settings.medikit
 	entity.data.heap.assist = activity.settings.assist
-	entity.data.heap.medkit = game.settings.addons.medkitPack
+	entity.data.heap.medkit = activity.settings.medkit	
 
 	entity.data.heap.score = activity.settings.lifePoints + #activity.match.players
 	entity.data.heap.ranking = ranking
@@ -239,7 +240,8 @@ function UALastManStanding:UpdateEntityBakedData(entity, ranking)
 	else
 		entity.data.baked.accuracy = 0
 	end
-	entity.data.baked.accuracy = string.format("%0.1f", entity.data.baked.accuracy) .. "%"
+	entity.data.baked.detailsScore = entity.data.baked.score .. " " .. l"oth068"
+	entity.data.baked.detailAccuracy = string.format("%0.1f", entity.data.baked.accuracy) .. "%"
 	entity.data.baked.nbAmmoPack = (entity.data.baked.nbAmmoPack or 0) + entity.data.heap.nbAmmoPack
 	entity.data.baked.nbMediKit = (entity.data.baked.nbMediKit or 0) + entity.data.heap.nbMediKit
 	

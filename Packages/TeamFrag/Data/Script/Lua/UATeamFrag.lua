@@ -64,9 +64,9 @@ function UATeamFrag:__ctor(...)
             [2] = { displayMode = nil, label = l"goption008", tip = l"tip030", choices = { { value = 2 }, { value = 3, conditional = true }, { value = 4, conditional = true } }, index = "numberOfTeams", condition = function (self) return (1 == game.settings.addons.medkitPack) end },
             [3] = { label = l"goption002", tip = l"tip025", choices = { { value = 0, displayMode = "large", text = "Auto"}, { value = 1, displayMode = "large", text = l"oth032" } }, index = "gameLaunch" },
             [4] = { label = l"goption003", tip = l"tip026", choices = { { value = 1, icon = "base:texture/ui/components/uiradiobutton_house.tga" }, { value = 2 }, { value = 3}, { value = 4 }, { value = 5, icon = "base:texture/ui/components/uiradiobutton_sun.tga" } }, index = "beamPower" },
-            [5] = { displayMode = nil, label = l"goption013", tip = l"tip041", choices = { { value = 0, displayMode = "large", text = "Off" }, { value = 1, displayMode = "large", text = "On"  } }, index = "teamFrag", },
-            [6] = { displayMode = nil, label = l"goption007", tip = l"tip040", choices = { { value = 0, displayMode = "large", text = "Off" }, { value = 1, displayMode = "large", text = "On"  } }, index = "swap", },
-            [7] = { label = l"goption014", tip = l"tip004", choices = { { value = 0, displayMode = "large", text = "Off"}, { value = 1, displayMode = "large", text = "On" } }, index = "assist" },
+            [5] = { displayMode = nil, label = l"goption013", tip = l"tip041", choices = { { value = 0, displayMode = "large", text = l"oth076" }, { value = 1, displayMode = "large", text = l"oth075"  } }, index = "teamFrag", },
+            [6] = { displayMode = nil, label = l"goption007", tip = l"tip040", choices = { { value = 0, displayMode = "large", text = l"oth076" }, { value = 1, displayMode = "large", text = l"oth075"  } }, index = "swap", },
+            [7] = { label = l"goption014", tip = l"tip004", choices = { { value = 0, displayMode = "large", text = l"oth076"}, { value = 1, displayMode = "large", text = l"oth075" } }, index = "assist" },
 
             },
         },
@@ -111,12 +111,12 @@ function UATeamFrag:__ctor(...)
             BlueArea = { priority = 20, size = 128, text = string.format(l"psexp025"), positions = { { 480, 150 }, }, },
             RedArea = { priority = 20, size = 128, text = string.format(l"psexp025"), positions = { { 50, 150 }, }, },
 
-            RF01 = { category = "Ammo", title = l"goption010", text = string.format(l"psexp014"), positions = { { 200, 100 }, }, },
-            RF02 = { category = "Ammo", title = l"goption010", text = string.format(l"psexp014"), positions = { { 330, 200 }, }, },
+            RF01 = { category = "Ammo", title = l"goption010", text = string.format(l"psexp014"), positions = { { 200, 100 }, }, condition = function (self) return (20 ~= activity.settings.ammunitions) end  },
+            RF02 = { category = "Ammo2", title = l"goption010", text = string.format(l"psexp014"), positions = { { 330, 200 }, }, condition = function (self) return (20 ~= activity.settings.ammunitions) end  },
             RF03 = { priority = 1, title = l"oth056" ..  " (" .. l"oth027" .. ")", text = string.format(l"psexp018"), positions = { { 50, 150 }, }, },
             RF04 = { priority = 2, title = l"oth057" ..  " (" .. l"oth028" .. ")", text = string.format(l"psexp019"), positions = { { 480, 150 }, }, },            
             RF07 = { category = "Med-Kit", title = l"goption009", text = string.format(l"psexp015"), positions = { { 330, 100 }, }, condition = function (self) return (1 == game.settings.addons.medkitPack) end },
-            RF08 = { category = "Med-Kit", title = l"goption009", text = string.format(l"psexp015"), positions = { { 200, 200 }, }, condition = function (self) return (1 == game.settings.addons.medkitPack) end },
+            RF08 = { category = "Med-Kit2", title = l"goption009", text = string.format(l"psexp015"), positions = { { 200, 200 }, }, condition = function (self) return (1 == game.settings.addons.medkitPack) end },
         },
 
         [3] = { 
@@ -125,13 +125,13 @@ function UATeamFrag:__ctor(...)
             BlueArea = { priority = 20, size = 128, text = string.format(l"psexp025"), positions = { { 480, 50 }, }, },
             YellowArea = { priority = 20, size = 128, text = string.format(l"psexp025"), positions = { { 265, 250 }, }, },
 
-            RF01 = { category = "Ammo", title = l"goption010", text = string.format(l"psexp014"), positions = { { 160, 100 }, }, },
-            RF02 = { category = "Ammo", title = l"goption010", text = string.format(l"psexp014"), positions = { { 370, 200 }, }, },
+            RF01 = { category = "Ammo", title = l"goption010", text = string.format(l"psexp014"), positions = { { 160, 100 }, }, condition = function (self) return (20 ~= activity.settings.ammunitions) end  },
+            RF02 = { category = "Ammo2", title = l"goption010", text = string.format(l"psexp014"), positions = { { 370, 200 }, }, condition = function (self) return (20 ~= activity.settings.ammunitions) end  },
             RF03 = { priority = 1, title = l"oth056" ..  " (" .. l"oth027" .. ")", text = string.format(l"psexp018"), positions = { { 50, 50 }, }, },
             RF04 = { priority = 2, title = l"oth057" ..  " (" .. l"oth028" .. ")", text = string.format(l"psexp019"), positions = { { 480, 50 }, }, },
             RF05 = { priority = 3, title = l"oth058" ..  " (" .. l"oth029" .. ")", text = string.format(l"psexp020"), positions = { { 265, 250 }, }, },
             RF07 = { category = "Med-Kit", title = l"goption009", text = string.format(l"psexp015"), positions = { { 370, 100 }, }, condition = function (self) return (1 == game.settings.addons.medkitPack) end },
-            RF08 = { category = "Med-Kit", title = l"goption009", text = string.format(l"psexp015"), positions = { { 160, 200 }, }, condition = function (self) return (1 == game.settings.addons.medkitPack) end },
+            RF08 = { category = "Med-Kit2", title = l"goption009", text = string.format(l"psexp015"), positions = { { 160, 200 }, }, condition = function (self) return (1 == game.settings.addons.medkitPack) end },
         },
 
         [4] = { 
@@ -141,14 +141,14 @@ function UATeamFrag:__ctor(...)
             YellowArea = { priority = 20, size = 128, text = string.format(l"psexp025"), positions = { { 50, 250 }, }, },
             GreenArea = { priority = 20, size = 128, text = string.format(l"psexp025"), positions = { { 480, 250 }, }, },
 
-            RF01 = { category = "Ammo", title = l"goption010", text = string.format(l"psexp014"), positions = { { 200, 100 }, }, },
-            RF02 = { category = "Ammo", title = l"goption010", text = string.format(l"psexp014"), positions = { { 330, 200 }, }, },
+            RF01 = { category = "Ammo", title = l"goption010", text = string.format(l"psexp014"), positions = { { 200, 100 }, }, condition = function (self) return (20 ~= activity.settings.ammunitions) end  },
+            RF02 = { category = "Ammo2", title = l"goption010", text = string.format(l"psexp014"), positions = { { 330, 200 }, }, condition = function (self) return (20 ~= activity.settings.ammunitions) end  },
             RF03 = { priority = 1, title = l"oth056" ..  " (" .. l"oth027" .. ")", text = string.format(l"psexp018"), positions = { { 50, 50 }, }, },
             RF04 = { priority = 2, title = l"oth057" ..  " (" .. l"oth028" .. ")", text = string.format(l"psexp019"), positions = { { 480, 50 }, }, },
             RF05 = { priority = 3, title = l"oth058" ..  " (" .. l"oth029" .. ")", text = string.format(l"psexp020"), positions = { { 50, 250 }, }, },
             RF06 = { priority = 4, title = l"oth059" ..  " (" .. l"oth030" .. ")", text = string.format(l"psexp021"), positions = { { 480, 250 }, }, },           
             RF07 = { category = "Med-Kit", title = l"goption009", text = string.format(l"psexp015"), positions = { { 330, 100 }, }, condition = function (self) return (1 == game.settings.addons.medkitPack) end },
-            RF08 = { category = "Med-Kit", title = l"goption009", text = string.format(l"psexp015"), positions = { { 200, 200 }, }, condition = function (self) return (1 == game.settings.addons.medkitPack) end },
+            RF08 = { category = "Med-Kit2", title = l"goption009", text = string.format(l"psexp015"), positions = { { 200, 200 }, }, condition = function (self) return (1 == game.settings.addons.medkitPack) end },
         },
     }
 
@@ -172,13 +172,14 @@ function UATeamFrag:__ctor(...)
 
 	self.detailsDescriptor = {
 		information = {
-			{key = "score", icon = "base:texture/ui/Icons/32x/score.tga", tip = l"tip072" },
-			{key = "accuracy", icon = "base:texture/ui/Icons/32x/precision.tga", tip = l"tip073" }
+			{key = "detailsScore", icon = "base:texture/ui/Icons/32x/score.tga", tip = l"tip072" },
+			{key = "detailAccuracy", icon = "base:texture/ui/Icons/32x/precision.tga", tip = l"tip073" }
 		},
 		details = {
-			{key = "name", width = 175, style = UIGridLine.RowTitleCellStyle},
-			{key = "hitByName", width = 75, style = UIGridLine.RowTitleCellStyle, icon = "base:texture/ui/Icons/32x/Hit.tga"},
-			{key = "killByName", width = 50, style = UIGridLine.RowTitleCellStyle, icon = "base:texture/ui/Icons/32x/Death.tga"},
+			{key = "detailsTeam", width = 55, style = UIGridLine.ImageCellStyle:New(35, 10), preferredHeight = 10, preferredWidth = 35},
+			{key = "name", width = 130, style = UIGridLine.RowTitleCellStyle},
+			{key = "hitByName", width = 75, style = UIGridLine.RowTitleCellStyle, icon = "base:texture/ui/Icons/32x/Hit.tga", tip = l"tip068"},
+			{key = "killByName", width = 50, style = UIGridLine.RowTitleCellStyle, icon = "base:texture/ui/Icons/32x/Death.tga", tip = l"tip070"},
 		}
 	}
 
@@ -332,7 +333,8 @@ function UATeamFrag:UpdateEntityBakedData(entity, ranking)
 		else
 			entity.data.baked.accuracy = 0
 		end
-		entity.data.baked.accuracy = string.format("%0.1f", entity.data.baked.accuracy) .. "%"
+		entity.data.baked.detailAccuracy = string.format("%0.1f", entity.data.baked.accuracy) .. "%"
+		entity.data.baked.detailsScore = entity.data.baked.score .. " " .. l"oth068"
 		entity.data.baked.nbRespawn = (entity.data.baked.nbRespawn or 0) + entity.data.heap.nbRespawn
 		entity.data.baked.nbAmmoPack = (entity.data.baked.nbAmmoPack or 0) + entity.data.heap.nbAmmoPack
 		entity.data.baked.nbMediKit = (entity.data.baked.nbMediKit or 0) + entity.data.heap.nbMediKit
@@ -351,6 +353,7 @@ function UATeamFrag:UpdateEntityBakedData(entity, ranking)
 
 			local details = {}
 			details.name = player.profile.name
+			details.detailsTeam = player.team.profile.details
 			details.hitByName = (entity.data.baked.hitByName[player.nameId] or 0)
 			details.killByName = (entity.data.baked.killByName[player.nameId] or 0)
 			entity.data.details[player.nameId] = details

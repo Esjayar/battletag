@@ -35,7 +35,7 @@ UIMoreButton.states = {
 
 }
 
-UIMoreButton.rectangle = { 0, 0, 30, 30}
+UIMoreButton.rectangle = { 0, 0, 32, 32}
 
 UIMoreButton.opaque = true
 UIMoreButton.sensitive = true

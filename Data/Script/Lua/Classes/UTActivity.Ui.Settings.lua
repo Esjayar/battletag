@@ -34,7 +34,12 @@ UTActivity.Ui.Settings.optionMargin = { 10, 10 }
 -- __ctor -------------------------------------------------------------------
 
 function UTActivity.Ui.Settings:__ctor(...)
-
+    
+	-- animate	
+    
+	self.slideBegin = true
+	self.slideEnd = true
+	
     -- holds the UIOptions to retrieve them easily
 
 	self.uiOptions = {}
@@ -125,6 +130,7 @@ function UTActivity.Ui.Settings:__ctor(...)
 		quartz.framework.audio.loadsound("base:audio/ui/back.wav")
 		quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
 		quartz.framework.audio.playsound()
+    		
 	    activity:PostStateChange("title") 
 	
 	end
@@ -150,6 +156,35 @@ function UTActivity.Ui.Settings:__ctor(...)
 		quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
 		quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
 		quartz.framework.audio.playsound()
+    
+		if (game and game.settings) then
+
+			if (not game.settings.activities) then
+			
+				game.settings.activities = {}
+			
+			end
+		
+			if (not game.settings.activities[activity.name]) then
+			
+				game.settings.activities[activity.name] = {}
+				
+			end
+			
+			local settings = game.settings.activities[activity.name]
+
+			for key, value in pairs(activity.settings) do
+				
+				if (type(activity.settings[key]) ~= "table") then
+				
+					settings[key] = activity.settings[key]
+					
+				end
+			end
+	        
+			game:SaveSettings()
+			
+		end
 
 	    activity:PostStateChange("playground") 
 

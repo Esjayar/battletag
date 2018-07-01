@@ -36,6 +36,7 @@ function UEEngine.State.Ignition:Begin()
     engine.libraries.audio = ULAudio:New(engine)
     engine.libraries.drawing = ULDrawing:New(engine)
     engine.libraries.usb = ULUsb:New(engine)
+    engine.libraries.tracking = ULTracking:New(engine)
 
 end
 

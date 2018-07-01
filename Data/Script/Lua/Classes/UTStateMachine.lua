@@ -54,7 +54,23 @@ end
 
 function UTStateMachine:PostStateChange(transition, ...)
 
-    self.transition = { transition, { ... }}
+	local args = {...}
+	
+	--[[
+	if UIMenuManager and UIMenuManager.stack.top and UIMenuManager.stack.top.slideEnd then
+	
+		self.mvtFx = UIManager:AddFx("position", { duration = 0.75, __self = UIMenuManager.stack.top, from = {0, UIMenuManager.stack.top.rectangle[2]}, to = { -1100, UIMenuManager.stack.top.rectangle[2]}, type = "accelerate" })
+		self.postChangeFx = UIManager:AddFx("callback", { timeOffset = 0.75, 
+							__function = function() 
+								self.transition = { transition, args }
+							end})
+	
+	else
+	--]]
+	
+		self.transition = { transition, args }
+	
+	--end
 
 end
 

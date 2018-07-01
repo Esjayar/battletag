@@ -167,6 +167,37 @@ function UTActivity.State.Matchmaking:Fill()
 
 		if (1 < #activity.matches) then
 
+			function sortMatches(m1,m2)
+
+				local val1 = 0
+				for _, challenger  in ipairs(m1.challengers) do
+					val1 = val1 + challenger.value
+				end
+				local val2 = 0
+				for _, challenger  in ipairs(m2.challengers) do
+					val2 = val2 + challenger.value
+				end
+
+				if (val1 < val2) then
+					for _, challenger  in ipairs(m1.challengers) do
+						challenger.value = challenger.value + 2
+					end				
+					return true
+				else
+					for _, challenger  in ipairs(m2.challengers) do
+						challenger.value = challenger.value + 2
+					end								
+				end
+			end
+
+			for _, match  in ipairs(activity.matches) do
+				for _, challenger  in ipairs(match.challengers) do
+					challenger.value = 0
+				end
+			end
+			table.sort(activity.matches, sortMatches)
+
+			--[[
 			function shortMatches(m1,m2)
 				if m1.shuffle > m2.shuffle then
 					return true
@@ -177,6 +208,7 @@ function UTActivity.State.Matchmaking:Fill()
 				match.shuffle = math.random(1, 100)
 			end
 			table.sort(activity.matches, shortMatches)
+			--]]
 
 		end
 		
@@ -194,11 +226,18 @@ function UTActivity.State.Matchmaking:Next()
     -- if we don't have a list of matches yet, then build it
 
     if (not activity.matches or (0 == #activity.matches)) then
+
         self:Fill()
+
+        -- the startup flag indicates the game is just starting
+        -- this is used in state "beginmatch" for tracking
+
+        activity.matches.startup = true
+
     end
 
     -- ... otherwise just pop one match from the list
 
-    return table.remove(activity.matches)
+    return table.remove(activity.matches, 1)
 
 end

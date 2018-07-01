@@ -102,6 +102,7 @@ function UATeamFrag.State.RoundLoop:OnDispatchMessage(device, addressee, command
 			end
 			
 			local clips = (arg[6] * 256) + arg[7]
+			device.owner.data.heap.nbShot = (arg[8] * 256) + arg[9]
 			if (0 == device.owner.data.heap.isDead) then
 			
 				if ((device.owner.data.heap.ammunitions < ammunitions and device.owner.data.heap.clips <= clips) or device.owner.data.heap.clips < clips) then
@@ -111,7 +112,6 @@ function UATeamFrag.State.RoundLoop:OnDispatchMessage(device, addressee, command
 				
 				elseif (device.owner.data.heap.ammunitions > ammunitions) then
 				
-					device.owner.data.heap.nbShot = device.owner.data.heap.nbShot + (device.owner.data.heap.ammunitions - ammunitions)
 					device.owner.data.heap.hitLost = device.owner.data.heap.hitLost + 1
 					if (device.owner.data.heap.hitLost == 5) then
 						-- throw "T'es aveugle" sound	
@@ -153,7 +153,7 @@ function UATeamFrag.State.RoundLoop:OnDispatchMessage(device, addressee, command
 					
 						if (time - self.shootCountTime < 10 * 1000000) then
 							-- ouais jsuis a donf
-							game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_24.wav","base:audio/gamemaster/DLG_GM_GLOBAL_25.wav",}, priority = 2, proba = 0.25})
+							game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_24.wav","base:audio/gamemaster/DLG_GM_GLOBAL_25.wav","base:audio/gamemaster/DLG_GM_GLOBAL_121.wav","base:audio/gamemaster/DLG_GM_GLOBAL_133.wav","base:audio/gamemaster/DLG_GM_GLOBAL_134.wav",}, priority = 2, proba = 0.25})
 						end			
 						
 						self.shootCountTime = time			
@@ -162,14 +162,15 @@ function UATeamFrag.State.RoundLoop:OnDispatchMessage(device, addressee, command
 					
 				end
 				
-				local index = 0
+				local curIndex = 9 + device.owner.data.heap.lifePoints - lifePoints
 				while (device.owner.data.heap.lifePoints > lifePoints) do
 
 					-- loose one life
 					device.owner.data.heap.lifePoints = device.owner.data.heap.lifePoints - 1
 
 					-- get device that shot me
-					local shooterDevice = engine.libraries.usb.proxy.devices.byRadioProtocolId[arg[8 + index]]
+					local shooterDevice = engine.libraries.usb.proxy.devices.byRadioProtocolId[arg[math.min(14, curIndex)]]
+					curIndex = curIndex - 1
 					if (shooterDevice) then
 
 						-- get shooter
@@ -193,7 +194,14 @@ function UATeamFrag.State.RoundLoop:OnDispatchMessage(device, addressee, command
 								shooter.data.heap.killByName[device.owner.nameId] = (shooter.data.heap.killByName[device.owner.nameId] or 0) + 1
 								device.owner.data.heap.isDead = 1							
 								-- throw "Dans le mille!" sound	
-								game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_27.wav","base:audio/gamemaster/DLG_GM_GLOBAL_28.wav","base:audio/gamemaster/DLG_GM_GLOBAL_37.wav","base:audio/gamemaster/DLG_GM_GLOBAL_38.wav",}, priority = 2,})	
+								game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_27.wav",
+								"base:audio/gamemaster/DLG_GM_GLOBAL_28.wav",
+								"base:audio/gamemaster/DLG_GM_GLOBAL_37.wav",
+								"base:audio/gamemaster/DLG_GM_GLOBAL_38.wav",
+								"base:audio/gamemaster/DLG_GM_GLOBAL_128.wav",
+								"base:audio/gamemaster/DLG_GM_GLOBAL_129.wav",
+								"base:audio/gamemaster/DLG_GM_GLOBAL_130.wav",
+								}, priority = 2,})	
 							
 							else
 
@@ -203,7 +211,7 @@ function UATeamFrag.State.RoundLoop:OnDispatchMessage(device, addressee, command
 									shooter.data.heap.nbHitLastPlayerShooted = shooter.data.heap.nbHitLastPlayerShooted + 1
 									if (shooter.data.heap.nbHitLastPlayerShooted == 3) then
 										-- throw "Tireur d'élite" sound	
-										game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_26.wav",}, priority = 3, proba = 0.33})	
+										game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_26.wav","base:audio/gamemaster/DLG_GM_GLOBAL_122.wav","base:audio/gamemaster/DLG_GM_GLOBAL_123.wav","base:audio/gamemaster/DLG_GM_GLOBAL_124.wav",}, priority = 3, proba = 0.33})	
 										shooter.data.heap.nbHitLastPlayerShooted = 0
 									end
 								else
@@ -230,7 +238,6 @@ function UATeamFrag.State.RoundLoop:OnDispatchMessage(device, addressee, command
 						end
 
 					end
-					index = index + 1
 
 				end
 
@@ -239,7 +246,8 @@ function UATeamFrag.State.RoundLoop:OnDispatchMessage(device, addressee, command
 				if (1 == device.owner.data.heap.isDead) then
 
 					device.owner.data.heap.nbRespawn = device.owner.data.heap.nbRespawn + 1
-					activity.uiAFP:PushLine(device.owner.profile.name .. " " .. l"ingame014", UIComponent.colors.gray, "base:texture/Ui/Icons/16x/Respawn.tga")
+					activity.uiAFP:PushLine(device.owner.profile.name .. " " .. l"ingame014", UIComponent.colors.gray, "base:texture/Ui/Icons/16x/Respawn" .. device.owner.team.profiles[device.owner.team.index].teamColor .. ".tga")
+					
 					device.owner.data.heap.isDead = 0
 					-- throw "De retour" sound		
 					game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_36.wav"}, priority = 2,})

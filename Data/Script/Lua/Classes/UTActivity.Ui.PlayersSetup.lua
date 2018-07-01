@@ -35,6 +35,11 @@ UTActivity.Ui.PlayersSetup.padding = { horizontal = 15, vertical = 20 }
 function UTActivity.Ui.PlayersSetup:__ctor(...)
 
     assert(activity)
+    
+	-- animate	
+	
+	self.slideBegin = true
+	self.slideEnd = true	
 
 	-- window settings
 
@@ -240,5 +245,9 @@ function UTActivity.Ui.PlayersSetup:Update()
 		end
 
 	end
+
+	-- update
+
+	self.slotGrid:Update()
 
 end

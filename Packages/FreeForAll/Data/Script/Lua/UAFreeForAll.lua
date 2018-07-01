@@ -31,6 +31,7 @@ UAFreeForAll.State = {}
 
 UAFreeForAll.bytecodePath = "game:../packages/freeforall/data/script/bytecode/UAFreeForAll.ByteCode.lua"
 UAFreeForAll.bitmap = "base:texture/ui/loading_freeforall.tga"
+UAFreeForAll.maxNumberOfPlayer = 16
 
 -- __ctor --------------------------------------------------------------------
 
@@ -61,10 +62,10 @@ function UAFreeForAll:__ctor(...)
         [1] = { title = l"titlemen006", options = {
 
             [1] = { label = l"goption001", tip = l"tip027", choices = { { value = 5 }, { value = 10 }, { value = 15 }, { value = 20 } }, index = "playtime", },
-            [2] = { label = l"goption007", tip = l"tip040", choices = { { value = 0, displayMode = "large", text = "Off" }, { value = 1, displayMode = "large", text = "On"  } }, index = "swap", },
+            [2] = { label = l"goption007", tip = l"tip040", choices = { { value = 0, displayMode = "large", text = l"oth076" }, { value = 1, displayMode = "large", text = l"oth075"  } }, index = "swap", },
             [3] = { label = l"goption002", tip = l"tip025", choices = { { value = 0, displayMode = "large", text = "Auto"}, { value = 1, displayMode = "large", text = l"oth032" } }, index = "gameLaunch" },
             [4] = { label = l"goption003", tip = l"tip026", choices = { { value = 1, icon = "base:texture/ui/components/uiradiobutton_house.tga" }, { value = 2 }, { value = 3}, { value = 4 }, { value = 5, icon = "base:texture/ui/components/uiradiobutton_sun.tga" } }, index = "beamPower" },
-            [5] = { label = l"goption014", tip = l"tip004", choices = { { value = 0, displayMode = "large", text = "Off"}, { value = 1, displayMode = "large", text = "On" } }, index = "assist" },
+            [5] = { label = l"goption014", tip = l"tip004", choices = { { value = 0, displayMode = "large", text = l"oth076"}, { value = 1, displayMode = "large", text = l"oth075" } }, index = "assist" },
 
             },
         },
@@ -105,10 +106,11 @@ function UAFreeForAll:__ctor(...)
 
         [1] = { 
 
-            RF01 = { category = "Ammo", positions = { { 265, 50 }, }, title = l"goption010", text = string.format(l"psexp014"), },
-            RF02 = { category = "Ammo", positions = { { 265, 250 }, }, title = l"goption010", text = string.format(l"psexp014"), },
+            Arrows2 = { category = "Position", size = 256, positions = { { 265, 150 }, }, title = l"goption002", text = string.format(l"psexp016"), },
+            RF01 = { category = "Ammo", positions = { { 265, 50 }, }, title = l"goption010", text = string.format(l"psexp014"), condition = function (self) return (20 ~= activity.settings.ammunitions) end },
+            RF02 = { category = "Ammo2", positions = { { 265, 250 }, }, title = l"goption010", text = string.format(l"psexp014"), condition = function (self) return (20 ~= activity.settings.ammunitions) end },
             RF07 = { category = "Med-Kit", positions = { { 50, 150 }, }, title = l"goption009", text = string.format(l"psexp015"), condition = function (self) return (1 == game.settings.addons.medkitPack) end },
-            RF08 = { category = "Med-Kit", positions = { { 480, 150 }, }, title = l"goption009", text = string.format(l"psexp015"), condition = function (self) return (1 == game.settings.addons.medkitPack) end },
+            RF08 = { category = "Med-Kit2", positions = { { 480, 150 }, }, title = l"goption009", text = string.format(l"psexp015"), condition = function (self) return (1 == game.settings.addons.medkitPack) end },
 
         },
     }
@@ -131,13 +133,13 @@ function UAFreeForAll:__ctor(...)
 
 	self.detailsDescriptor = {
 		information = {
-			{ key = "score", icon = "base:texture/ui/Icons/32x/Score.tga", tip = l"tip072" },
-			{ key = "accuracy", icon = "base:texture/ui/Icons/32x/precision.tga", tip = l"tip073" }
+			{ key = "detailsScore", icon = "base:texture/ui/Icons/32x/score.tga", tip = l"tip072" },
+			{ key = "detailAccuracy", icon = "base:texture/ui/Icons/32x/precision.tga", tip = l"tip073" }
 		},
 		details = {
 			{ key = "name", width = 175, style = UIGridLine.RowTitleCellStyle },
-			{ key = "hitByName", width = 75, style = UIGridLine.RowTitleCellStyle, icon = "base:texture/ui/Icons/32x/Hit.tga" },
-			{ key = "killByName", width = 50, style = UIGridLine.RowTitleCellStyle, icon = "base:texture/ui/Icons/32x/Death.tga" },
+			{ key = "hitByName", width = 75, style = UIGridLine.RowTitleCellStyle, icon = "base:texture/ui/Icons/32x/Hit.tga", tip = l"tip068"},
+			{ key = "killByName", width = 50, style = UIGridLine.RowTitleCellStyle, icon = "base:texture/ui/Icons/32x/Death.tga", tip = l"tip070" },
 		}
 	}
 
@@ -245,7 +247,8 @@ function UAFreeForAll:UpdateEntityBakedData(entity, ranking)
 	else
 		entity.data.baked.accuracy = 0
 	end
-	entity.data.baked.accuracy = string.format("%0.1f", entity.data.baked.accuracy) .. "%"
+	entity.data.baked.detailsScore = entity.data.baked.score .. " " .. l"oth068"
+	entity.data.baked.detailAccuracy = string.format("%0.1f", entity.data.baked.accuracy) .. "%"
 	entity.data.baked.nbRespawn = (entity.data.baked.nbRespawn or 0) + entity.data.heap.nbRespawn
 	entity.data.baked.nbAmmoPack = (entity.data.baked.nbAmmoPack or 0) + entity.data.heap.nbAmmoPack
 	entity.data.baked.nbMediKit = (entity.data.baked.nbMediKit or 0) + entity.data.heap.nbMediKit

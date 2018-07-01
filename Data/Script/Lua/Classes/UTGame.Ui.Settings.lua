@@ -33,13 +33,13 @@ function UTGame.Ui.Settings:__ctor(...)
 
 	-- window settings
 
-	self.uiWindow.title = l"menu03"
+	self.uiWindow.title = l "menu03"
 	self.uiWindow.icon = "base:video/uianimatedbutton_settings.avi"
-	self.uiSelector.title = l"oth011"
+	self.uiSelector.title = l "oth011"
 
     -- dedicated settings on the right side,
 
- 	self.labels = {l"sett004", l"sett001", l"sett003", l"sett006"}
+ 	self.labels = {l "sett004", l "sett001", l "sett003", l "sett006"}
 
 	self.uiSettings = {
 
@@ -49,19 +49,19 @@ function UTGame.Ui.Settings:__ctor(...)
 	    [4] = self.uiWindows:AddComponent(UTGame.Ui.Settings.Credits:New()),
 
 	}
-	
+
 	self.uiSettingsTips = {
 
-	    [1] = l"tip075",
-	    [2] = l"tip074",
-	    [3] = l"tip076",
+	    [1] = l "tip075",
+	    [2] = l "tip074",
+	    [3] = l "tip076",
 	    [4] = nil,
 
 	}
 
     -- contents
 
-    self:Reserve(#self.uiSettings, false)
+    self:Reserve(math.max(#self.uiSettings, 14), false)
 
     for index, uiSetting in ipairs(self.uiSettings) do
 
@@ -99,8 +99,8 @@ function UTGame.Ui.Settings:__ctor(...)
 
     self.uiButton2 = self:AddComponent(UIButton:New(), "uiButton1")
     self.uiButton2.rectangle = UIMenuWindow.buttonRectangles[1]
-    self.uiButton2.text = l"but016"
-	self.uiButton2.tip = l"tip007"
+    self.uiButton2.text = l "but016"
+	self.uiButton2.tip = l "tip007"
 
     self.uiButton2.OnAction = function (_self) 
     

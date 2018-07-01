@@ -47,7 +47,7 @@ function UIBackgroundBanner:__ctor()
 	-- init pos
 
 	self.positionBanner = {1600, 100}
-
+	
 end
 
 -- __dtor -------------------------------------------------------------------
@@ -59,42 +59,33 @@ end
 
 function UIBackgroundBanner:Draw()
 
-	if (activity) then
+	local color = self.color or UIComponent.colors.white
+
+	-- banner BOTTOM
+
+	quartz.system.drawing.loadcolor3f(unpack(color))
+	quartz.system.drawing.loadtexture("base:texture/ui/Ranking_Bg_bottom.tga")
+	quartz.system.drawing.drawtexture(self.positionBanner[1], 470)
 	
-		local color = self.color or UIComponent.colors.white
+	-- banner UP
 
-		-- banner BOTTOM
-
-		quartz.system.drawing.loadcolor3f(unpack(color))
-		quartz.system.drawing.loadtexture("base:texture/ui/Ranking_Bg_bottom.tga")
-		quartz.system.drawing.drawtexture(self.positionBanner[1], 470)
+	quartz.system.drawing.loadcolor3f(unpack(color))
+	quartz.system.drawing.loadtexture("base:texture/ui/Ranking_Bg_top.tga")
+	quartz.system.drawing.drawtexture(self.positionBanner[1] + self.width - 1460, 60)
 		
-		-- banner UP
+	quartz.system.drawing.loadcolor3f(unpack(self.fontColor))
+	quartz.system.drawing.loadfont(self.font or self.fonts.default)
+	local rectangleText = { self.positionBanner[1] + UIBackgroundBanner.margin, self.positionBanner[2] + 100 }
+	quartz.system.drawing.drawtext(self.text or "", unpack(rectangleText))
 
-		quartz.system.drawing.loadcolor3f(unpack(color))
-		quartz.system.drawing.loadtexture("base:texture/ui/Ranking_Bg_top.tga")
-		quartz.system.drawing.drawtexture(self.positionBanner[1] + self.width - 1460, 60)
+
+	-- banner STAR
+
+	quartz.system.drawing.loadcolor3f(unpack(color))
+	quartz.system.drawing.loadtexture(self.iconBanner or UIBackgroundBanner.defaultIcon)
+	quartz.system.drawing.drawtexture(self.positionBanner[1], self.positionBanner[2] + 120)
+	quartz.system.drawing.drawtexture(self.positionBanner[1] + self.width + UIBackgroundBanner.margin, self.positionBanner[2] + 120)
 			
-		if (self.text ~= activity.name) then
-		
-			self:SetText(activity.name)
-
-		end
-		quartz.system.drawing.loadcolor3f(unpack(self.fontColor))
-		quartz.system.drawing.loadfont(self.font or self.fonts.default)
-		local rectangleText = { self.positionBanner[1] + UIBackgroundBanner.margin, self.positionBanner[2] + 100 }
-		quartz.system.drawing.drawtext(self.text, unpack(rectangleText))
-
-	
-		-- banner STAR
-
-		quartz.system.drawing.loadcolor3f(unpack(color))
-		quartz.system.drawing.loadtexture(activity and activity.iconBanner or UIBackgroundBanner.defaultIcon)
-		quartz.system.drawing.drawtexture(self.positionBanner[1], self.positionBanner[2] + 120)
-		quartz.system.drawing.drawtexture(self.positionBanner[1] + self.width + UIBackgroundBanner.margin, self.positionBanner[2] + 120)
-			
-	end
-	
 end
 
 -- SetText -------------------------------------------------------------------

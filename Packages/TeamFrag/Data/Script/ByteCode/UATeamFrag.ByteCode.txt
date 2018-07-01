@@ -3,6 +3,7 @@
 VAR nb_lifepoint	SEND
 VAR nb_ammo		SEND	
 VAR nb_clip		SEND
+VAR nb_shoot		SEND
 VAR display
 VAR max_lifepoint	CONFIG
 VAR max_ammo	CONFIG
@@ -54,6 +55,9 @@ ELSE
 	HUD_JAUGE	0
 
 END_IF
+
+
+
 
 
 
@@ -199,6 +203,9 @@ GOTO	game
 
 
 
+
+
+
 END_FUNCTION
 
 FUNCTION get_hit
@@ -276,12 +283,18 @@ hud
 
 
 
+
+
+
 END_FUNCTION
 
 FUNCTION reload
 SET	nb_clip		max_clip
 SET 	last_ammo_rfid 	lastrfid_type
 SET	display		1
+
+
+
 
 
 
@@ -409,6 +422,9 @@ hud
 
 
 
+
+
+
 END_FUNCTION
 
 STATE init 
@@ -418,6 +434,7 @@ FIRST_STATE
 EVENT ENTER_STATE
 TIMER		100
 SET_HARNESS	1
+SET	nb_shoot		0
 SET 	local 		0
 SET	assist_timer	0
 
@@ -430,6 +447,9 @@ SET team_base	team
 DEC team_base
 SND START
 respawn
+
+
+
 
 
 
@@ -520,6 +540,7 @@ IF	nb_ammo		SUP	0
 	SND		SHOOT
 	FLASH_ORANGE	1
 	IR
+	INC	nb_shoot
 
 	IF	nb_ammo		COMP	0
 		IF nb_clip SUP 0
@@ -613,6 +634,9 @@ hud
 
 
 
+
+
+
 END_EVENT
 
 EVENT BUTTON_3_JUST_PRESSED
@@ -628,10 +652,12 @@ IF	scan_ok		COMP	1
 		GOTO	reload
 	END_IF
 
-	IF lastrfid_type COMP RFID_LIFE_PACK
-		SET local 1
-		RFID_TYPE_MINOR lastrfid_type
-		GOTO	medikit
+	IF	medic	COMP	1
+		IF lastrfid_type COMP RFID_LIFE_PACK
+			SET local 1
+			RFID_TYPE_MINOR lastrfid_type
+			GOTO	medikit
+		END_IF
 	END_IF
 END_IF
 
@@ -701,10 +727,16 @@ END_IF
 
 
 
+
+
+
 END_EVENT
 
 EVENT HIT
 get_hit
+
+
+
 
 
 
@@ -840,6 +872,9 @@ hud
 
 
 
+
+
+
 END_EVENT
 
 EVENT TIMER
@@ -895,10 +930,16 @@ END_IF
 
 
 
+
+
+
 END_EVENT
 
 EVENT ENTER_STATE
 SET	auto_reload	0
+
+
+
 
 
 
@@ -907,6 +948,9 @@ END_EVENT
 EVENT ANIM_FINISHED
 HUD_JAUGE_BLINK	1
 HUD_ICON_ON	BULLET
+
+
+
 
 END_EVENT
 
@@ -931,6 +975,9 @@ ELSE
 END_IF
 
 	
+
+
+
 
 
 
@@ -1039,13 +1086,21 @@ GOTO	game
 
 
 
+
+
+
 END_EVENT
 
 EVENT HIT
 reload
+DEC 	nb_clip
+SET	nb_ammo		max_ammo
 ANIM_OFF
 get_hit
 GOTO	game
+
+
+
 
 
 
@@ -1155,6 +1210,9 @@ END_IF
 
 
 
+
+
+
 END_EVENT
 
 EVENT ANIM_FINISHED
@@ -1163,6 +1221,9 @@ IF assist COMP	1
 	SND_PRIO	OK
 END_IF
 GOTO	game
+
+
+
 
 
 
@@ -1250,6 +1311,9 @@ GOTO	game
 
 
 
+
+
+
 END_EVENT
 
 END_STATE
@@ -1262,6 +1326,9 @@ SND	SCAN_GOOD
 SET 	local 	0
 ANIM_OFF
 HUD_DIGIT	respawn_time
+
+
+
 
 
 
@@ -1361,6 +1428,9 @@ END_IF
 
 
 
+
+
+
 END_EVENT
 
 END_STATE
@@ -1385,6 +1455,9 @@ END_IF
 IF 	team_base	COMP	3
 	ANIM_LOOP	AGB4
 END_IF
+
+
+
 
 
 
@@ -1481,6 +1554,9 @@ END_IF
 
 
 
+
+
+
 END_EVENT
 
 EVENT TIMER
@@ -1502,6 +1578,9 @@ IF	assist	COMP 1
 		END_IF
 	END_IF
 END_IF
+
+
+
 
 
 

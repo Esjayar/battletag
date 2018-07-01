@@ -41,7 +41,11 @@ function UIPicture:Draw()
         
         local color = self.color or UIComponent.colors.white
                 
-	    quartz.system.drawing.loadcolor3f(unpack(color))
+        if (#color == 4) then
+			quartz.system.drawing.loadcolor4f(unpack(color))
+	    else
+			quartz.system.drawing.loadcolor3f(unpack(color))
+	    end
         quartz.system.drawing.loadtexture(self.texture)
         quartz.system.drawing.drawtexture(unpack(self.rectangle))
         

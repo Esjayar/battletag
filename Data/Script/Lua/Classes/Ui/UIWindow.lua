@@ -24,7 +24,7 @@ UTClass.UIWindow(UIMultiComponent)
 
 -- defaults
 
-UIWindow.rectangle = { 95, 56, 865, 666 }
+UIWindow.rectangle = { 95, 56, 865, 800 }
 UIWindow.size = { UIWindow.rectangle[3] - UIWindow.rectangle[1], UIWindow.rectangle[4] - UIWindow.rectangle[2] }
 
 -- title
@@ -76,7 +76,7 @@ function UIWindow:Draw()
 
     quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))	 
     quartz.system.drawing.loadtexture("base:texture/ui/components/uiwindow_main.tga")
-    quartz.system.drawing.drawtexture(unpack(self.rectangle))
+    quartz.system.drawing.drawtexture(self.rectangle[1], self.rectangle[2])
 
     -- animated icon
 

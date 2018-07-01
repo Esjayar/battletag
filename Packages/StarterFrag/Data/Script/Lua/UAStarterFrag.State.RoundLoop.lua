@@ -143,7 +143,7 @@ function UAStarterFrag.State.RoundLoop:OnDispatchMessage(device, addressee, comm
 					
 						if (time - self.shootCountTime < 10 * 1000000) then
 							-- ouais jsuis a donf
-							game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_24.wav","base:audio/gamemaster/DLG_GM_GLOBAL_25.wav",}, priority = 2, proba = 0.25})
+							game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_24.wav","base:audio/gamemaster/DLG_GM_GLOBAL_25.wav","base:audio/gamemaster/DLG_GM_GLOBAL_121.wav","base:audio/gamemaster/DLG_GM_GLOBAL_133.wav","base:audio/gamemaster/DLG_GM_GLOBAL_134.wav",}, priority = 2, proba = 0.25})
 						end			
 						
 						self.shootCountTime = time			
@@ -152,15 +152,15 @@ function UAStarterFrag.State.RoundLoop:OnDispatchMessage(device, addressee, comm
 					
 				end
 
-				local index = 0
+				local curIndex = 7 + nbHit - device.owner.data.heap.nbHit
 				while (device.owner.data.heap.nbHit < nbHit) do
 
 					-- loose one life
 					device.owner.data.heap.nbHit = device.owner.data.heap.nbHit + 1
 
 					-- get device that shot me
-					local shooterDevice = engine.libraries.usb.proxy.devices.byRadioProtocolId[arg[8 + index]]
-										
+					local shooterDevice = engine.libraries.usb.proxy.devices.byRadioProtocolId[arg[math.min(12, curIndex)]]
+					curIndex = curIndex - 1			
 					if (shooterDevice) then
 
 						-- get shooter
@@ -174,7 +174,7 @@ function UAStarterFrag.State.RoundLoop:OnDispatchMessage(device, addressee, comm
 								shooter.data.heap.nbHitLastPlayerShooted = shooter.data.heap.nbHitLastPlayerShooted + 1
 								if (shooter.data.heap.nbHitLastPlayerShooted == 3) then
 									-- throw "Tireur d'élite" sound	
-									game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_26.wav",}, priority = 3, proba = 0.33})	
+									game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_26.wav","base:audio/gamemaster/DLG_GM_GLOBAL_122.wav","base:audio/gamemaster/DLG_GM_GLOBAL_123.wav","base:audio/gamemaster/DLG_GM_GLOBAL_124.wav",}, priority = 3, proba = 0.33})	
 									shooter.data.heap.nbHitLastPlayerShooted = 0
 								end
 							else
@@ -183,7 +183,6 @@ function UAStarterFrag.State.RoundLoop:OnDispatchMessage(device, addressee, comm
 							end
 							shooter.data.heap.hitLost = 0
 								
-							print("shoot")
 							shooter.data.heap.score = shooter.data.heap.score + 1
 							shooter.data.heap.hit = shooter.data.heap.hit + 1
 							activity.uiAFP:PushLine(shooter.profile.name .. " " .. l"ingame009" .. " " .. device.owner.profile.name, UIComponent.colors.gray, "base:texture/Ui/Icons/16x/Hit.tga")
@@ -192,7 +191,6 @@ function UAStarterFrag.State.RoundLoop:OnDispatchMessage(device, addressee, comm
 						end
 
 					end
-					index = index + 1
 
 				end
 

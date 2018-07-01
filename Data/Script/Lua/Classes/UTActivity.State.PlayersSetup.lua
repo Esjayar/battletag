@@ -102,7 +102,12 @@ function UTActivity.State.PlayersSetup:Begin()
 				self.uiPopup.uiButton2.OnAction = function ()
 
 					UIManager.stack:Pop()
-					game:PostStateChange("title")
+					UIMenuManager.stack:Pop()
+					activity.matches = nil
+					activity:PostStateChange("playersmanagement")
+					self.enabled = false
+					--UIManager.stack:Pop()
+					--game:PostStateChange("title")
 
 				end
 

@@ -93,16 +93,27 @@ function UISelector.Item:Draw()
             --quartz.system.drawing.loadtexture("base:texture/ui/components/uipanel07.tga")
             --quartz.system.drawing.drawtexture(unpack(rectangle))
 
-            if (self.color) then
+            if (self.iconCategory or self.iconText) then
 
                 rectangle[1] = rectangle[1] + 20
 
-                quartz.system.drawing.loadcolor3f(unpack(self.enabled and self.color or UIComponent.colors.lightgray))
-                quartz.system.drawing.loadtexture("base:texture/ui/components/uigridline_background01.tga")
+				if (self.iconCategory) then
 
-                local rectangle = { self.rectangle[1], self.rectangle[2], self.rectangle[1] + 20, self.rectangle[4] }
+					quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
+					quartz.system.drawing.loadtexture("base:" .. self.iconCategory)
+					quartz.system.drawing.drawtexture(rectangle[1] - 27,rectangle[2] - 8)
 
-                quartz.system.drawing.drawtexture(unpack(rectangle))
+				end
+
+				if (self.iconText) then
+
+					quartz.system.drawing.loadcolor3f(unpack(self.iconColor))
+                    quartz.system.drawing.loadfont(UIComponent.fonts.title)
+                    quartz.system.drawing.drawtextjustified(self.iconText, quartz.system.drawing.justification.center, rectangle[1] - 27,rectangle[2] - 10, rectangle[1] + 18, rectangle[2] + 14)
+
+				end
+
+				rectangle[1] = rectangle[1] + 5
 
             end
 
@@ -120,24 +131,20 @@ function UISelector.Item:Draw()
 
                     quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
                     quartz.system.drawing.loadtexture("base:texture/ui/components/uigridline_background01.tga")
-                    quartz.system.drawing.drawwindow(unpack(rectangle))
+                    quartz.system.drawing.drawtextureh(unpack(rectangle))
 
                     if (self.header.icon) then
 
                         quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
                         quartz.system.drawing.loadtexture(self.header.icon)
+                        local textureWidth, textureHeight = quartz.system.drawing.gettexturedimensions()
 
 							rectangle[1] = rectangle[1] + 10
 							rectangle[3] = rectangle[3] - 10 - 2
 
                         if (self.iconType) then
 
-							rectangle[1] = rectangle[1] - 15
-							rectangle[3] = rectangle[3] + 15 - 2
-							rectangle[2] = rectangle[2] - 25
-							rectangle[4] = rectangle[4] + 25
-
-							quartz.system.drawing.drawtexture(rectangle[1], rectangle[2])
+							quartz.system.drawing.drawtexture(rectangle[1] - 10, rectangle[2] - (textureHeight * 0.5) + 5)
 
 						else
 
@@ -160,7 +167,7 @@ function UISelector.Item:Draw()
 
                     quartz.system.drawing.loadcolor3f(unpack(state.color))
                     quartz.system.drawing.loadtexture("base:texture/ui/components/uigridline_background02.tga")
-                    quartz.system.drawing.drawwindow(unpack(rectangle))
+                    quartz.system.drawing.drawtextureh(unpack(rectangle))
 
                     local fontColor = state.fontColor or UIComponent.colors.darkgray
                     local fontJustification = quartz.system.drawing.justification.singlelineverticalcenter
@@ -177,7 +184,7 @@ function UISelector.Item:Draw()
 
                 quartz.system.drawing.loadcolor3f(unpack(state.color))
                 quartz.system.drawing.loadtexture("base:texture/ui/components/uigridline_background02.tga")
-                quartz.system.drawing.drawwindow(unpack(rectangle))
+                quartz.system.drawing.drawtextureh(unpack(rectangle))
 
             end
 

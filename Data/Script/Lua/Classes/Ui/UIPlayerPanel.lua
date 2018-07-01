@@ -43,20 +43,13 @@ function UIPlayerPanel:__ctor(player, position)
 
 		-- hud icon and gun number
 
+		self.uiGunhud= self:AddComponent(UIPicture:New(), "uiGunhud")
+		self.uiGunhud.rectangle = { 5, -10, 5 + 55, -10 + 55 }
 		if (player.rfGunDevice) then
-
-			self.uiGunhud= self:AddComponent(UIPicture:New(), "uiGunhud")
-			self.uiGunhud.rectangle = { 5, 0, 5 + 32, 32 }
-			self.uiGunhud.texture = "base:texture/ui/icons/32x/GunHud.tga"
-			
-			self.uiGunLabel= self:AddComponent(UILabel:New(), "uiGunLabel")
-			self.uiGunLabel.fontJustification = quartz.system.drawing.justification.center + quartz.system.drawing.justification.singlelineverticalcenter
-			self.uiGunLabel.rectangle = { 5, 0, 5 + 32, 32 }
-			self.uiGunLabel.font = UIComponent.fonts.default
-			self.uiGunLabel.fontColor = UIComponent.colors.orange
-			self.uiGunLabel.text = player.rfGunDevice.classId
-
-		end
+			self.uiGunhud.texture = "base:texture/ui/pictograms/64x/Hud_" .. player.rfGunDevice.classId .. ".tga"
+		else
+			self.uiGunhud.texture = "base:texture/ui/pictograms/64x/Hud_guest.tga"
+		end	
 
 		-- harness (if necessary) with state
 

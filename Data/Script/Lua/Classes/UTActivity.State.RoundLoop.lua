@@ -177,7 +177,8 @@ function UTActivity.State.RoundLoop:Update()
 				if (player and player.rfGunDevice) then
 
 					local size = #activity.gameplayData
-					quartz.system.usb.sendmessage(engine.libraries.usb.proxy.handle, { size + 1, player.rfGunDevice.radioProtocolId, 0x95, size, unpack(activity.gameplayData) })
+					local nbData = size / 2
+					quartz.system.usb.sendmessage(engine.libraries.usb.proxy.handle, { size + 1, player.rfGunDevice.radioProtocolId, 0x95, nbData, unpack(activity.gameplayData) })
 
 				end
 				self.currentPlayerIndex = self.currentPlayerIndex + 1

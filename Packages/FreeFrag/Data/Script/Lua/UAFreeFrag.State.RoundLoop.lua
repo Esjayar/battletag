@@ -106,7 +106,7 @@ function UAFreeFrag.State.RoundLoop:OnDispatchMessage(device, addressee, command
 					
 						if (time - self.shootCountTime < 10 * 1000000) then
 							-- ouais jsuis a donf
-							game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_24.wav","base:audio/gamemaster/DLG_GM_GLOBAL_25.wav",}, priority = 2, proba = 0.25})
+							game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_24.wav","base:audio/gamemaster/DLG_GM_GLOBAL_25.wav","base:audio/gamemaster/DLG_GM_GLOBAL_121.wav","base:audio/gamemaster/DLG_GM_GLOBAL_133.wav","base:audio/gamemaster/DLG_GM_GLOBAL_134.wav",}, priority = 2, proba = 0.25})
 						end			
 						
 						self.shootCountTime = time			
@@ -114,14 +114,16 @@ function UAFreeFrag.State.RoundLoop:OnDispatchMessage(device, addressee, command
 					end
 					
 				end
-				local index = 0
+
+				local curIndex = 5 + nbHit - device.owner.data.heap.nbHit
 				while (device.owner.data.heap.nbHit < nbHit) do
 
 					-- loose one life
 					device.owner.data.heap.nbHit = device.owner.data.heap.nbHit + 1
 
 					-- get device that shot me
-					local shooterDevice = engine.libraries.usb.proxy.devices.byRadioProtocolId[arg[6 + index]]
+					local shooterDevice = engine.libraries.usb.proxy.devices.byRadioProtocolId[arg[math.min(10, curIndex)]]
+					curIndex = curIndex - 1						
 					if (shooterDevice) then
 
 						-- get shooter
@@ -136,7 +138,7 @@ function UAFreeFrag.State.RoundLoop:OnDispatchMessage(device, addressee, command
 								shooter.data.heap.nbHitLastPlayerShooted = shooter.data.heap.nbHitLastPlayerShooted + 1
 								if (shooter.data.heap.nbHitLastPlayerShooted == 3) then
 									-- throw "Tireur d'élite" sound	
-									game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_26.wav",}, priority = 3, proba = 0.333})	
+									game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_26.wav","base:audio/gamemaster/DLG_GM_GLOBAL_122.wav","base:audio/gamemaster/DLG_GM_GLOBAL_123.wav","base:audio/gamemaster/DLG_GM_GLOBAL_124.wav",}, priority = 3, proba = 0.33})	
 									shooter.data.heap.nbHitLastPlayerShooted = 0
 								end
 							else
@@ -146,7 +148,7 @@ function UAFreeFrag.State.RoundLoop:OnDispatchMessage(device, addressee, command
 								
 							shooter.data.heap.score = shooter.data.heap.score + 1
 							shooter.data.heap.hit = shooter.data.heap.hit + 1
-							activity.uiAFP:PushLine(shooter.profile.name .. " "  .. " has shot " .. " " .. device.owner.profile.name, UIComponent.colors.gray, "base:texture/Ui/Icons/16x/Hit.tga")
+							activity.uiAFP:PushLine(shooter.profile.name .. " "  .. l"ingame009" .. " " .. device.owner.profile.name, UIComponent.colors.gray, "base:texture/Ui/Icons/16x/Hit.tga")
 							shooter.data.heap.hitByName[device.owner.nameId] = (shooter.data.heap.hitByName[device.owner.nameId] or 0) + 1
 							-- throw "Touché ! ça doit faire mal" sound									
 							game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_29.wav","base:audio/gamemaster/DLG_GM_GLOBAL_30.wav"}, priority = 3, proba = 0.333})							
@@ -154,7 +156,6 @@ function UAFreeFrag.State.RoundLoop:OnDispatchMessage(device, addressee, command
 						end
 
 					end
-					index = index + 1
 
 				end
 
@@ -177,7 +178,7 @@ function UAFreeFrag.State.RoundLoop:Update()
 	-- end match
 
 	if (activity.timer <= 0) then
-		activity:PostStateChange("endround")
+			activity:PostStateChange("endround")
 	end
 
 end

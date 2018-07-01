@@ -9,7 +9,7 @@ local nfo = {
 
     ["difficulty"] = 10,
     ["flags"] = { "2-8 joueurs", },
-
+    ["category"] = 3,
 }
 
 return nfo

@@ -50,23 +50,21 @@ function UIFinalRanking:Build(challengers)
 	self.challengers = challengers	
 	self.width = 400 
 	
-	local podium = 1 
+	local rank = 1 
 	local score = -1
-	local realRanking = 0
+	local realRank = 0
 	
-	self.nbEltBanner = 0
+	self.nbChallenger = 0
 	
 	for i, challenger in pairs(self.challengers) do
-		if (i > 3) then
-			self.nbEltBanner = self.nbEltBanner + 1
-		end
+		self.nbChallenger = self.nbChallenger + 1
 	end
 	
 	if (#activity.teams == 0) then
 				
 		local bannerOffset = 0 
 		
-		if (self.nbEltBanner > 0) then
+		if (self.nbChallenger > 3) then
 		
 			-- banner container
 			
@@ -84,7 +82,7 @@ function UIFinalRanking:Build(challengers)
 			-- banner LINE
 
 			local uiBannerLine = self.uiBanner:AddComponent(UIPicture:New(), "uiBannerLine")
-			uiBannerLine.rectangle = {0, 0, self.width * self.nbEltBanner - 64, 32}
+			uiBannerLine.rectangle = {0, 0, self.width * (self.nbChallenger - 3) - 64, 32}
 			uiBannerLine.texture = "base:texture/ui/ranking_banner_middlebg.tga"
 			uiBannerLine:MoveTo(0, 15)
 			
@@ -93,7 +91,7 @@ function UIFinalRanking:Build(challengers)
 			local uiBannerRight = self.uiBanner:AddComponent(UIPicture:New(), "uiBannerRight")
 			uiBannerRight.rectangle = {0, 0, 64, 32}
 			uiBannerRight.texture = "base:texture/ui/ranking_banner_startbg.tga"
-			uiBannerRight:MoveTo(self.width * self.nbEltBanner - 64, 15)
+			uiBannerRight:MoveTo(self.width * (self.nbChallenger - 3) - 64, 15)
 			
 			-- banner apparait au bout de 3 secondes
 			
@@ -103,15 +101,15 @@ function UIFinalRanking:Build(challengers)
 		
 		for i, challenger in pairs(self.challengers) do
 		
-			if (podium <= 3) then
+			if (rank <= 3) then
 				
 				if (score == - 1 or score > challenger.data.baked.score) then
 					score = challenger.data.baked.score
-					realRanking = realRanking + 1
+					realRank = realRank + 1
 				end 
 				
-				self.uiPodiums[podium] = self:AddComponent(UIPodiumSlot:New(), "uiFinalRanking.Podium" .. podium)				
-				self.uiPodiums[podium]:Build(challenger, podium, self.nbEltBanner, realRanking)
+				self.uiPodiums[rank] = self:AddComponent(UIPodiumSlot:New(), "uiFinalRanking.Podium" .. rank)				
+				self.uiPodiums[rank]:Build(challenger, self.nbChallenger, rank, realRank)
 			
 			else
 			
@@ -124,7 +122,7 @@ function UIFinalRanking:Build(challengers)
 				local uiPosition = self.uiBanner:AddComponent(UILabel:New({0, 0, 100, 64}, challenger.profile.name), "uiPosition")
 				uiPosition.fontColor = UIComponent.colors.white
 				uiPosition.font = UIComponent.fonts.header				
-				uiPosition.text = podium .. "th"
+				uiPosition.text = rank .. "th"
 			
 				local uiBannerName1 = self.uiBanner:AddComponent(UIPicture:New(), "uiBannerLine1")
 				uiBannerName1.rectangle = {0, 0, 70, 22}
@@ -198,25 +196,25 @@ function UIFinalRanking:Build(challengers)
 				
 			end
 				
-			podium = podium + 1
+			rank = rank + 1
 			
 		end
 
 	else
 		
-		local teamPosition = 0
+		local teamPosition = 10
 		for i, challenger in pairs(self.challengers) do
 								
 			if (score == -1 or score > challenger.data.baked.score) then
 				score = challenger.data.baked.score
-				realRanking = realRanking + 1
+				realRank = realRank + 1
 			end 
 			
-			self.uiPodiums[podium] = self:AddComponent(UIPodiumSlot:New(), "uiFinalRanking.Podium" .. podium)
-			self.uiPodiums[podium]:Build(challenger, podium, self.nbEltBanner, realRanking, teamPosition, challenger.data.baked.score)
-			teamPosition = teamPosition + self.uiPodiums[podium].width
+			self.uiPodiums[rank] = self:AddComponent(UIPodiumSlot:New(), "uiFinalRanking.Podium" .. rank)
+			self.uiPodiums[rank]:Build(challenger, self.nbChallenger, rank, realRank, teamPosition, challenger.data.baked.score)
+			teamPosition = teamPosition + self.uiPodiums[rank].height
 				
-			podium = podium + 1
+			rank = rank + 1
 		end
 					
 	end
@@ -244,7 +242,7 @@ end
 
 function UIFinalRanking:Update()
 
-	if ( self.nbEltBanner > 0 and self.uiBanner and self.uiBanner.visible == true) then	
+	if ( self.nbChallenger > 3 and self.uiBanner and self.uiBanner.visible == true) then	
 	
 		local elapsedTime = quartz.system.time.gettimemicroseconds() - self.timer
 		self.timer = quartz.system.time.gettimemicroseconds()
@@ -256,7 +254,7 @@ function UIFinalRanking:Update()
 
 		-- when out of screen, then must restart
 
-		if (self.uiBanner.rectangle[1] < - (128 + self.nbEltBanner * self.width )) then
+		if (self.uiBanner.rectangle[1] < - (128 + (self.nbChallenger - 3) * self.width )) then
 			self.uiBanner.rectangle[1] = 1240
 			self.uiBanner.rectangle[3] = 1240 + 100
 		end

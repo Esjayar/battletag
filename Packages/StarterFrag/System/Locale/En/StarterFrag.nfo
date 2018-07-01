@@ -6,6 +6,8 @@ local nfo = {
     ["name"] = "Starter Frag",
     ["description"] = "Players fight each other to score hits.\nThis is a simple game, great for new players.",
     ["pictogram"] = "StarterFrag.tga",
+    ["category"] = 3,
+
 
     ["difficulty"] = 20,
     ["flags"] = { "2-8 players", },

@@ -55,6 +55,8 @@ HUD_ICON_ON	BULLET
 
 
 
+
+
 END_FUNCTION
 
 STATE init 
@@ -66,6 +68,8 @@ TIMER			100
 SET_HARNESS		1
 SET	nb_hit		0
 GOTO	wait
+
+
 
 
 
@@ -121,6 +125,8 @@ END_IF
 
 
 
+
+
 END_EVENT
 
 EVENT HIT
@@ -147,6 +153,8 @@ END_IF
 
 
 
+
+
 END_EVENT
 
 EVENT DATA_CHANGE
@@ -154,6 +162,11 @@ phase
 IF	phase	COMP	2
 	GOTO	wait
 END_IF
+IF	phase	COMP	0
+	SND START
+END_IF
+
+
 
 
 
@@ -165,6 +178,9 @@ EVENT ENTER_STATE
 SND RELOAD
 SET	dead		0
 hud
+
+
+
 END_EVENT
 
 END_STATE
@@ -173,31 +189,18 @@ STATE wait
 
 EVENT DATA_CHANGE
 phase
-IF	phase	COMP		1
+IF	phase	DIFF		2
 	ANIM_OFF
 	GOTO	duel
 END_IF
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 END_EVENT
 
 EVENT ENTER_STATE
 SET	phase	0
 SET 	nb_ammo	6
 ANIM_LOOP	AOUT
+
+
 END_EVENT
 
 END_STATE

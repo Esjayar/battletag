@@ -40,6 +40,7 @@ function UAFreeForAll.Ui.RoundLoop:__ctor(...)
     ------------------------------------------------
 
     self.uiLeaderboard = self:AddComponent(UILeaderboard:New(), "uiLeaderboardTest")
+    self.uiLeaderboard.showSlotEmpty = true
     self.uiLeaderboard:MoveTo(520, 40)
 
     -- key / icon / position / justification

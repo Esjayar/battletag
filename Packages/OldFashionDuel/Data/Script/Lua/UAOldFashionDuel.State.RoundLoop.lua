@@ -45,7 +45,8 @@ function UAOldFashionDuel.State.RoundLoop:Begin()
 	self.time = quartz.system.time.gettimemicroseconds()
     activity.timer = 0
 
-	UIMenuManager.stack:Push(self.uiClass)
+	self.ui = self.uiClass:New()
+	UIMenuManager.stack:Push(self.ui)
 	
 	game.gameMaster:Begin()	
 	engine.libraries.audio:Play("base:audio/musicingame.ogg",game.settings.audio["volume:music"])
@@ -97,17 +98,6 @@ function UAOldFashionDuel.State.RoundLoop:InitRound()
 
 	else
 
-		-- start voice
-
-		local random = math.random(0,3)
-		if (random == 0) then
-			game.gameMaster:Play("base:audio/gamemaster/DLG_GM_OW_DUEL_03.wav", function () self.phase = 1 end)
-		elseif (random == 1) then
-			game.gameMaster:Play("base:audio/gamemaster/DLG_GM_OW_DUEL_04.wav", function () self.phase = 1 end)
-		else
-			game.gameMaster:Play("base:audio/gamemaster/DLG_GM_OW_DUEL_05.wav", function () self.phase = 1 end)
-		end
-
 		-- GOooooooo timer
 
 		self.phase = 0
@@ -117,6 +107,17 @@ function UAOldFashionDuel.State.RoundLoop:InitRound()
 
 		self.round = self.round + 1
 
+		-- start voice
+
+		local random = 3 + math.random(0,2)
+		local snd = "base:audio/gamemaster/DLG_GM_OW_DUEL_0" .. random .. ".wav"
+		game.gameMaster:Play(snd, function () 
+			if (self.phase == 0) then
+				self.phase = 1
+				self.ui:UpdateState("READY")
+			end
+		end)				
+
 	end
 	
 end
@@ -125,7 +126,7 @@ end
 
 function UAOldFashionDuel.State.RoundLoop:OnDeviceRemoved(device)
 
-	for _, player in ipairs(activity.match.players) do
+	for _, player in ipairs(activity.match.players) do 
 
 		if (self.canBeStopped and (player.rfGunDevice == device)) then
 
@@ -175,8 +176,12 @@ function UAOldFashionDuel.State.RoundLoop:OnDispatchMessage(device, addressee, c
 		local nbHits = (arg[4] * 256) + arg[5]
 		if ((self.phase <= 1) and (nbHits > device.owner.data.heap.nbHits)) then
 
+			-- update ui
+
+			self.ui:UpdateState()
+
 			-- this player has been hit : give points !
-			
+
 			local shooterDevice = engine.libraries.usb.proxy.devices.byRadioProtocolId[arg[6]]
 			if (shooterDevice) then
 
@@ -231,6 +236,7 @@ function UAOldFashionDuel.State.RoundLoop:OnDispatchMessage(device, addressee, c
 
 			game.gameMaster:Play( "base:audio/gamemaster/DLG_GM_GLOBAL_118.wav" )
 			self.phase = 2
+			self.ui:UpdateState()
 			self.roundTimer = 4000000
 
 			-- ui
@@ -257,17 +263,22 @@ function UAOldFashionDuel.State.RoundLoop:Update()
 		self.roundTimer = self.roundTimer - elapsedTime
 		if (0 >= self.roundTimer) then
 
-			if (self.phase <= 1) then
+			if (self.phase == 1) then
 
-				local random = math.random(0,2)
-				if (random == 0) then
-					game.gameMaster:Play("base:audio/gamemaster/DLG_GM_OW_DUEL_06.wav", function () self.canShoot = true end)
-				else
-					game.gameMaster:Play("base:audio/gamemaster/DLG_GM_OW_DUEL_07.wav", function () self.canShoot = true end)
-				end
+				local random = 6 + math.random(0,1)
+				local snd = "base:audio/gamemaster/DLG_GM_OW_DUEL_0" .. random .. ".wav"
+				game.gameMaster:Play(snd, function () 
+					if (self.phase == 1) then
+						self.canShoot = true 
+						self.ui:UpdateState("FIRE", true)
+						self.phase = 0
+					end
+				end)
 
 			elseif (self.phase == 2) then
+
 				self:InitRound()
+
 			end
 	
 		end

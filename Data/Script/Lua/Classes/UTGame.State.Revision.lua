@@ -78,8 +78,8 @@ function UTGame.State.Revision:Update()
 
                 self.uiPopup = UIPopupWindow:New()
 
-                self.uiPopup.title = l"con041"
-                self.uiPopup.text = l"con042"
+                self.uiPopup.title = l "con041"
+                self.uiPopup.text = l "con042"
 
                 UIManager.stack:Push(self.uiPopup)
                 game.gameMaster:Play("base:audio/gamemaster/dlg_gm_init_03.wav")

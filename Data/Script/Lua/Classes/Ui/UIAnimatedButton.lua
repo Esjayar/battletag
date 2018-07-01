@@ -78,6 +78,7 @@ function UIAnimatedButton:OnFocus()
         end
 
 	    quartz.system.drawing.loadvideo(self.video)
+	    quartz.system.drawing.setvideoposition(0)
 	    quartz.system.drawing.pausevideo()
 
 	    UIComponent.OnFocus(self)

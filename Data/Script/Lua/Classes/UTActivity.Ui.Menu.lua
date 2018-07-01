@@ -40,7 +40,10 @@ function UTActivity.Ui.Menu:__ctor(...)
 	self.uiButton1.text = l"but017"
 	self.uiButton1.tip = l"tip063"
 
-	self.uiButton1.OnAction = function (self) UIManager.stack:Pop() end
+	self.uiButton1.OnAction = function (self) 
+		activity.mainMenu = nil
+		UIManager.stack:Pop() 
+	end
 
 	-- uiButton2: quit
 
@@ -52,6 +55,7 @@ function UTActivity.Ui.Menu:__ctor(...)
 	self.uiButton2.OnAction = function (self) 
 
 		UIManager.stack:Pop() 
+		activity.mainMenu = nil
 		activity:PostStateChange("endmatch")
 
 	end

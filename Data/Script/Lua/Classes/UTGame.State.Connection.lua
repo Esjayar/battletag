@@ -57,8 +57,6 @@ function UTGame.State.Connection:Begin()
         engine.libraries.audio:Play("base:audio/musicmenu.ogg",game.settings.audio["volume:music"])
 	end
 
-    UIManager:StopBackgroundBanner()
-    
 	UIManager.drawBackground = true
 
 end

@@ -34,6 +34,11 @@ function UTActivity.Ui.Bytecode:__ctor(...)
 
     assert(activity)
     
+	-- animate	
+	
+	self.slideBegin = true
+	self.slideEnd = true	
+    
 	-- window settings
 
 	self.uiWindow.title = l "oth024"
@@ -93,6 +98,7 @@ function UTActivity.Ui.Bytecode:Draw()
     -- contents,
 
     quartz.system.drawing.pushcontext()
+		quartz.system.drawing.loadtranslation(self.rectangle[1], self.rectangle[2])
     quartz.system.drawing.loadtranslation(unpack(self.uiContents.clientRectangle))
     quartz.system.drawing.loadtranslation(0, UITitledPanel.headerSize)
 

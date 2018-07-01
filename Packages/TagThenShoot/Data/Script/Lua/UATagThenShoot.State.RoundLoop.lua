@@ -71,6 +71,10 @@ function UATagThenShoot.State.RoundLoop:Begin()
 
 	self.msgTimer = quartz.system.time.gettimemicroseconds()
 
+	-- data
+
+	activity.gameplayData =  {quartz.system.bitwise.bitwiseand(self.player.data.heap.nbHit, 0xff00) / 256, quartz.system.bitwise.bitwiseand(self.player.data.heap.nbHit, 0x00ff)}
+
 end
 
 -- OnDeviceRemoved  ----------------------------------------------------------
@@ -120,30 +124,41 @@ function UATagThenShoot.State.RoundLoop:OnDispatchMessage(device, addressee, com
 
 		if (device.owner == self.player) then
 
-			local nbTag = (arg[2] * 256) + arg[3]
-			
-			if (nbTag > self.player.data.heap.nbTag) then
-			
-				if (self.player.data.heap.state == 0) then
-					activity.uiAFP:PushLine(self.player.profile.name .. " " .. l"ingame002", UIComponent.colors.gray, "base:texture/Ui/Icons/16x/Ammunition.tga")
-				elseif (self.player.data.heap.state == 1) then
-					activity.uiAFP:PushLine(self.player.profile.name .. " " .. l"ingame003", UIComponent.colors.gray, "base:texture/Ui/Icons/16x/Ammunition.tga")
-				elseif (self.player.data.heap.state == 2) then
-					activity.uiAFP:PushLine(self.player.profile.name .. " " .. l"ingame004", UIComponent.colors.gray, "base:texture/Ui/Icons/16x/Ammunition.tga")
+			local stage = (arg[2] * 256) + arg[3]
+			local tagging = (arg[4] * 256) + arg[5]
+
+			if (tagging ~= self.player.data.heap.tagging) then
+
+				if (tagging == 1) then
+
+					-- tagging now
+
+					activity.uiAFP:PushLine(self.player.profile.name .. " " .. l"ingame008", UIComponent.colors.gray, "base:texture/Ui/Icons/16x/Ammunition.tga")
+					game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_88.wav", "base:audio/gamemaster/DLG_GM_GLOBAL_89.wav", "base:audio/gamemaster/DLG_GM_GLOBAL_90.wav"}, priority = 1,})
+					self.player.data.heap.score = self.player.data.heap.score + 1
+					self.player.data.heap.state = stage
+
 				else
-					activity.uiAFP:PushLine(self.player.profile.name .. " " .. l"ingame005", UIComponent.colors.gray, "base:texture/Ui/Icons/16x/Ammunition.tga")
-				end
-				game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_" .. (72 + self.player.data.heap.state) .. ".wav"},priority = 1,})
-				game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_78.wav","base:audio/gamemaster/DLG_GM_GLOBAL_79.wav","base:audio/gamemaster/DLG_GM_GLOBAL_80.wav","base:audio/gamemaster/DLG_GM_GLOBAL_81.wav"}, offset = 0.5, priority = 1,})
 
-				self.player.data.heap.state = nil
-				self.currentBase = nbTag % 2
-				if (activity.settings.numberOfBase > 2) then self.currentBase = nbTag % 4
-				end
+					-- shooting	now
 
-				self.player.data.heap.score = self.player.data.heap.score + 1
-				self.player.data.heap.nbTag = nbTag
-				
+					if (stage == 0) then
+						activity.uiAFP:PushLine(self.player.profile.name .. " " .. l"ingame002", UIComponent.colors.gray, "base:texture/Ui/Icons/16x/respawn.tga")
+					elseif (stage == 1) then
+						activity.uiAFP:PushLine(self.player.profile.name .. " " .. l"ingame003", UIComponent.colors.gray, "base:texture/Ui/Icons/16x/respawn.tga")
+					elseif (stage == 2) then
+						activity.uiAFP:PushLine(self.player.profile.name .. " " .. l"ingame004", UIComponent.colors.gray, "base:texture/Ui/Icons/16x/respawn.tga")
+					elseif (stage == 3) then
+						activity.uiAFP:PushLine(self.player.profile.name .. " " .. l"ingame005", UIComponent.colors.gray, "base:texture/Ui/Icons/16x/respawn.tga")
+					end
+					game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_" .. (72 + stage) .. ".wav"},priority = 1,})
+					game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_78.wav","base:audio/gamemaster/DLG_GM_GLOBAL_79.wav","base:audio/gamemaster/DLG_GM_GLOBAL_80.wav","base:audio/gamemaster/DLG_GM_GLOBAL_81.wav"}, offset = 0.5, priority = 1,})
+					self.player.data.heap.score = self.player.data.heap.score + 1
+					self.player.data.heap.state = nil
+
+				end
+				self.player.data.heap.tagging = tagging
+
 			end
 
 		end
@@ -155,18 +170,15 @@ function UATagThenShoot.State.RoundLoop:OnDispatchMessage(device, addressee, com
         if (engine.libraries.usb.proxy.radioProtocolId == addressee) then
 
             local device = engine.libraries.usb.proxy.devices.byRadioProtocolId[arg[2]]
-            if (device) then
+            if (not (self.player.data.heap.state) and device) then
 
                 local player = device.owner
                 if (player == self.player) then
 
-					activity.uiAFP:PushLine(self.player.profile.name .. " " .. l"ingame008", UIComponent.colors.gray, "base:texture/Ui/Icons/16x/Ammunition.tga")
-
-					self.player.data.heap.state = self.currentBase
+					--self.player.data.heap.state = self.currentBase
                     self.player.data.heap.nbHit = self.player.data.heap.nbHit + 1
-                    activity.gameplayData = { 0x00, self.player.data.heap.nbHit }
-					game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_88.wav", "base:audio/gamemaster/DLG_GM_GLOBAL_89.wav", "base:audio/gamemaster/DLG_GM_GLOBAL_90.wav"}, priority = 1,})
-					self.player.data.heap.score = self.player.data.heap.score + 1
+                    activity.gameplayData =  {quartz.system.bitwise.bitwiseand(self.player.data.heap.nbHit, 0xff00) / 256, quartz.system.bitwise.bitwiseand(self.player.data.heap.nbHit, 0x00ff)}
+                    --activity.gameplayData = { 0x00, self.player.data.heap.nbHit }
 
                 end
 

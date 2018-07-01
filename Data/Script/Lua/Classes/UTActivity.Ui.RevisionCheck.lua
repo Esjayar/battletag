@@ -40,6 +40,7 @@ UTActivity.Ui.RevisionCheck.banks = {
     ["DSN2"] = 0x15000,
     ["DSN3"] = 0x25000,
     ["DSN4"] = 0x35000,
+    ["DSN5"] = 0x45000,
 
     ["DANI"] = 0x02000,
 
@@ -49,6 +50,11 @@ UTActivity.Ui.RevisionCheck.banks = {
 
 function UTActivity.Ui.RevisionCheck:__ctor(state)
 
+	-- animate	
+	
+	self.slideBegin = true
+	self.slideEnd = true
+	
 	self.text = ""
     self.clientRectangle = { 13 + UIMenuWindow.margin.left, 87 + UIMenuWindow.margin.top, 768 - UIMenuWindow.margin.right, 608 - 12 - UIMenuWindow.margin.bottom - 34 }
 
@@ -118,9 +124,15 @@ function UTActivity.Ui.RevisionCheck:LookupForRevision(revision)
         local lastRevision = string.lower(string.format("game:../system/revision/0x%08x/banks/%s/%s-%s", class, self.targetBank, self.targetBank, revision))
         local bestRevision = string.lower(revisions[#revisions])
 
-        -- print(lastRevision, bestRevision)
+        -- shorten paths because aliases may have been discarded along the way
 
-        if not (lastRevision == bestRevision) then
+        local f, l = string.find(bestRevision, "banks")
+        local shortBestRevision = string.sub(bestRevision, l + 2)
+        local shortLastRevision = string.lower(string.format("%s/%s-%s.bin", self.targetBank, self.targetBank, revision))
+
+        print("^^" .. shortLastRevision .. " # ^^" .. shortBestRevision)
+
+        if not (shortBestRevision == shortLastRevision) or (REG_FORCEREVISION) then
 
             -- push the upload request,
             -- the flash memory manager shall handle all binary uploads
@@ -250,6 +262,8 @@ function UTActivity.Ui.RevisionCheck:Update()
             return
 
         end
+
+print("2222222222")
 
         -- configure the new target,
         -- save all the data banks that must be checked

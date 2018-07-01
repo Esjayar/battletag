@@ -15,7 +15,7 @@
 
 --[[Dependencies ----------------------------------------------------------]]
 
-	require "Ui/UIPlayerSlot"
+	require "UI/UIScrollBar"
 
 --[[ Class -----------------------------------------------------------------]]
 
@@ -24,6 +24,8 @@ UTClass.UIPlayerSlotGrid(UIMultiComponent)
 -- default
 
 UIPlayerSlotGrid.horizontalPadding = 50
+
+UIPlayerSlotGrid.maxSlot = 8
 
 UIPlayerSlotGrid.teamColor = {
 	{ "UIRedSlot_01.tga", "UIRedSlot_02.tga" },
@@ -52,14 +54,39 @@ function UIPlayerSlotGrid:__ctor( numberOfSlot, numberOfTeam )
 		self.uiTeamSlots[i].right.background = "base:texture/ui/components/" .. self.teamColor[i][2]	
 
 	end
-	
+
+	-- all slots
+
 	self.uiPlayerSlots = {}
 	for i = 1, numberOfSlot do
 
-		local slot = self:AddComponent(UIPlayerSlot:New(), "uiPlayerSlot" .. i)
+		local slot = self:AddComponent(activity.playerSlot:New(), "uiPlayerSlot" .. i)
+		slot.visible = false
 		table.insert(self.uiPlayerSlots, slot)
 
 	end   
+
+	-- visible slots
+
+	self.uiVisibleSlots = {}
+	for i = 1, math.min(self.maxSlot, numberOfSlot) do
+
+		local slot = self.uiPlayerSlots[i]
+		slot.visible = true
+		table.insert(self.uiVisibleSlots, slot)
+
+	end
+
+	-- a scroll bar may be necessary ...
+
+	self.uiScrollBar = self:AddComponent(UIScrollBar:New({ 308, 0 }, 360), "uiScrollBar")
+
+	self.uiScrollBar.OnActionUp = function(_self)  self:Scroll(-1) end
+	self.uiScrollBar.OnActionDown = function(_self)	self:Scroll(1) end
+
+	self.uiScrollBar:SetSize(0, self.maxSlot)
+	self.maxIndex = 0
+	self.curIndex = 0
 
 	-- rearrange slots
 
@@ -87,6 +114,8 @@ function UIPlayerSlotGrid:AddSlot(player, button)
 
 			slot = self.uiPlayerSlots[i]
 			slot:SetPlayer(player, button)
+			self.maxIndex = self.maxIndex + 1
+			self.uiScrollBar:SetSize(self.maxIndex, self.maxSlot)
 			break
 
 		end
@@ -117,10 +146,10 @@ end
 
 function UIPlayerSlotGrid:Rearrange()
 
-	for i, slot in ipairs(self.uiPlayerSlots) do
+	-- earase
 
-		slot:MoveTo( 0, self.horizontalPadding * (i - 1) )
-
+	for _, slot in ipairs(self.uiPlayerSlots)  do
+		slot.visible = false
 	end
 
 	-- for team only
@@ -132,6 +161,8 @@ function UIPlayerSlotGrid:Rearrange()
 		local teams = {}
 		for i = 1, #activity.teams do
 			teams[i] = {}
+			self.uiTeamSlots[i].left.visible = false
+			self.uiTeamSlots[i].right.visible = false
 		end
 
 		-- add slot
@@ -142,7 +173,7 @@ function UIPlayerSlotGrid:Rearrange()
 				table.insert(teams[slot.player.team.index], slot)
 			else
 
-				-- take an empty team ... or leave it 
+				-- take for an empty team
 
 				for i, team in ipairs(teams) do
 
@@ -159,23 +190,52 @@ function UIPlayerSlotGrid:Rearrange()
 
 		-- change display
 
-		local playerOffset = 0
 		local teamOffset = 0
-		for i, team in ipairs(teams) do
-
-			-- team slot
-
-			self.uiTeamSlots[i].left.rectangle = { -50, teamOffset, -10, teamOffset + 35 + (50 * (#team - 1)) }
-			self.uiTeamSlots[i].right.rectangle = { 310, teamOffset, 330, teamOffset + 35 + (50 * (#team - 1))  }
-			teamOffset = teamOffset + (50 * #team)
-
-			-- player slot
-
-			for j, slot in ipairs(team) do
-				slot:MoveTo( 0, self.horizontalPadding * (playerOffset + (j - 1)))
+		self.uiVisibleSlots = {}
+		local index = 1
+		for _, team in ipairs(teams) do
+			for _, slot in ipairs(team) do
+				if ((index <= (self.maxSlot + self.curIndex)) and ((1 + self.curIndex) <= index)) then
+					table.insert(self.uiVisibleSlots, slot)
+					team.nbSlot = (team.nbSlot or 0) + 1
+				end
+				index = index + 1
 			end
-			playerOffset = playerOffset + #team
+		end
+		for i = (#self.uiVisibleSlots + 1), self.maxSlot do
+			table.insert(self.uiVisibleSlots, self.uiPlayerSlots[i])
+		end
 
+		-- visible and correct pos
+
+		for i, slot in ipairs(self.uiVisibleSlots) do
+			slot.visible = true
+			slot:MoveTo( 0, self.horizontalPadding * (i - 1) )
+		end
+
+		-- borders
+
+		for i, team in ipairs(teams) do
+			if (team.nbSlot) then
+				local size = math.min(self.maxSlot, team.nbSlot)
+				self.uiTeamSlots[i].left.visible = true
+				if (self.maxSlot >= self.maxIndex) then
+					self.uiTeamSlots[i].right.visible = true
+				end
+				self.uiTeamSlots[i].left.rectangle = { -50, teamOffset, -10, teamOffset + 35 + (50 * (size - 1)) }
+				self.uiTeamSlots[i].right.rectangle = { 310, teamOffset, 330, teamOffset + 35 + (50 * (size - 1))  }
+				teamOffset = teamOffset + (50 * size)
+			end
+		end
+
+	else
+
+		-- no team
+
+		for i, slot in ipairs(self.uiVisibleSlots) do
+			slot = self.uiPlayerSlots[i + self.curIndex]
+			slot.visible = true
+			slot:MoveTo( 0, self.horizontalPadding * (i - 1) )
 		end
 
 	end
@@ -200,6 +260,8 @@ function UIPlayerSlotGrid:RemoveSlot(removedPlayer)
 				removedPlayer = nil
 				slot = self.uiPlayerSlots[i]
 				self.uiPlayerSlots[i]:SetPlayer(nil)
+				self.maxIndex = self.maxIndex - 1
+				self.uiScrollBar:SetSize(self.maxIndex, self.maxSlot)
 
 			end
 
@@ -215,8 +277,32 @@ function UIPlayerSlotGrid:RemoveSlot(removedPlayer)
 
 	-- rearrange
 
+	self:Scroll(-1)
 	self:Rearrange()
 
 	return slot
+
+end
+
+-- Scroll --------------------------------------------------------------------
+
+function UIPlayerSlotGrid:Scroll(value)
+
+	self.curIndex = self.curIndex + value
+	self.curIndex = math.max(self.curIndex, 0)
+	self.curIndex = math.min(self.curIndex, math.max(self.maxIndex - self.maxSlot, 0))
+
+	self:Rearrange()
+
+end
+
+-- update --------------------------------------------------------------------
+
+function UIPlayerSlotGrid:Update()
+
+	-- update 
+
+	if (self.uiScrollBar) then self.uiScrollBar:Update()
+	end
 
 end

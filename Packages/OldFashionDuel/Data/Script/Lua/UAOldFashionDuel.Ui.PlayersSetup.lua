@@ -92,6 +92,36 @@ function UAOldFashionDuel.Ui.PlayersSetup:__ctor(...)
 	
 end
 
+-- ErrorMessage  -------------------------------------------------------------
+
+function UAOldFashionDuel.Ui.PlayersSetup:ErrorMessage()
+
+	self.uiPopup = UIPopupWindow:New()
+
+	self.uiPopup.title = l"con037"
+	self.uiPopup.text = l"con048"
+
+	-- buttons
+
+	self.uiPopup.uiButton2 = self.uiPopup:AddComponent(UIButton:New(), "uiButton2")
+	self.uiPopup.uiButton2.rectangle = UIPopupWindow.buttonRectangles[2]
+	self.uiPopup.uiButton2.text = l "but019"
+
+	self.uiPopup.uiButton2.OnAction = function ()
+
+			UIManager.stack:Pop()
+			UIMenuManager.stack:Pop()
+			activity.matches = nil
+			activity:PostStateChange("playersmanagement")
+			self.enabled = false
+
+	end
+
+	self.setupFailed = true
+	UIManager.stack:Push(self.uiPopup)	
+
+end
+
 -- OnClose  --------------------------------------------------------------------
 
 function UAOldFashionDuel.Ui.PlayersSetup:OnClose()
@@ -139,8 +169,6 @@ end
 
 function UAOldFashionDuel.Ui.PlayersSetup:OnDeviceRemoved(device)
 
--- !! stop carrying about deconnection here ...
---[[
     -- lookup the player with the matching device,
 
     --for _, player in pairs(activity.match.players) do
@@ -150,37 +178,12 @@ function UAOldFashionDuel.Ui.PlayersSetup:OnDeviceRemoved(device)
 
 			-- deconnection : quit now !!!
 
-			if (not self.setupFailed) then
-
-				self.uiPopup = UIPopupWindow:New()
-
-				self.uiPopup.title = "Fail ..."
-				self.uiPopup.text = "A T-Blaster is deconnected !"
-
-				-- buttons
-
-				self.uiPopup.uiButton2 = self.uiPopup:AddComponent(UIButton:New(), "uiButton2")
-				self.uiPopup.uiButton2.rectangle = UIPopupWindow.buttonRectangles[2]
-				self.uiPopup.uiButton2.text = l "but019"
-
-				self.uiPopup.uiButton2.OnAction = function ()
-
-					UIManager.stack:Pop()
-					activity:PostStateChange("end") 
-					game:PostStateChange("title")
-
-				end
-
-				self.setupFailed = true
-				UIManager.stack:Push(self.uiPopup)		
-
+			if (not self.setupFailed) then	self:ErrorMessage()	
 			end
 
         end
 
     end
-
---]]
 
 end
 
@@ -191,6 +194,15 @@ function UAOldFashionDuel.Ui.PlayersSetup:OnOpen()
 	self.player = {}
 	self.player[1] = activity.match.challengers[1]
 	self.player[2] = activity.match.challengers[2]
+
+	-- check if a device has been removed anywhere
+
+	if ((not self.player[1].rfGunDevice) or (not self.player[2].rfGunDevice)) then
+
+		if (not self.setupFailed) then	self:ErrorMessage()	
+		end
+
+	end
 
 	-- next players : generic component
 
@@ -212,9 +224,9 @@ function UAOldFashionDuel.Ui.PlayersSetup:OnOpen()
 	-- VS
 
 	self.uiVsLabel = self.uiNextMatchPanel:AddComponent(UILabel:New(), "uiVsLabel")
-	self.uiVsLabel.font = UIComponent.fonts.header
+	self.uiVsLabel.font = UIComponent.fonts.larger
 	self.uiVsLabel.fontColor = UIComponent.colors.orange
-	self.uiVsLabel.rectangle = { 675 * 0.5 - 20, 60 }
+	self.uiVsLabel.rectangle = { 675 * 0.5 - 35, 80 }
 	self.uiVsLabel.text = "VS"
 
 	-- get first last three matchs 

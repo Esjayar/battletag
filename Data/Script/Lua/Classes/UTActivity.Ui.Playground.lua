@@ -52,6 +52,11 @@ function UTActivity.Ui.Playground:__ctor(...)
 
     assert(activity)
 
+	-- animate	
+    
+	self.slideBegin = true
+	self.slideEnd = true
+	
     __self = self
 
 	-- window settings
@@ -163,12 +168,18 @@ function UTActivity.Ui.Playground:__ctor(...)
 			self.uiArrowLeft = self:AddComponent(UIArrowLeft:New(), "uiArrowLeft")
 			self.uiArrowLeft:MoveTo(self.MaterialPanel.arrowLeft[1], self.MaterialPanel.arrowLeft[2])
 			self.uiArrowLeft.OnAction = function (self)
+				quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
+				quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
+				quartz.framework.audio.playsound()
 				__self.iconIndex = (__self.icons[__self.iconIndex + 1] and __self.iconIndex + 1 or 1)
 			end        
 
 			self.uiArrowRight = self:AddComponent(UIArrowRight:New(), "uiArrowRight")
 			self.uiArrowRight:MoveTo(self.MaterialPanel.arrowRight[1], self.MaterialPanel.arrowRight[2])
 			self.uiArrowRight.OnAction = function (self)
+				quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
+				quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
+				quartz.framework.audio.playsound()
 				__self.iconIndex = (__self.icons[__self.iconIndex - 1] and __self.iconIndex - 1 or #__self.icons) 
 			end
 		end
@@ -219,65 +230,72 @@ function UTActivity.Ui.Playground:Draw()
 
     UIMenuWindow.Draw(self)
 
-    if (self.currentPlayground) then
+    if (self.rectangle) then
     
-        local icon = self.icons[self.iconIndex]
+        quartz.system.drawing.pushcontext()
+		quartz.system.drawing.loadtranslation(self.rectangle[1], self.rectangle[2])
+		if (self.currentPlayground) then
 
-        if (icon) then
+			local icon = self.icons[self.iconIndex]
 
-            if (self.previousCategory and self.previousCategory ~= icon.category) then
-                table.foreachi(self.icons[self.previousCategory], function (index, icon) icon.bitmap = icon.unfocusedBitmap end )
-            end
+			if (icon) then
 
-            table.foreachi(self.icons[icon.category], function (index, icon) icon.bitmap = icon.focusedBitmap end )
+				if (self.previousCategory and self.previousCategory ~= icon.category) then
+					table.foreachi(self.icons[self.previousCategory], function (index, icon) icon.bitmap = icon.unfocusedBitmap end )
+				end
 
-            if (icon.bitmap) then
+				table.foreachi(self.icons[icon.category], function (index, icon) icon.bitmap = icon.focusedBitmap end )
 
-                local rectangle = { 230, 515, 230 + 64, 515 + 64 }
+				if (icon.bitmap) then
 
-                quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
-                quartz.system.drawing.loadtexture(icon.bitmap)
-                quartz.system.drawing.drawtexture(unpack(rectangle))
+					local rectangle = { 230, 515, 230 + 64, 515 + 64 }
 
-            end
+					quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
+					quartz.system.drawing.loadtexture(icon.bitmap)
+					quartz.system.drawing.drawtexture(unpack(rectangle))
 
-            if (icon.title) then
+				end
 
-                local fontJustification = quartz.system.drawing.justification.topleft + quartz.system.drawing.justification.wordbreak + quartz.system.drawing.justification.singlelineverticalcenter
-                local rectangle = { 300, 510, 750, 525 }
+				if (icon.title) then
 
-                quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.orange))
-                quartz.system.drawing.loadfont(UIComponent.fonts.default)
-                quartz.system.drawing.drawtextjustified(icon.title, fontJustification, unpack(rectangle))
+					local fontJustification = quartz.system.drawing.justification.topleft + quartz.system.drawing.justification.wordbreak + quartz.system.drawing.justification.singlelineverticalcenter
+					local rectangle = { 300, 510, 750, 525 }
 
-            end
+					quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.orange))
+					quartz.system.drawing.loadfont(UIComponent.fonts.default)
+					quartz.system.drawing.drawtextjustified(icon.title, fontJustification, unpack(rectangle))
 
-            if (icon.text) then
+				end
 
-                local fontJustification = quartz.system.drawing.justification.topleft + quartz.system.drawing.justification.wordbreak
-                local rectangle = { 300, 530, 750, 700 }
+				if (icon.text) then
 
-                quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.darkgray))
-                quartz.system.drawing.loadfont(UIComponent.fonts.default)
-                quartz.system.drawing.drawtextjustified(icon.text, fontJustification, unpack(rectangle))
+					local fontJustification = quartz.system.drawing.justification.topleft + quartz.system.drawing.justification.wordbreak
+					local rectangle = { 300, 530, 750, 700 }
 
-            end 
+					quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.darkgray))
+					quartz.system.drawing.loadfont(UIComponent.fonts.default)
+					quartz.system.drawing.drawtextjustified(icon.text, fontJustification, unpack(rectangle))
 
-            self.previousCategory = icon.category
+				end 
 
-        end
+				self.previousCategory = icon.category
 
-        if (self.titleCommon) then
+			end
 
-            local fontJustification = quartz.system.drawing.justification.topleft + quartz.system.drawing.justification.wordbreak
-            local rectangle = { 220, 165, 1000, 1000 }
+			if (self.titleCommon) then
 
-            quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.darkgray))
-            quartz.system.drawing.loadfont(UIComponent.fonts.default)
-            quartz.system.drawing.drawtextjustified(self.titleCommon, fontJustification, unpack(rectangle))
+				local fontJustification = quartz.system.drawing.justification.topleft + quartz.system.drawing.justification.wordbreak
+				local rectangle = { 220, 165, 1000, 1000 }
 
-        end 
-    
+				quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.darkgray))
+				quartz.system.drawing.loadfont(UIComponent.fonts.default)
+				quartz.system.drawing.drawtextjustified(self.titleCommon, fontJustification, unpack(rectangle))
+
+			end 
+
+		end
+        quartz.system.drawing.pop()
+
     end
 
 end

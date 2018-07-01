@@ -39,6 +39,10 @@ UAOldFashionDuel.bitmap = "base:texture/ui/Loading_OldFashionDuel.tga"
 
 UAOldFashionDuel.countdownDuration = 5
 
+UAOldFashionDuel.gameoverTexture = "base:texture/ui/text_roundover.tga"
+
+UAOldFashionDuel.gameoverSound = {"base:audio/gamemaster/DLG_GM_GLOBAL_120.wav"}
+
 -- SD07 snd
 UAOldFashionDuel.gameoverSnd = { 0x53, 0x44, 0x30, 0x37 }
 

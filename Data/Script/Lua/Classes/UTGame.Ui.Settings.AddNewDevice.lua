@@ -36,10 +36,11 @@ function UTGame.Ui.Settings.AddNewDevice:__ctor()
     -- uiButton2: link
     
 	self.uiButton1 = self:AddComponent(UIButton:New(), "uiButton1")
-	self.uiButton1.rectangle = { 0, 0, 200, 34 }
+	self.uiButton1.rectangle = { 0, 0, 220, 34 }
 	self.uiButton1:MoveTo(82,190)
 	self.uiButton1.text = l"sett005"
 	self.uiButton1.tip = l"tip075"
+	self.uiButton1.direction = DIR_HORIZONTAL
 	UTGame.Ui.Settings.AddNewDevice.hasPopup = false
 
 

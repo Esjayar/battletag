@@ -6,6 +6,8 @@ local nfo = {
     ["name"] = "Team Frag",
     ["description"] = "Teams fighting each other to score frags.",
     ["pictogram"] = "TeamFrag.tga",
+    ["category"] = 3,
+
 
     ["difficulty"] = 50,
     ["flags"] = { "2-8 players", "2-4 teams",},

@@ -46,22 +46,33 @@ function UAFreeFrag:__ctor(...)
     self.iconBanner = "base:texture/ui/Ranking_Bg_FreeFrag.tga"
 
 	-- scoringField
-	
+
     self.scoringField = {
 		{"score", nil, nil, 280, quartz.system.drawing.justification.right, UIComponent.fonts.header, UIComponent.colors.orange},
 	}
-	
+
     -- settings
 
     self.settings = {
 
-        [1] = { title = l"titlemen006", options = {
+        [1] = { title = l "titlemen006", options = {
 
-            [1] = { label = l"goption001", tip = l"tip027", choices = { { value = 5 }, { value = 10 } }, index = "playtime", },
-            [2] = { label = l"goption002", tip = l"tip025", choices = { { value = 0, displayMode = "large", text = "Auto"}, { value = 1, displayMode = "large", text = l"oth032" } }, index = "gameLaunch" },
-            [3] = { label = l"goption003", tip = l"tip026", choices = { { value = 1, icon = "base:texture/ui/components/uiradiobutton_house.tga" }, { value = 2 }, { value = 3}, { value = 4 }, { value = 5, icon = "base:texture/ui/components/uiradiobutton_sun.tga" } }, index = "beamPower" },
+            [1] = { label = l "goption001", tip = l "tip027", choices = { { value = 5 }, { value = 10 } }, index = "playtime", },
+            [2] = { label = l "goption002", tip = l "tip025", choices = { { value = 0, displayMode = "large", text = "Auto"}, { value = 1, displayMode = "large", text = l"oth032" } }, index = "gameLaunch" },
+            [3] = { label = l "goption003", tip = l "tip026", choices = { { value = 1, icon = "base:texture/ui/components/uiradiobutton_house.tga" }, { value = 2 }, { value = 3}, { value = 4 }, { value = 5, icon = "base:texture/ui/components/uiradiobutton_sun.tga" } }, index = "beamPower" },
 
             },
+        },
+
+        -- fake settings
+
+        [2] = { title = l "titlemen007", options = {
+
+            [1] = { label = l "goption004", tip = l "tip028", choices = { { value = -1, text = "", icon = "base:texture/ui/components/uiradiobutton_infinity.tga" } }, index = "ammunitions", },
+            [2] = { label = l "goption006", tip = l "tip033", choices = { { value = -1, text = "", icon = "base:texture/ui/components/uiradiobutton_infinity.tga" } }, index = "lifePoints", },
+
+            },
+
         },
 
         -- keyed settings
@@ -83,16 +94,15 @@ function UAFreeFrag:__ctor(...)
 
 	self.detailsDescriptor = {
 		information = {
-			{key = "score", icon = "base:texture/ui/Icons/32x/Score.tga", tip = l"tip072" },
-			{key = "accuracy", icon = "base:texture/ui/Icons/32x/precision.tga", tip = l"tip073" }
+			{ key = "detailsScore", icon = "base:texture/ui/Icons/32x/score.tga", tip = l"tip072" },
+			{ key = "detailAccuracy", icon = "base:texture/ui/Icons/32x/precision.tga", tip = l"tip073" }
 		},
 		details = {
-			{key = "name", width = 175, style = UIGridLine.RowTitleCellStyle},
-			{key = "hitByName", width = 75, style = UIGridLine.RowTitleCellStyle, icon = "base:texture/ui/Icons/32x/Hit.tga"},
+			{ key = "name", width = 175, style = UIGridLine.RowTitleCellStyle },
+			{ key = "hitByName", width = 75, style = UIGridLine.RowTitleCellStyle, icon = "base:texture/ui/Icons/32x/Hit.tga", tip = l"tip068" },
 		}
 	}
-	
-	
+
 	-- playground
     -- !! TABLE FORMAT : { [numberofplayer] = { ["ITEM_BITMAP"] = { category = "string", priority = number, size = number, positions = { { number, number }, ... }, title = "string", text = "string", condition = function() }, ... }
 
@@ -101,14 +111,14 @@ function UAFreeFrag:__ctor(...)
         [1] = { 
 
             Arrows = { category = "Position", size = 256, positions = { { 265, 150 }, }, title = l"goption002", text = string.format(l"psexp016"), },
-       
+
         },
     }
 
     -- overriden states
 
     self.states["roundloop"] = UAFreeFrag.State.RoundLoop:New(self)
-    
+
     -- ?? LES SETTINGS SONT RENSEIGNÉS DANS LE CONSTRUCTEUR DE L'ACTIVITÉ
     -- ?? LES PARAMÈTRES (DISPLAYMODE, TEXTE, ICONE...) DES COLONES DE GRID SONT RENSEIGNÉS DANS LE COMPOSANT DÉDIÉ DU LEADERBOARD
     -- ?? LES ATTRIBUTS - HEAP, BAKED - DES ENTITÉS SONT RENSEIGNÉS PAR 2 APPELS DE FONCTION DÉDIÉS DANS L'ACTIVITÉ (À SURCHARGER)
@@ -157,9 +167,9 @@ function UAFreeFrag:InitEntityHeapData(entity, ranking)
 	entity.data.heap.nbHit = 0
 	entity.data.heap.accuracy = 0
 	entity.data.heap.hitByName = {}
-	
+
 	-- gameMaster
-	
+
 	entity.data.heap.lastPlayerShooted = {}
 	entity.data.heap.nbHitLastPlayerShooted = 0
 
@@ -180,7 +190,8 @@ function UAFreeFrag:UpdateEntityBakedData(entity, ranking)
 	else
 		entity.data.baked.accuracy = 0
 	end
-	entity.data.baked.accuracy = string.format("%0.1f", entity.data.baked.accuracy) .. "%"
+	entity.data.baked.detailsScore = entity.data.baked.score .. " " .. l"oth068"
+	entity.data.baked.detailAccuracy = string.format("%0.1f", entity.data.baked.accuracy) .. "%"
 	for player, value in pairs(entity.data.heap.hitByName) do
 		entity.data.baked.hitByName[player] = (entity.data.baked.hitByName[player] or 0) + value
 	end

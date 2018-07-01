@@ -141,13 +141,13 @@ end
 
 -- ChangeTeam --------------------------------------------------------
 
-function UTActivity.State.PlayersManagement:ChangeTeam(player)
+function UTActivity.State.PlayersManagement:ChangeTeam(player, teamIndex)
 
     assert(player:IsKindOf(UTPlayer))
 
 	-- next team
 
-	local newTeamIndex = player.team.index + 1
+	local newTeamIndex = teamIndex or (player.team.index + 1)
 	if (newTeamIndex > #activity.teams) then
 		newTeamIndex = 1
 	end

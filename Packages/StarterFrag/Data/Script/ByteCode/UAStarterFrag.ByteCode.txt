@@ -72,6 +72,10 @@ HUD_JAUGE	nb_clip
 
 
 
+
+
+
+
 END_FUNCTION
 
 FUNCTION respawn
@@ -80,6 +84,10 @@ DEC 	nb_clip
 SET	nb_ammo		max_ammo
 hud
 GOTO	game
+
+
+
+
 
 
 
@@ -182,10 +190,18 @@ LED_ON		30	1
 
 
 
+
+
+
+
 END_FUNCTION
 
 FUNCTION reload
 SET	nb_clip	max_clip
+
+
+
+
 
 
 
@@ -245,6 +261,10 @@ SET	nb_hit		0
 SND	START
 SET	local 		0
 respawn
+
+
+
+
 
 
 
@@ -400,6 +420,10 @@ hud
 
 
 
+
+
+
+
 END_EVENT
 
 EVENT BUTTON_3_JUST_PRESSED
@@ -417,9 +441,13 @@ IF	scan_ok		COMP	1
 
 END_IF
 
-IF local COMP	1
+IF local COMP	0
 	SND	SCAN_BAD
 END_IF
+
+
+
+
 
 
 
@@ -528,11 +556,19 @@ get_hit
 
 
 
+
+
+
+
 END_EVENT
 
 EVENT ENTER_STATE
 SET	auto_reload	0
 hud
+
+
+
+
 
 
 
@@ -593,6 +629,10 @@ END_IF
 
 
 
+
+
+
+
 END_EVENT
 
 END_STATE
@@ -604,6 +644,10 @@ SND	RELOAD_CLIP
 FLASH_GREEN	1
 ANIM ARAM
 	
+
+
+
+
 
 
 
@@ -719,13 +763,23 @@ GOTO	game
 
 
 
+
+
+
+
 END_EVENT
 
 EVENT HIT
 reload
+DEC 	nb_clip
+SET	nb_ammo		max_ammo
 ANIM_OFF
 get_hit
 GOTO	game
+
+
+
+
 
 
 
