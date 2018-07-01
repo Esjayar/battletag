@@ -1,0 +1,7 @@
+<fontdef name="orbitron" face="orbitron">
+  <fonts>
+    <font path="base:data/font/orbitron-light.otf"/>
+  </fonts>
+  <height>40</height>
+  <weight>500</weight>
+</fontdef>

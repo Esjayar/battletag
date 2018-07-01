@@ -1,0 +1,698 @@
+
+
+VAR stage	RECEIVE
+VAR stage_	SEND
+VAR out0	SEND
+VAR local0
+VAR ammunitions
+VAR auto_reload
+VAR auto_reset
+
+
+FUNCTION StageChanged
+SET stage_ stage
+SET out0 0
+
+IF stage COMP 1
+	GOTO _Ubiconnect
+END_IF
+IF stage COMP 2
+	GOTO _Vest0
+END_IF
+IF stage COMP 3
+	GOTO _Vest1
+END_IF
+IF stage COMP 4
+	GOTO _Ffa
+END_IF
+IF stage COMP 5
+	GOTO _Scan0
+END_IF
+IF stage COMP 6
+	GOTO _Scan1
+END_IF
+IF stage COMP 7
+	GOTO _Ok
+END_IF
+
+
+
+
+
+
+
+
+
+
+
+END_FUNCTION
+
+STATE _Initialize 
+
+FIRST_STATE
+
+EVENT DATA_CHANGE
+stage
+StageChanged
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+END_EVENT
+
+EVENT ENTER_STATE
+SND START
+SET stage 0
+HUD_DIGIT 9
+HUD_ICON_ON BULLET
+HUD_JAUGE 5
+TIMER 100
+
+
+
+
+
+
+
+
+
+
+
+END_EVENT
+
+END_STATE
+
+STATE _Ubiconnect 
+
+EVENT DATA_CHANGE
+stage
+StageChanged
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+END_EVENT
+
+EVENT BUTTON_2_JUST_PRESSED
+IF ammunitions SUP 9
+ELSE
+	IF ammunitions SUP 0
+		DEC ammunitions
+		HUD_DIGIT ammunitions
+		IR
+		SND SHOOT
+	END_IF
+	
+	IF ammunitions COMP	0	
+		SET auto_reload	1
+	END_IF
+END_IF
+
+
+
+
+
+
+
+
+
+
+
+END_EVENT
+
+EVENT ANIM_FINISHED
+SET ammunitions 9
+HUD_DIGIT ammunitions
+
+
+
+
+
+
+
+
+
+
+END_EVENT
+
+EVENT ENTER_STATE
+SET ammunitions 9
+SET auto_reload	0
+
+
+
+
+
+
+
+
+
+
+END_EVENT
+
+EVENT TIMER
+IF auto_reload	COMP	1
+	SET ammunitions 10
+	SND RELOAD
+	ANIM ARAM
+	HUD_DIGIT ammunitions
+	SET	auto_reload	0
+END_IF
+
+
+
+
+END_EVENT
+
+END_STATE
+
+STATE _Vest0 
+
+EVENT DATA_CHANGE
+stage
+StageChanged
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+END_EVENT
+
+EVENT ENTER_STATE
+SET ammunitions 10
+
+
+
+
+
+
+
+
+
+
+END_EVENT
+
+END_STATE
+
+STATE _Ok 
+
+EVENT DATA_CHANGE
+stage
+StageChanged
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+END_EVENT
+
+END_STATE
+
+STATE _Ffa 
+
+EVENT DATA_CHANGE
+stage
+StageChanged
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+END_EVENT
+
+EVENT BUTTON_2_JUST_PRESSED
+IF ammunitions SUP 9
+ELSE
+	IF ammunitions SUP 0
+		DEC ammunitions
+		HUD_DIGIT ammunitions
+		IR
+		SND SHOOT
+	END_IF
+	
+	IF ammunitions COMP	0	
+		SET auto_reload	1
+	END_IF
+END_IF
+
+
+
+
+
+
+
+
+
+END_EVENT
+
+EVENT HIT
+MOTOR 30
+LED_ON 30 1
+INC out0
+SND HURT
+
+
+
+
+
+
+
+
+
+
+
+END_EVENT
+
+EVENT ENTER_STATE
+SET ammunitions 9
+SET auto_reload	0
+HUD_DIGIT ammunitions
+
+
+
+
+
+
+
+
+
+
+END_EVENT
+
+EVENT ANIM_FINISHED
+SET ammunitions 9
+HUD_DIGIT ammunitions
+
+
+
+
+
+
+
+
+
+
+
+END_EVENT
+
+EVENT TIMER
+IF auto_reload	COMP	1
+	SET ammunitions 10
+	SND RELOAD
+	ANIM ARAM
+	HUD_DIGIT ammunitions
+	SET	auto_reload	0
+END_IF
+
+
+
+
+END_EVENT
+
+END_STATE
+
+STATE _Vest1 
+
+EVENT DATA_CHANGE
+stage
+StageChanged
+
+
+
+
+
+
+
+
+
+
+
+END_EVENT
+
+EVENT ENTER_STATE
+SET_HARNESS 1
+
+
+
+
+
+
+
+
+
+
+
+END_EVENT
+
+END_STATE
+
+STATE _Scan0 
+
+EVENT DATA_CHANGE
+stage
+StageChanged
+
+
+
+
+
+
+
+
+
+
+END_EVENT
+
+EVENT BUTTON_2_JUST_PRESSED
+IF ammunitions SUP 9
+ELSE
+	IF ammunitions SUP 0
+		DEC ammunitions
+		HUD_DIGIT ammunitions
+		IR
+		SND SHOOT
+	END_IF
+	
+	IF ammunitions COMP	0	
+		SET auto_reload	1
+	END_IF
+END_IF
+
+
+
+
+
+
+
+
+
+END_EVENT
+
+EVENT ANIM_FINISHED
+SET ammunitions 9
+HUD_DIGIT ammunitions
+
+
+
+
+
+
+
+
+
+
+
+END_EVENT
+
+EVENT HIT
+MOTOR 30
+LED_ON 30 1
+SND HURT
+
+
+
+
+
+
+
+
+
+
+END_EVENT
+
+EVENT TIMER
+IF auto_reload	COMP	1
+	SET ammunitions 10
+	SND RELOAD
+	ANIM ARAM
+	HUD_DIGIT ammunitions
+	SET	auto_reload	0
+END_IF
+
+
+
+
+END_EVENT
+
+EVENT ENTER_STATE
+SET ammunitions 9
+SET auto_reload	0
+
+
+
+
+END_EVENT
+
+END_STATE
+
+STATE _Scan1 
+
+EVENT DATA_CHANGE
+stage
+StageChanged
+
+
+
+
+
+
+
+
+
+
+END_EVENT
+
+EVENT BUTTON_3_JUST_PRESSED
+RFID_SCAN local0
+IF local0 COMP 1
+	RFID_TYPE_MAJOR local0
+	IF local0 COMP RFID_AMMO_PACK
+		SND RELOAD_CLIP
+		FLASH_GREEN	1
+		RFID_TYPE_MINOR local0
+		IF local0 COMP RFID_AMMO1
+			SET out0 65431
+		ELSE
+			SET out0 65432
+		END_IF
+		ANIM ARAM
+		SET ammunitions 10
+	ELSE
+		SND SCAN_BAD
+		SET out0 local0
+		SET auto_reset	1
+	END_IF
+ELSE
+	SND SCAN_BAD
+END_IF
+
+
+
+
+
+
+
+
+
+
+END_EVENT
+
+EVENT ANIM_FINISHED
+SND_PRIO	OK
+SET ammunitions 9
+HUD_DIGIT ammunitions
+
+
+
+
+
+
+
+
+
+
+
+END_EVENT
+
+EVENT BUTTON_2_JUST_PRESSED
+IF ammunitions SUP 9
+ELSE
+	IF ammunitions SUP 0
+		DEC ammunitions
+		HUD_DIGIT ammunitions
+		IR
+		SND SHOOT
+	END_IF
+	
+	IF ammunitions COMP	0	
+		SET auto_reload	1
+	END_IF
+END_IF
+
+
+
+
+
+
+
+
+
+
+END_EVENT
+
+EVENT HIT
+MOTOR 30
+LED_ON 30 1
+SND HURT
+
+
+
+
+
+
+
+
+
+
+END_EVENT
+
+EVENT ENTER_STATE
+SET ammunitions 9
+SET auto_reload	0
+
+
+
+
+END_EVENT
+
+EVENT TIMER
+IF auto_reload	COMP	1
+	SET ammunitions 10
+	SND RELOAD
+	ANIM ARAM
+	HUD_DIGIT ammunitions
+	SET	auto_reload	0
+END_IF
+
+IF	auto_reset	SUP	0
+
+	DEC	auto_reset
+	IF	auto_reset	COMP	0
+		SET	out0	0	
+	END_IF
+
+END_IF
+
+END_EVENT
+
+END_STATE

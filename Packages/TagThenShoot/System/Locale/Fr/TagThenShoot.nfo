@@ -1,0 +1,16 @@
+
+local nfo = {
+
+    class = "UATagThenShoot",
+
+    ["name"] = "Tag et Tire!",
+    ["description"] = "Scanne et tire !",
+    ["pictogram"] = "TagNShoot.tga",
+
+    ["difficulty"] = 30,
+    ["flags"] = { "1-8 joueurs", },
+    ["materials"] = { 0x03000050, 0x03000051, 0x03000052, 0x03000053,},
+
+}
+
+return nfo

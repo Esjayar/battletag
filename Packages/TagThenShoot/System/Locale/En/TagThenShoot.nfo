@@ -1,0 +1,16 @@
+
+local nfo = {
+
+    class = "UATagThenShoot",
+
+    ["name"] = "Tag'n Shoot",
+    ["description"] = "Tag and Shoot !",
+    ["pictogram"] = "TagNShoot.tga",
+
+    ["difficulty"] = 30,
+    ["flags"] = { "1-8 players", },
+    ["materials"] = { 0x03000050, 0x03000051, 0x03000052, 0x03000053,},
+
+}
+
+return nfo

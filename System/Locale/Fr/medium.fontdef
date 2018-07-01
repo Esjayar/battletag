@@ -1,0 +1,8 @@
+<fontdef name="default" face="ubisofttitletwo bold">
+  <fonts>
+    <font path="base:font/ubittl.ttf"/>
+    <font path="base:font/ubittb.ttf"/>
+  </fonts>
+  <height>22</height>
+  <weight>400</weight>
+</fontdef>

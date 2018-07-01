@@ -1,0 +1,16 @@
+
+local nfo = {
+
+    class = "UAStarterFrag",
+
+    ["name"] = "Match Rapide",
+    ["description"] = "Les joueurs s'affrontent pour marquer des points.\nCe jeu est très simple et parfait pour commencer.",
+    ["pictogram"] = "StarterFrag.tga",
+
+    ["difficulty"] = 20,
+    ["flags"] = { "2-8 joueurs", },
+    ["materials"] = { 0x03000040, 0x03000041, },
+
+}
+
+return nfo
