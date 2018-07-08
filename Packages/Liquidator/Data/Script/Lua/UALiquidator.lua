@@ -30,10 +30,8 @@ UALiquidator.State = {}
 
 -- default
 
-UALiquidator.bytecodePath = "game:../packages/liquidator/data/script/bytecode/UALiquidator.ByteCode.lua"
 UALiquidator.bitmap = "base:texture/ui/Loading_Liquidator.tga"
 
-UALiquidator.maxNumberOfPlayer = 8
 UALiquidator.minNumberOfPlayer = 3
 
 UALiquidator.playerSlot = UALiquidator.UIPlayerSlot
@@ -71,44 +69,40 @@ function UALiquidator:__ctor(...)
 
         [1] = { title = l"titlemen006", options = {
 
-            [1] = { displayMode = nil, label = l"goption001", tip = l"tip114", choices = { { value = 5 }, { value = 10 }, { value = 15 }, { value = 20 } }, index = "playtime", },
-            [2] = { label = l"goption002", tip = l"tip025", choices = { { value = 0, displayMode = "large", text = "Auto"}, { value = 1, displayMode = "large", text = l"oth032" } }, index = "gameLaunch" },
-            [3] = { label = l"goption003", tip = l"tip026", choices = { { value = 1, icon = "base:texture/ui/components/uiradiobutton_house.tga" }, { value = 2 }, { value = 3}, { value = 4 }, { value = 5, icon = "base:texture/ui/components/uiradiobutton_sun.tga" } }, index = "beamPower" },
+            [1] = { displayMode = nil, label = l"goption001", tip = l"tip114", choices = { { value = 2 }, { value = 5 }, { value = 6 }, { value = 7 }, { value = 8 }, { value = 10 }, { value = 15 }, { value = 20 }, { value = 30 } }, index = "playtime", },
 
             },
         },
 
---        [2] = { title = l"titlemen007", options = {
         [2] = { title = l"oth077", options = {
 
-            [1] = { label = l"goption006", tip = l"tip115", choices = { { value = 10 }, { value = 15 }, { value = 19 } }, index = "lifePointsLiquidator", },
-            [2] = { label = l"goption004", tip = l"tip028", choices = { { value = 20, text = "", icon = "base:texture/ui/components/uiradiobutton_infinity.tga" } }, index = "ammunitionsLiquidator", },
-            [3] = { label = l"goption016", tip = l"tip117", choices = { { value = 5 }, { value = 10 } }, index = "invulnerabilityTimeLiquidator", },
-            [4] = { displayMode = nil, label = l"goption013", tip = l"tip041", choices = { { value = 0, displayMode = "large", text = l"oth076" }, { value = 1, displayMode = "large", text = l"oth075"  } }, index = "teamFragLiquidator", },
+            [1] = { label = l"goption006", tip = l"tip115", choices = { { value = 5 }, { value = 8 }, { value = 10 }, { value = 12 }, { value = 15 }, { value = 18 } }, index = "lifePointsLiquidator", },
+            [2] = { label = l"goption004", tip = l"tip028", choices = { { value = 255, text = "", icon = "base:texture/ui/components/uiradiobutton_infinity.tga" } }, index = "ammunitionsLiquidator", },
+            [3] = { label = l"goption016", tip = l"tip117", choices = { { value = 5 }, { value = 6 }, { value = 8 }, { value = 10 }, { value = 12 }, { value = 15 } }, index = "invulnerabilityTimeLiquidator", },
+            [4] = { displayMode = nil, label = l"goption013", tip = l"tip041", choices = { { value = 0, displayMode = "medium", text = l"oth076" }, { value = 1, displayMode = "medium", text = l"oth075"  } }, index = "teamFragLiquidator", },
+            [5] = { displayMode = nil, label = l"goption036", tip = l"tip200", choices = { { value = 0, displayMode = "medium", text = l"oth102" }, { value = 1, displayMode = "medium", text = l"oth103"  } }, index = "endgame", },
 
             },
         },
         
---        [3] = { title = l"titlemen007", options = {
         [3] = { title = l"oth078", options = {        
 
-            [1] = { label = l"goption004", tip = l"tip028", choices = { { value = 9 } }, index = "ammunitionsSurvivor", },
-            [2] = { label = l"goption005", tip = l"tip118", choices = { { value = 3 } }, index = "clipsSurvivor", },
-            [3] = { label = l"goption006", tip = l"tip119", choices = { { value = 3 }, { value = 5 }, { value = 7 } }, index = "lifePointsSurvivor", },
-            [4] = { label = l"oth071", tip = l"tip123", choices = { { value = 5 }, { value = 10 }, { value = 15 } }, index = "timePenality", },
-            [5] = { label = l"goption012", tip = l"tip121", choices = { { value = 0 } }, index = "respawnTimeSurvivor", },
-            [6] = { displayMode = nil, label = l"goption013", tip = l"tip041", choices = { { value = 0, displayMode = "large", text = l"oth076" }, { value = 1, displayMode = "large", text = l"oth075"  } }, index = "teamFragSurvivor", },
-            [7] = { displayMode = nil, label = l"goption007", tip = l"tip040", choices = { { value = 0, displayMode = "large", text = l"oth076" }, { value = 1, displayMode = "large", text = l"oth075"  } }, index = "swap", },
+            [1] = { label = l"goption004", tip = l"tip028", choices = { { value = 6 }, { value = 9 }, { value = 12 }, { value = 15 }, { value = 18 } }, index = "ammunitionsSurvivor", },
+            [2] = { label = l"goption005", tip = l"tip118", choices = { { value = 1 }, { value = 2 }, { value = 3 }, { value = 4 }, { value = 5 }, { value = 6 } }, index = "clipsSurvivor", },
+            [3] = { label = l"goption006", tip = l"tip119", choices = { { value = 1 }, { value = 3 }, { value = 5 }, { value = 7 }, { value = 9 }, { value = 10 } }, index = "lifePointsSurvivor", },
+            [4] = { label = l"oth071", tip = l"tip123", choices = { { value = 5 }, { value = 10 }, { value = 15 }, { value = 20 }, { value = 25 }, { value = 30 } }, index = "timePenality", },
+            [5] = { label = l"goption012", tip = l"tip036", choices = { { value = 0 }, { value = 1 }, { value = 2 }, { value = 3 }, { value = 5 }, { value = 10 } }, index = "respawnTimeSurvivor", },
+            [6] = { displayMode = nil, label = l"goption013", tip = l"tip041", choices = { { value = 0, displayMode = "medium", text = l"oth076" }, { value = 1, displayMode = "medium", text = l"oth075"  } }, index = "teamFragSurvivor", },
+            [7] = { displayMode = nil, label = l"goption007", tip = l"tip040", choices = { { value = 0, displayMode = "medium", text = l"oth076" }, { value = 1, displayMode = "medium", text = l"oth082" }, { value = 2, displayMode = "medium", text = l"oth111" } }, index = "swap", },
+            [8] = { displayMode = nil, label = l"goption011", tip = l"tip128", choices = { { value = 0, displayMode = "medium", text = l"oth079" }, { value = 1, displayMode = "medium", text = l"oth080" } }, index = "respawnmodeSurvivor", },
 
             },
         },        
 
         -- keyed settings
 
-	    playtime = 5,
-        gameLaunch = 0,
-        beamPower = 3,        
-        ammunitionsLiquidator = 20,
+	    playtime = 5,       
+        ammunitionsLiquidator = 255,
         ammunitionsSurvivor = 9,
         clipsSurvivor = 5,
         lifePointsLiquidator = 15,
@@ -120,6 +114,8 @@ function UALiquidator:__ctor(...)
         teamFragSurvivor = 0,
         invulnerabilityTimeLiquidator = 10,
         timePenality = 10,
+        respawnmodeSurvivor = 0,
+        endgame = 1,
 
     }
 
@@ -133,9 +129,9 @@ function UALiquidator:__ctor(...)
             RedArea = { priority = 20, size = 128, text = string.format(l"psexp032"), positions = { { 50, 150 }, }, },
             BlueArea = { priority = 20, size = 128, text = string.format(l"psexp035"), positions = { { 480, 150 }, }, },
 
-            RF01 = { category = "Ammo", title = l"goption010", text = string.format(l"psexp014"), positions = { { 200, 50 }, }, condition = function (self) return (20 ~= activity.settings.ammunitions) end  },
-            RF02 = { category = "Ammo2", title = l"goption010", text = string.format(l"psexp014"), positions = { { 200, 250 }, }, condition = function (self) return (20 ~= activity.settings.ammunitions) end  },
-            RF03 = { priority = 1, title = l"oth056" ..  " (" .. l"oth027" .. ")", text = string.format(l"psexp031"), positions = { { 50, 150 }, }, },
+            RF01 = { category = "Ammo", title = l"goption010", text = string.format(l"psexp014"), positions = { { 200, 50 }, }, condition = function (self) return (255 ~= activity.settings.ammunitions) end  },
+            RF02 = { category = "Ammo2", title = l"goption010", text = string.format(l"psexp014"), positions = { { 200, 250 }, }, condition = function (self) return (255 ~= activity.settings.ammunitions) end  },
+            RF03 = { priority = 1, title = l"oth056" ..  " (" .. l"oth027" .. ")", text = string.format(l"psexp031"), positions = { { 50, 150 }, }, condition = function (self) return (0 == activity.settings.respawnmodeSurvivor) end },
             RF07 = { category = "Med-Kit", title = l"goption009", text = string.format(l"psexp015"), positions = { { 330, 50 }, }, condition = function (self) return (1 == game.settings.addons.medkitPack) end },
             RF08 = { category = "Med-Kit2", title = l"goption009", text = string.format(l"psexp015"), positions = { { 330, 250 }, }, condition = function (self) return (1 == game.settings.addons.medkitPack) end },
         },
@@ -153,10 +149,9 @@ function UALiquidator:__ctor(...)
 		"liquidator",
 		"teamFrag",
 		"medkit",
+		"respawnmode",
 
-    }    
-
-    self.gameplayData = { 0x00, 0x00 }
+    }
     
 	-- details columms descriptor
 
@@ -177,14 +172,14 @@ function UALiquidator:__ctor(...)
 
     self.states["roundloop"] = UALiquidator.State.RoundLoop:New(self)
     
-    -- ?? LES SETTINGS SONT RENSEIGNÉS DANS LE CONSTRUCTEUR DE L'ACTIVITÉ
-    -- ?? LES PARAMÈTRES (DISPLAYMODE, TEXTE, ICONE...) DES COLONES DE GRID SONT RENSEIGNÉS DANS LE COMPOSANT DÉDIÉ DU LEADERBOARD
-    -- ?? LES ATTRIBUTS - HEAP, BAKED - DES ENTITÉS SONT RENSEIGNÉS PAR 2 APPELS DE FONCTION DÉDIÉS DANS L'ACTIVITÉ (À SURCHARGER)
-    -- ?? POUR LES DONNÉES DE CONFIGURATION DE BYTECODE, CE SERA SUREMENT PAREIL QUE POUR LES ATTRIBUTS = FONCTION DÉDIÉ (À SURCHARGER)
+    -- ?? LES SETTINGS SONT RENSEIGNï¿½S DANS LE CONSTRUCTEUR DE L'ACTIVITï¿½
+    -- ?? LES PARAMï¿½TRES (DISPLAYMODE, TEXTE, ICONE...) DES COLONES DE GRID SONT RENSEIGNï¿½S DANS LE COMPOSANT Dï¿½DIï¿½ DU LEADERBOARD
+    -- ?? LES ATTRIBUTS - HEAP, BAKED - DES ENTITï¿½S SONT RENSEIGNï¿½S PAR 2 APPELS DE FONCTION Dï¿½DIï¿½S DANS L'ACTIVITï¿½ (ï¿½ SURCHARGER)
+    -- ?? POUR LES DONNï¿½ES DE CONFIGURATION DE BYTECODE, CE SERA SUREMENT PAREIL QUE POUR LES ATTRIBUTS = FONCTION Dï¿½DIï¿½ (ï¿½ SURCHARGER)
     -- ?? POUR LE LEADERBOARD:
     -- ??       - SURCHARGER LA PAGE QUI UTILISE LE LEADERBOARD STANDARD,
-    -- ??       - RAJOUTER DES PARAMÈTRES (DISPLAYMODE, TEXTE, ICONE...) DES COLONES DE GRID SI NÉCESSAIRE EN + DE CEUX PAR DÉFAUT (LIFE, HIT, AMMO...)
-    -- ??       - RENSEIGNER QUELS ATTRIBUTS ON SOUHAITE REPRÉSENTER PARMIS CEUX EXISTANT EN HEAP
+    -- ??       - RAJOUTER DES PARAMï¿½TRES (DISPLAYMODE, TEXTE, ICONE...) DES COLONES DE GRID SI Nï¿½CESSAIRE EN + DE CEUX PAR Dï¿½FAUT (LIFE, HIT, AMMO...)
+    -- ??       - RENSEIGNER QUELS ATTRIBUTS ON SOUHAITE REPRï¿½SENTER PARMIS CEUX EXISTANT EN HEAP
 
 end
 
@@ -200,7 +195,20 @@ function UALiquidator:Check()
 	-- check number of liquidator
 
 	local numberOfLiquidator = self:GetLiquidatorNumber()
-	if (((#activity.players < 6) and (numberOfLiquidator == 1)) or ((#activity.players >= 6) and (numberOfLiquidator == 2))) then
+	local numplayers = 0
+	for i, player in ipairs(activity.players) do
+		if (not player.primary) then
+			numplayers = numplayers + 1
+		elseif (player.liquidator) then
+			numberOfLiquidator = numberOfLiquidator - 1
+		elseif (player.primary.liquidator) then
+			player.liquidator = true
+		end
+
+
+	end
+	--if (numberOfLiquidator == math.floor(numplayers / 6 + 1)) then
+	if (numberOfLiquidator > 0) then
 
 		return true
 
@@ -209,11 +217,11 @@ function UALiquidator:Check()
 		local uiPopup = UIPopupWindow:New()
 
 		uiPopup.title = l"con035"
-		if (numberOfLiquidator == 1) then
-			uiPopup.text = l"tip125"
-		else
-			uiPopup.text = l"tip124"
-		end
+		--if (numberOfLiquidator < math.floor(numplayers / 6)) then
+		--	uiPopup.text = l"tip125"
+		--else
+			uiPopup.text = l"tip122"
+		--end
 		
 
 		-- buttons
@@ -264,6 +272,7 @@ function UALiquidator:InitEntityBakedData(entity, ranking)
 		entity.data.baked.nbRespawn = 0
 		entity.data.baked.nbAmmoPack = 0
 		entity.data.baked.nbMediKit = 0
+		entity.data.baked.timeshit = 0
 		entity.data.baked.hitByName = {}
 		entity.data.baked.killByName = {}
 
@@ -277,8 +286,10 @@ function UALiquidator:InitEntityHeapData(entity, ranking)
 
     -- !! INITIALIZE ALL HEAP DATA (RELEVANT DURING ONE MATCH ONLY)
 
-	entity.data.heap.score = 0
-	entity.data.heap.ranking = ranking
+	if (not game.gameMaster.ingame) then
+		entity.data.heap.score = 0
+		entity.data.heap.ranking = ranking
+	end
 	
 	-- init entity specific data
 
@@ -295,6 +306,14 @@ function UALiquidator:InitEntityHeapData(entity, ranking)
         UTActivity:InitEntityHeapData(entity, ranking)
 
 		-- !! PLAYER : CAN BE TAKEN FROM SETTINGS OR NOT ... TODO
+
+		if (entity.primary) then
+			entity.gameplayData = { 0x00, 0x06 }
+		else
+			entity.gameplayData = { 0x00, 0x00 }
+			entity.data.heap.gunseconds = 0
+			entity.data.heap.guntime = 0
+		end
 
 		if (entity.liquidator) then
 
@@ -317,29 +336,32 @@ function UALiquidator:InitEntityHeapData(entity, ranking)
 		end
 		entity.data.heap.swap = activity.settings.swap
 		entity.data.heap.medkit = game.settings.addons.medkitPack
-
-		entity.data.heap.hit = 0
-		entity.data.heap.death = 0
-		entity.data.heap.accuracy = 0
-		entity.data.heap.isDead = 0
+		entity.data.heap.respawnmode = activity.settings.respawnmodeSurvivor
+		entity.data.heap.invulnerabilityTimeLiquidator = activity.settings.invulnerabilityTimeLiquidator
 
 		-- statistics
 
-		entity.data.heap.accuracy = 0
-		entity.data.heap.nbShot = 0
-		entity.data.heap.nbRespawn = 0
-		entity.data.heap.nbAmmoPack = 0
-		entity.data.heap.nbMediKit = 0
-		entity.data.heap.hitByName = {}
-		entity.data.heap.killByName = {}
+		if (not game.gameMaster.ingame) then
+			entity.data.heap.hit = 0
+			entity.data.heap.death = 0
+			entity.data.heap.accuracy = 0
+			entity.data.heap.nbShot = 0
+			entity.data.heap.nbRespawn = 0
+			entity.data.heap.nbAmmoPack = 0
+			entity.data.heap.nbMediKit = 0
+			entity.data.heap.timeshit = 0
+			entity.data.heap.isDead = 0
+			entity.data.heap.hitByName = {}
+			entity.data.heap.killByName = {}
 
-		--print("my team index is : " .. entity.data.heap.team)
+			--print("my team index is : " .. entity.data.heap.team)
 
-		-- gameMaster
+			-- gameMaster
 		
-		entity.data.heap.hitLost = 0
-		entity.data.heap.lastPlayerShooted = {}
-		entity.data.heap.nbHitLastPlayerShooted = 0
+			entity.data.heap.hitLost = 0
+			entity.data.heap.lastPlayerShooted = {}
+			entity.data.heap.nbHitLastPlayerShooted = 0
+		end
 		
 	end
 	
@@ -351,7 +373,7 @@ function UALiquidator:GetLiquidatorNumber()
 
 	local numberOfLiquidator = 0
 	for _, player in ipairs(activity.players) do
-		if (player.liquidator) then numberOfLiquidator = numberOfLiquidator  + 1
+		if (player.liquidator) then numberOfLiquidator = numberOfLiquidator + 1
 		end
 	end
 	return numberOfLiquidator
@@ -389,6 +411,7 @@ function UALiquidator:UpdateEntityBakedData(entity, ranking)
 		entity.data.baked.nbRespawn = (entity.data.baked.nbRespawn or 0) + entity.data.heap.nbRespawn
 		entity.data.baked.nbAmmoPack = (entity.data.baked.nbAmmoPack or 0) + entity.data.heap.nbAmmoPack
 		entity.data.baked.nbMediKit = (entity.data.baked.nbMediKit or 0) + entity.data.heap.nbMediKit
+		entity.data.baked.timeshit = (entity.data.baked.timeshit or 0) + entity.data.heap.timeshit
 		
 		for player, value in pairs(entity.data.heap.hitByName) do
 			entity.data.baked.hitByName[player] = (entity.data.baked.hitByName[player] or 0) + value

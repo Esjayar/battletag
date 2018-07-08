@@ -54,8 +54,8 @@ function UTActivity.Ui.Playground:__ctor(...)
 
 	-- animate	
     
-	self.slideBegin = true
-	self.slideEnd = true
+	self.slideBegin = game.settings.UiSettings.slideBegin
+	self.slideEnd = game.settings.UiSettings.slideEnd
 	
     __self = self
 
@@ -200,19 +200,20 @@ function UTActivity.Ui.Playground:__ctor(...)
 		quartz.framework.audio.loadsound("base:audio/ui/back.wav")
 		quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
 		quartz.framework.audio.playsound()
+		UTActivity.Ui.Settings.slideBegin = true
 
 		activity:PostStateChange("settings") 
 
 	end
 
-	 -- uiButton4: next
+	 -- uiButton5: next
 
-    self.uiButton4 = self:AddComponent(UIButton:New(), "uiButton4")
-    self.uiButton4.rectangle = UIMenuWindow.buttonRectangles[4]
-	self.uiButton4.text = l"but006"
-    self.uiButton4.tip = l"tip018"
+    self.uiButton5 = self:AddComponent(UIButton:New(), "uiButton5")
+    self.uiButton5.rectangle = UIMenuWindow.buttonRectangles[5]
+	self.uiButton5.text = l"but006"
+    self.uiButton5.tip = l"tip018"
 
-	self.uiButton4.OnAction = function (self)
+	self.uiButton5.OnAction = function (self)
 
 		quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
 		quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
@@ -297,5 +298,61 @@ function UTActivity.Ui.Playground:Draw()
         quartz.system.drawing.pop()
 
     end
+
+end
+
+function UTActivity.Ui.Playground:OnOpen()
+
+	self:Activate()
+end
+
+function UTActivity.Ui.Playground:OnClose()
+
+	self:Deactivate()
+end
+
+function UTActivity.Ui.Playground:Activate()
+
+    if (not self.keyboardActive) then
+
+        --game._Char:Add(self, self.Char)
+        game._KeyDown:Add(self, self.KeyDown)
+        self.keyboardActive = true
+
+    end
+
+end
+
+function UTActivity.Ui.Playground:Deactivate()
+
+    if (self.keyboardActive) then 
+    
+        --game._Char:Remove(self, self.Char)
+        game._KeyDown:Remove(self, self.KeyDown)
+        self.keyboardActive = false
+
+    end
+
+end
+
+function UTActivity.Ui.Playground:KeyDown(virtualKeyCode, scanCode)
+		
+	if (27 == virtualKeyCode or 49 == virtualKeyCode) then
+		
+		quartz.framework.audio.loadsound("base:audio/ui/back.wav")
+		quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
+		quartz.framework.audio.playsound()
+		UTActivity.Ui.Settings.slideBegin = true
+
+		activity:PostStateChange("settings") 
+	end
+	if (13 == virtualKeyCode or 53 == virtualKeyCode) then
+		
+		quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
+		quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
+		quartz.framework.audio.playsound()
+
+		activity:PostStateChange("playersmanagement")
+	end
 
 end

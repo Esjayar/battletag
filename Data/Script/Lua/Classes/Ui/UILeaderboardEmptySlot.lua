@@ -33,8 +33,8 @@ function UILeaderboardEmptySlot:__ctor(leaderboard)
     for index, item in ipairs(leaderboard.rankedList) do
     		
         if (item.challenger:IsKindOf(UTTeam)) then
-			itemOffset = itemOffset + 30 + (64 * #item.challenger.players)
-		else
+			itemOffset = itemOffset + 30 + (64 * item.numplayers)
+		elseif (not item.challenger.primary) then
 			if (self.largePanel) then
 				itemOffset = itemOffset + 80
 			else
@@ -43,13 +43,13 @@ function UILeaderboardEmptySlot:__ctor(leaderboard)
 		end
 	end
 	
-	self.itemOffset = (#activity.teams == 0) and itemOffset or (itemOffset - 50)
+	self.itemOffset = #activity.teams == 0 and itemOffset or itemOffset - 50
 		
 	-- calcul du nombre de slot décoratif pouvant tenir 
 	
 	self.nbSlotEmpty = math.floor((520 - self.itemOffset) / (50 + 15))
 	
-	local buttom = (#activity.teams > 0) and 620 or 660
+	local buttom = #activity.teams > 0 and 620 or 660
 	
 	self.uiSlotEmpty = {}
 	self.uiSlotEmptyLabel1 = {}

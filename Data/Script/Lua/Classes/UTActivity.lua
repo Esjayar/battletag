@@ -35,7 +35,7 @@ UTActivity.categories = {
 
 UTActivity.updateFrameRate = 30
 
-UTActivity.maxNumberOfPlayer = 8
+UTActivity.maxNumberOfPlayer = 48
 UTActivity.minNumberOfPlayer = 2
 
 UTActivity.bytecodePath = nil
@@ -62,6 +62,7 @@ UTActivity.State = {}
 
     require "UTActivity.State.Title"
     require "UTActivity.State.Settings"
+    require "UTActivity.State.AdvancedSettings"
     require "UTActivity.State.Playground"
     require "UTActivity.State.PlayersManagement"
     require "UTActivity.State.PlayersSetup"
@@ -92,6 +93,7 @@ function UTActivity:__ctor(...)
 
 	self.states["title"] = UTActivity.State.Title:New(self)
     self.states["settings"] = UTActivity.State.Settings:New(self)
+    self.states["advancedsettings"] = UTActivity.State.AdvancedSettings:New(self)
 	self.states["playground"] = UTActivity.State.Playground:New(self)
     self.states["playersmanagement"] = UTActivity.State.PlayersManagement:New(self)
 	self.states["playerssetup"] = UTActivity.State.PlayersSetup:New(self)
@@ -126,18 +128,22 @@ function UTActivity:__ctor(...)
     -- settings
     
     self.settings = {}
+    self.advancedsettings = {}
 
     -- gameplay data send
 
     self.gameplayData = {}
+	game.gameplayData = {}
 
     -- listen for disconnected devices,
     -- will handler players entities' bindings
 
     assert(engine.libraries.usb)
-    assert(engine.libraries.usb.proxy)
-    
-    engine.libraries.usb.proxy._DeviceRemoved:Add(self, self.OnDeviceRemoved, 10)
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		assert(proxy)
+		
+		proxy._DeviceRemoved:Add(self, self.OnDeviceRemoved, 10)
+	end
 
     -- restart the state machine
 
@@ -149,9 +155,11 @@ end
 
 function UTActivity:__dtor()
 
-    if (engine and engine.libraries.usb.proxy) then
-        engine.libraries.usb.proxy._DeviceRemoved:Remove(self, self.OnDeviceRemoved)
-    end
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		if (engine and proxy) then
+			proxy._DeviceRemoved:Remove(self, self.OnDeviceRemoved)
+		end
+	end
 
 end
 

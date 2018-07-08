@@ -71,7 +71,7 @@ function UISelector.Item:Draw()
 
 	    if (self.rectangle) then
 
-            local index = ((self.enabled and ST_ENABLED) or ST_DISABLED) + ((self.focused and ST_FOCUSED) or 0) + ((self.clicked and ST_CLICKED) or 0)
+            local index = (self.enabled and ST_ENABLED or ST_DISABLED) + (self.focused and ST_FOCUSED or 0) + (self.clicked and ST_CLICKED or 0)
             local state = self.states[index] or self.states[ST_ENABLED]
 
             if (self.indexed and not self.clicked and not self.focused) then
@@ -132,6 +132,24 @@ function UISelector.Item:Draw()
                     quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
                     quartz.system.drawing.loadtexture("base:texture/ui/components/uigridline_background01.tga")
                     quartz.system.drawing.drawtextureh(unpack(rectangle))
+					if (self.header.iconbackground) then
+                        quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
+                        quartz.system.drawing.loadtexture(self.header.iconbackground)
+                        local textureWidth, textureHeight = quartz.system.drawing.gettexturedimensions()
+
+							rectangle[1] = rectangle[1] + 18
+							rectangle[3] = rectangle[3] - 4
+
+                        if (self.iconType) then
+
+							quartz.system.drawing.drawtexture(rectangle[1] - 10, rectangle[2] - textureHeight * 0.5 + 5)
+
+						else
+
+							quartz.system.drawing.drawtexture(unpack(rectangle))
+						end
+
+                    end
 
                     if (self.header.icon) then
 
@@ -139,8 +157,13 @@ function UISelector.Item:Draw()
                         quartz.system.drawing.loadtexture(self.header.icon)
                         local textureWidth, textureHeight = quartz.system.drawing.gettexturedimensions()
 
-							rectangle[1] = rectangle[1] + 10
-							rectangle[3] = rectangle[3] - 10 - 2
+							if (self.header.iconbackground) then
+								rectangle[1] = rectangle[1] - 8
+								rectangle[3] = rectangle[3] - 25
+							else
+								rectangle[1] = rectangle[1] + 10
+								rectangle[3] = rectangle[3] - 12
+							end
 
                         if (self.iconType) then
 

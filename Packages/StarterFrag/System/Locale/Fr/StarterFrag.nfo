@@ -6,11 +6,11 @@ local nfo = {
     ["name"] = "Match Rapide",
     ["description"] = "Les joueurs s'affrontent pour marquer des points.\nCe jeu est très simple et parfait pour commencer.",
     ["pictogram"] = "StarterFrag.tga",
-    ["category"] = 3,
+    ["category"] = 1,
 
 
     ["difficulty"] = 20,
-    ["flags"] = { "2-8 joueurs", },
+    ["flags"] = { "2-32 joueurs", },
     ["materials"] = { 0x03000040, 0x03000041, },
 
 }

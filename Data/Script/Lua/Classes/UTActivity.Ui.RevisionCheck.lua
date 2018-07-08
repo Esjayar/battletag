@@ -53,7 +53,7 @@ function UTActivity.Ui.RevisionCheck:__ctor(state)
 	-- animate	
 	
 	self.slideBegin = true
-	self.slideEnd = true
+	self.slideEnd = false
 	
 	self.text = ""
     self.clientRectangle = { 13 + UIMenuWindow.margin.left, 87 + UIMenuWindow.margin.top, 768 - UIMenuWindow.margin.right, 608 - 12 - UIMenuWindow.margin.bottom - 34 }
@@ -184,11 +184,13 @@ end
 
 function UTActivity.Ui.RevisionCheck:OnClose()
 
-    if (engine.libraries.usb.proxy) then
+    for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		if (proxy) then
 
-        engine.libraries.usb.proxy._DispatchMessage:Remove(self, UTActivity.Ui.RevisionCheck.OnDispatchMessage)
+			proxy._DispatchMessage:Remove(self, UTActivity.Ui.RevisionCheck.OnDispatchMessage)
 
-    end
+		end
+	end
 
 end
 
@@ -218,12 +220,16 @@ end
 function UTActivity.Ui.RevisionCheck:OnOpen()
 
     assert(engine.libraries.usb)
-    assert(engine.libraries.usb.proxy)
-    assert(engine.libraries.usb.proxy.handle)
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		assert(proxy)
+		assert(proxy.handle)
 
-    engine.libraries.usb.proxy._DispatchMessage:Add(self, UTActivity.Ui.RevisionCheck.OnDispatchMessage)
+		proxy._DispatchMessage:Add(self, UTActivity.Ui.RevisionCheck.OnDispatchMessage)
+	end
 
-    self.flashMemoryManager = engine.libraries.usb.proxy.processes.deviceFlashMemoryManager
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		self.flashMemoryManager = proxy.processes.deviceFlashMemoryManager
+	end
     assert(self.flashMemoryManager)
 
     --
@@ -287,7 +293,9 @@ print("2222222222")
 
                 -- send a ping message just for the sake of it ? ...
 
-                quartz.system.usb.sendmessage(engine.libraries.usb.proxy.handle, { 0x00, 0xff, 0x05 })
+				for index, proxy in ipairs(engine.libraries.usb.proxies) do
+					quartz.system.usb.sendmessage(proxy.handle, { 0x00, 0xff, 0x05 })
+				end
                 print("ping **")
 
                 return
@@ -330,7 +338,9 @@ print("2222222222")
             if (self.timeInterval <= time - self.time) then
             
                 self.time = time
-                quartz.system.usb.sendmessage(engine.libraries.usb.proxy.handle, self.message)
+				for index, proxy in ipairs(engine.libraries.usb.proxies) do
+					quartz.system.usb.sendmessage(proxy.handle, self.message)
+				end
             
             end
         end

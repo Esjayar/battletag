@@ -26,6 +26,10 @@ require "UTGame.Ui.Settings.Sound"
 require "UTGame.Ui.Settings.TboxesManagement"
 require "UTGame.Ui.Settings.AddNewDevice"
 require "UTGame.Ui.Settings.Credits"
+require "UTGame.Ui.Settings.GameSettings"
+require "UTGame.Ui.Settings.ActivitySettings"
+require "UTGame.Ui.Settings.UiSettings"
+require "UTGame.Ui.Settings.TestSettings"
 
 -- __ctor --------------------------------------------------------------------
 
@@ -39,14 +43,18 @@ function UTGame.Ui.Settings:__ctor(...)
 
     -- dedicated settings on the right side,
 
- 	self.labels = {l "sett004", l "sett001", l "sett003", l "sett006"}
+ 	self.labels = {l "sett004", l "sett001", l "sett003", l "sett014", l "sett017", l "sett025", l "sett037", l "sett006"}
 
 	self.uiSettings = {
 
 	    [1] = self.uiWindows:AddComponent(UTGame.Ui.Settings.AddNewDevice:New()),
 	    [2] = self.uiWindows:AddComponent(UTGame.Ui.Settings.Sound:New()),
 	    [3] = self.uiWindows:AddComponent(UTGame.Ui.Settings.TBoxesManagement:New()),
-	    [4] = self.uiWindows:AddComponent(UTGame.Ui.Settings.Credits:New()),
+	    [4] = self.uiWindows:AddComponent(UTGame.Ui.Settings.GameSettings:New()),
+	    [5] = self.uiWindows:AddComponent(UTGame.Ui.Settings.ActivitySettings:New()),
+	    [6] = self.uiWindows:AddComponent(UTGame.Ui.Settings.UiSettings:New()),
+        [7] = self.uiWindows:AddComponent(UTGame.Ui.Settings.TestSettings:New()),
+	    [8] = self.uiWindows:AddComponent(UTGame.Ui.Settings.Credits:New()),
 
 	}
 
@@ -55,7 +63,11 @@ function UTGame.Ui.Settings:__ctor(...)
 	    [1] = l "tip075",
 	    [2] = l "tip074",
 	    [3] = l "tip076",
-	    [4] = nil,
+	    [4] = l "tip154",
+	    [5] = l "tip176",
+	    [6] = l "tip196",
+        [7] = l "tip251",
+	    [8] = nil,
 
 	}
 
@@ -73,9 +85,9 @@ function UTGame.Ui.Settings:__ctor(...)
 
 		local properties = { text = uiSetting.title, }
 		local item = self:AddItem(properties)
-
-		item.Action = function ()
 		
+		item.Action = function ()
+            
             if (self.uiActiveSetting ~= uiSetting) then
 			
 				quartz.system.drawing.loadvideo("base:video/credits.avi")
@@ -97,20 +109,14 @@ function UTGame.Ui.Settings:__ctor(...)
     
     -- uiButton1: Menu
 
-    self.uiButton2 = self:AddComponent(UIButton:New(), "uiButton1")
-    self.uiButton2.rectangle = UIMenuWindow.buttonRectangles[1]
-    self.uiButton2.text = l "but016"
-	self.uiButton2.tip = l "tip007"
+    self.uiButton1 = self:AddComponent(UIButton:New(), "uiButton1")
+    self.uiButton1.rectangle = UIMenuWindow.buttonRectangles[1]
+    self.uiButton1.text = l "but016"
+	self.uiButton1.tip = l "tip007"
 
-    self.uiButton2.OnAction = function (_self) 
+    self.uiButton1.OnAction = function () 
     
-		quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
-		quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
-		quartz.framework.audio.playsound()
-
-		game:SaveSettings()
-		
-		game:PostStateChange("title")
+		self:Back()
 
     end
 
@@ -123,12 +129,13 @@ end
 
 function UTGame.Ui.Settings:OnClose()
 	
-	if (UTGame.Ui.Settings.AddNewDevice.hasPopup == true) then
+	self:Deactivate()
+	if (UTGame.Ui.Settings.AddNewDevice.hasPopup) then
 	
 		UTGame.Ui.Settings.AddNewDevice.hasPopup = false
 		UIManager.stack:Pop() 
 		
-	end 
+	end
 
 end
 
@@ -137,8 +144,61 @@ end
 
 function UTGame.Ui.Settings:OnOpen()
 
-    self.index = self.index or 1
+    self.index = uiSettingprev or 1
     self.uiActiveSetting = self.uiSettings[self.index]
     self.uiActiveSetting.visible = true
+	self:Activate()
+
+end
+
+function UTGame.Ui.Settings:Back()
+
+	quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
+	quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
+	quartz.framework.audio.playsound()
+
+	game:SaveSettings()
+		
+	if (activity) then
+		uiSettingprev = nil
+		UIManager.stack:Pop()
+		slideanimation = false
+		activity:PostStateChange("playersmanagement")
+	else
+		uiSettingprev = 1
+		game:PostStateChange("title")
+	end
+end
+
+function UTGame.Ui.Settings:Activate()
+
+    if (not self.keyboardActive) then
+
+        --game._Char:Add(self, self.Char)
+        game._KeyDown:Add(self, self.KeyDown)
+        self.keyboardActive = true
+
+    end
+
+end
+
+function UTGame.Ui.Settings:Deactivate()
+
+    if (self.keyboardActive) then 
+    
+        --game._Char:Remove(self, self.Char)
+        game._KeyDown:Remove(self, self.KeyDown)
+        self.keyboardActive = false
+
+    end
+
+end
+
+function UTGame.Ui.Settings:KeyDown(virtualKeyCode, scanCode)
+		
+	if (27 == virtualKeyCode) then
+
+		self:Back()
+	end
 
 end

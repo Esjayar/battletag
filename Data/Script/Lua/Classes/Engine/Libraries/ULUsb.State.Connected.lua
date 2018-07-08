@@ -37,7 +37,9 @@ end
 function ULUsb.State.Connected:Begin()
 
     assert(engine.libraries.usb)
-    assert(engine.libraries.usb.proxy)
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		assert(proxy)
+	end
 
     print("ULUsb.State.Connected:Begin")
 
@@ -60,18 +62,20 @@ end
 
 function ULUsb.State.Connected:OnDeviceRemoveComplete(handle)
 
-    print("ONDEVICEREMOVECOMPLETE", handle)
-    print(engine.libraries.usb.proxy.handle)
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		print("ONDEVICEREMOVECOMPLETE", handle)
+		print(proxy.handle)
 
-    assert(engine.libraries.usb.proxy)
+		assert(proxy)
 
-    -- check if the left handle matches the active proxy's
+		-- check if the left handle matches the active proxy's
 
-    if (handle == engine.libraries.usb.proxy.handle) then
+		if (handle == proxy.handle) then
 
-        engine.libraries.usb:Disconnect()
+			engine.libraries.usb:Disconnect(proxy)
 
-    end
+		end
+	end
 
 end
 
@@ -82,6 +86,8 @@ function ULUsb.State.Connected:Update()
     -- update the active proxy,
     -- all usb messages will be processed shortly
 
-    engine.libraries.usb.proxy:Update()
+    for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		proxy:Update()
+	end
 
 end

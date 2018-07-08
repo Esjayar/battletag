@@ -81,13 +81,13 @@ function UIPodiumSlot:Build(challenger, nbChallenger, rank, realRank, teamPositi
 		self.teamPosition = teamPosition
 		self.teamScore = teamScore
 		
-		if (#self.team.players > 3) then
-			self.height = 15 + 30 * #self.team.players
+		if (#self.team.players > 5) then
+			self.height = 15 + 20 * #self.team.players
 		else
 			self.height = 110
 		end
 		
-		if (#self.team.players > 3) then
+		if (#self.team.players > 5) then
 			self.positionY = 570 - #self.team.players * 30
 		else
 			self.positionY = 470
@@ -117,8 +117,13 @@ function UIPodiumSlot:Build(challenger, nbChallenger, rank, realRank, teamPositi
 		self.visible = true 
 	
 	end})
-	self.fxs[2] = UIManager:AddFx("value", { timeOffset = timeStart, duration = 0.2, __self = self, value = "rankVectorX", from = -100, to = 50 + self.realRank * 40 , })
-	self.fxs[3] = UIManager:AddFx("value", { timeOffset = timeStart, duration = 0.2, __self = self, value = "positionX", from = 1000, to = 350 + self.realRank * 40 , })
+    if (game.settings.UiSettings.finalranking == 1 and #activity.teams == 2) then
+	    self.fxs[2] = UIManager:AddFx("value", { timeOffset = timeStart, duration = 0.2, __self = self, value = "rankVectorX", from = -100, to = -970 + self.rank * 660 , })
+	    self.fxs[3] = UIManager:AddFx("value", { timeOffset = timeStart, duration = 0.2, __self = self, value = "positionX", from = 1000, to = -670 + self.rank * 660 , })
+    else
+        self.fxs[2] = UIManager:AddFx("value", { timeOffset = timeStart, duration = 0.2, __self = self, value = "rankVectorX", from = -100, to = 50 + self.realRank * 40 , })
+	    self.fxs[3] = UIManager:AddFx("value", { timeOffset = timeStart, duration = 0.2, __self = self, value = "positionX", from = 1000, to = 350 + self.realRank * 40 , })
+    end
 	self.fxs[4] = UIManager:AddFx("value", { timeOffset = timeStart + 0.2, duration = 0.1, __self = self, value = "scaleIcon", from = 0, to = 5, type = "descelerate" })
 	self.fxs[5] = UIManager:AddFx("value", { timeOffset = timeStart + 0.3, duration = 0.15, __self = self, value = "scaleIcon", from = 5, to = 0, type = "accelerate" })
 	self.fxs[6] = UIManager:AddFx("value", { timeOffset = timeStart + 0.45, duration = 0.2, __self = self, value = "alphaMedal", from = 0, to = 1 })
@@ -164,7 +169,7 @@ function UIPodiumSlot:Draw()
 		    
 			quartz.system.drawing.loadalpha(self.alphaMedal)
 			
-			local rectIcon = {-150 + -128 + self.positionX + 10 * self.alphaMedal, -5 + self.positionY + 10 * self.alphaMedal,-150 + self.positionX - 10 * self.alphaMedal, -5 + self.positionY - 10 * self.alphaMedal + 128}
+			local rectIcon = {-278 + self.positionX + 10 * self.alphaMedal, -5 + self.positionY + 10 * self.alphaMedal, -150 + self.positionX - 10 * self.alphaMedal, self.positionY - 10 * self.alphaMedal + 123}
 
 			quartz.system.drawing.loadtexture(UIPodiumSlot.medalIcons[self.realRank])
 			quartz.system.drawing.drawtexture(unpack(rectIcon))
@@ -172,7 +177,7 @@ function UIPodiumSlot:Draw()
 			quartz.system.drawing.loadalpha(1)
 		end
 	    
-		local rectangleLine = {self.positionX, self.positionY + 40, self.positionX + 400, self.positionY + 40 + 40}
+		local rectangleLine = {self.positionX, self.positionY + 40, self.positionX + 400, self.positionY + 80}
 
 		quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
 		quartz.system.drawing.loadtexture("base:texture/ui/components/uigridline_background01.tga")
@@ -203,15 +208,28 @@ function UIPodiumSlot:Draw()
 			quartz.system.drawing.drawtextjustified(self.challenger.data.baked.score, fontJustification, self.positionX + self.scoreOffset[1] - 200, self.positionY + self.scoreOffset[2], self.positionX + 40 + self.scoreOffset[1], self.positionY + 200 + self.scoreOffset[2])
 		end
 		
-		local rectIcon = {-140 + self.positionX - 10 * self.scaleIcon, self.positionY - 40 - 10 * self.scaleIcon, -160 + self.positionX + 200 + 10 * self.scaleIcon, self.positionY - 40 + 200 + 10 * self.scaleIcon}
+		if (game.settings.UiSettings.teamribbon == 2 and self.challenger.profile.team > 0) then
+			local rectIconbackground = {-125 + self.positionX - 10 * self.scaleIcon, self.positionY - 15 - 10 * self.scaleIcon, self.positionX + 25 + 10 * self.scaleIcon, self.positionY + 135 + 10 * self.scaleIcon}
+			quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
+			quartz.system.drawing.loadtexture("base:texture/ui/pictograms/48x/Team_" .. self.challenger.profile.team .. "_Circle.tga")
+			quartz.system.drawing.drawtexture(unpack(rectIconbackground))	
+		end
 		
+		local rectIcon = {-140 + self.positionX - 10 * self.scaleIcon, self.positionY - 40 - 10 * self.scaleIcon, self.positionX + 40 + 10 * self.scaleIcon, self.positionY + 160 + 10 * self.scaleIcon}
+
 		quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
 		quartz.system.drawing.loadtexture("base:texture/avatars/256x/" .. self.challenger.profile.icon)
+		
 		quartz.system.drawing.drawtexture(unpack(rectIcon))
 		
 	elseif (self.team) then
-		
-		local rectangle = {self.positionX - 20, self.positionY + 20, self.positionX + 420, self.positionY + 25 + 30 * #self.team.players}
+		local numplayers = 0
+		for i, player in pairs(self.team.players) do
+			if (not player.primary) then
+				numplayers = numplayers + 1
+			end
+		end
+		local rectangle = {self.positionX - 20, self.positionY + 15, self.positionX + 420, self.positionY + 20 + 20 * numplayers}
 		
 		quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
 		quartz.system.drawing.loadtexture("base:texture/ui/components/uipanel05.tga")
@@ -220,58 +238,66 @@ function UIPodiumSlot:Draw()
 		local fontJustification = quartz.system.drawing.justification.left + quartz.system.drawing.justification.singlelineverticalcenter
 			
 		for i, player in pairs(self.team.players) do
-		
-			local rectangleLine = {self.positionX, self.positionY + 30 * i, self.positionX + 400, self.positionY + 16 + 30 * i}
+			if (not player.primary) then
+				local rectangleLine = {self.positionX, self.positionY + 20 * i, self.positionX + 400, self.positionY + 16 + 20 * i}
 
-			quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
-			quartz.system.drawing.loadtexture("base:texture/ui/components/uigridline_background01.tga")
-			quartz.system.drawing.drawwindow(unpack(rectangleLine))
-
-			
-			local rectIcon = {rectangleLine[1] + 25,rectangleLine[2] - 15,rectangleLine[1] + 35 + 32,rectangleLine[2] - 5 + 32}
-			
-			quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
-			quartz.system.drawing.loadtexture("base:texture/avatars/42x/" .. player.profile.icon)
-			quartz.system.drawing.drawtexture(unpack(rectIcon))		
-			
-			quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.darkgray))
-			quartz.system.drawing.loadfont(UIComponent.fonts.header)
-			quartz.system.drawing.drawtextjustified(player.profile.name, fontJustification, self.positionX + self.nameOffset[1], self.positionY + self.nameOffset[2] - 30 + 30 * i - 45, self.positionX + 400 + self.nameOffset[1], self.positionY + 200 + self.nameOffset[2] + 30 * i - 45)
-			
-			if (player.rfGunDevice and player.rfGunDevice.classId) then
-				local rectangleHud = {rectangleLine[1] + 70, rectangleLine[2] - 10, rectangleLine[1]+ 102, rectangleLine[2] + 22}
 				quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
-				quartz.system.drawing.loadtexture("base:texture/ui/pictograms/64x/hud_" .. player.rfGunDevice.classId .. ".tga")
-				quartz.system.drawing.drawtexture(unpack(rectangleHud))
-			end
+				quartz.system.drawing.loadtexture("base:texture/ui/components/uigridline_background01.tga")
+				quartz.system.drawing.drawwindow(unpack(rectangleLine))
+
+
+				if (game.settings.UiSettings.teamribbon == 2 and player.profile.team > 0) then
+					local rectIconbackground = {rectangleLine[1] + 28, rectangleLine[2] - 5, rectangleLine[1] + 52, rectangleLine[2] + 19}
+					quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
+					quartz.system.drawing.loadtexture("base:texture/ui/pictograms/48x/Team_" .. player.profile.team .. "_Circle.tga")
+					quartz.system.drawing.drawtexture(unpack(rectIconbackground))	
+				end
+
+				local rectIcon = {rectangleLine[1] + 25, rectangleLine[2] - 8, rectangleLine[1] + 55, rectangleLine[2] + 22}
 			
-			if (player.data and player.data.baked and player.data.baked.score and activity.dontDisplayScore == nil) then
-				quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.orange))
-				quartz.system.drawing.loadfont(UIComponent.fonts.header) 
-				quartz.system.drawing.drawtextjustified(player.data.baked.score, fontJustification, rectangleLine[1] + self.nameOffset[1] + 220, rectangleLine[2] + self.nameOffset[2] - 60, self.positionX + 620 + self.nameOffset[1], rectangleLine[2] + 200 + self.nameOffset[2] - 60)
+				quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
+				quartz.system.drawing.loadtexture("base:texture/avatars/42x/" .. player.profile.icon)
+				quartz.system.drawing.drawtexture(unpack(rectIcon))		
+			
+				quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.darkgray))
+				quartz.system.drawing.loadfont(UIComponent.fonts.header)
+				quartz.system.drawing.drawtextjustified(player.profile.name, fontJustification, self.positionX + self.nameOffset[1], self.positionY + self.nameOffset[2] - 75 + 20 * i, self.positionX + 400 + self.nameOffset[1], self.positionY + 155 + self.nameOffset[2] + 20 * i)
+			
+				if (player.rfGunDevice and player.rfGunDevice.classId) then
+					local rectangleHud = {rectangleLine[1] + 74, rectangleLine[2] - 6, rectangleLine[1] + 100, rectangleLine[2] + 20}
+					quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
+					quartz.system.drawing.loadtexture("base:texture/ui/pictograms/64x/hud_" .. player.rfGunDevice.classId .. ".tga")
+					quartz.system.drawing.drawtexture(unpack(rectangleHud))
+				end
+			
+				if (player.data and player.data.baked and player.data.baked.score and activity.dontDisplayScore == nil) then
+					quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.orange))
+					quartz.system.drawing.loadfont(UIComponent.fonts.header) 
+					quartz.system.drawing.drawtextjustified(player.data.baked.score, fontJustification, rectangleLine[1] + self.nameOffset[1] + 220, rectangleLine[2] + self.nameOffset[2] - 60, self.positionX + 620 + self.nameOffset[1], rectangleLine[2] + 140 + self.nameOffset[2])
+				end
 			end
 		end	
 		
 		local leftIconPosition = 0
 		
-		if (#self.team.players >= 3) then
+		--if (#self.team.players >= 3) then
 		
-			leftIconPosition = 15 * #self.team.players
+			--leftIconPosition = 15 * #self.team.players
 			
-		else
+		--else
 		
 			leftIconPosition = 30
 			
-		end
+		--end
 	
-		if (self.realRank < 4) then
+		if (self.realRank < 4 and (game.settings.UiSettings.finalranking == 0 or game.settings.UiSettings.finalranking == 1 and #activity.teams ~= 2)) then
 			quartz.system.drawing.loadcolor3f(unpack(color))		
 			quartz.system.drawing.loadtexture(self.rankingPictures[self.realRank])
 			quartz.system.drawing.drawtexture(self.rankVectorX, self.positionY - 25 + leftIconPosition)
 		    
 			quartz.system.drawing.loadalpha(self.alphaMedal)
 			
-			local rectIcon = {-150 + -128 + self.positionX + 10 * self.alphaMedal, -40 + self.positionY + 10 * self.alphaMedal + leftIconPosition, -150 + self.positionX - 10 * self.alphaMedal, -40 + self.positionY + leftIconPosition - 10 * self.alphaMedal + 128}
+			local rectIcon = {-278 + self.positionX + 10 * self.alphaMedal, -40 + self.positionY + 10 * self.alphaMedal + leftIconPosition, -150 + self.positionX - 10 * self.alphaMedal, self.positionY + leftIconPosition - 10 * self.alphaMedal + 88}
 
 			quartz.system.drawing.loadtexture(UIPodiumSlot.medalIcons[self.realRank])
 			quartz.system.drawing.drawtexture(unpack(rectIcon))
@@ -279,7 +305,7 @@ function UIPodiumSlot:Draw()
 			quartz.system.drawing.loadalpha(1)
 		end
 		
-		local rectScore = {-130 + self.positionX + 15, self.positionY + 20 + leftIconPosition, -130 + self.positionX - 10 + 100, self.positionY + 30 + leftIconPosition + 48}
+		local rectScore = {-115 + self.positionX, self.positionY + 20 + leftIconPosition, -40 + self.positionX, self.positionY + leftIconPosition + 78}
 	
 		
 		local fontJustificationScore = quartz.system.drawing.justification.right + quartz.system.drawing.justification.singlelineverticalcenter
@@ -296,15 +322,15 @@ function UIPodiumSlot:Draw()
 		
 		end
 		
-		local rectIcon = {-150 + self.positionX - 10 * self.scaleIcon, self.positionY - 35 + leftIconPosition - 10 * self.scaleIcon, -150 + self.positionX + 168 + 10 * self.scaleIcon, self.positionY - 35 + leftIconPosition + 100 + 10 * self.scaleIcon}
+		local rectIcon = {-150 + self.positionX - 10 * self.scaleIcon, self.positionY - 35 + leftIconPosition - 10 * self.scaleIcon, -150 + self.positionX + 168 + 10 * self.scaleIcon, self.positionY + leftIconPosition + 65 + 10 * self.scaleIcon}
 		
 		quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
 		quartz.system.drawing.loadtexture("base:texture/ui/components/UI" .. self.team.profile.teamColor .. "slot_01.tga")--self.team.profile.icon)
-		quartz.system.drawing.drawtexturev(self.positionX - 45, self.positionY + 20, self.positionX - 5, self.positionY + 20 + 30 * #self.team.players + 5)
+		quartz.system.drawing.drawtexturev(self.positionX - 45, self.positionY + 15, self.positionX - 5, self.positionY + 15 + 20 * #self.team.players + 5)
 		
 		quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
 		quartz.system.drawing.loadtexture("base:texture/ui/components/UI" .. self.team.profile.teamColor .. "slot_02.tga")--self.team.profile.icon)
-		quartz.system.drawing.drawtexturev(self.positionX + 416, self.positionY + 20, self.positionX + 436, self.positionY + 20 + 30 * #self.team.players + 5)
+		quartz.system.drawing.drawtexturev(self.positionX + 416, self.positionY + 15, self.positionX + 436, self.positionY + 15 + 20 * #self.team.players + 5)
 	
 		quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
 		quartz.system.drawing.loadtexture(self.team.profile.icon)

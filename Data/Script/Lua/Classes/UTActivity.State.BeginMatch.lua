@@ -33,6 +33,8 @@ end
 
 function UTActivity.State.BeginMatch:Begin()
 
+	--engine.libraries.usb.updateFrameRate = 10
+
 	self.ui = UTActivity.Ui.BeginMatch:New()
 	UIManager.stack:Push(self.ui)
 
@@ -42,9 +44,9 @@ function UTActivity.State.BeginMatch:Begin()
     for i = 1, self.ui.countdownDuration do
 
 		if (13 - i >= 10) then
-			game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_" ..  13 - i .. ".wav"}, offset = 0.8 + (activity.countdownDuration - i), })
+			game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_" ..  13 - i .. ".wav"}, offset = 0.8 + (self.ui.countdownDuration - i), })
 		else
-			game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_0" ..  13 - i .. ".wav"}, offset = 0.8 + (activity.countdownDuration - i), })
+			game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_0" ..  13 - i .. ".wav"}, offset = 0.8 + (self.ui.countdownDuration - i), })
 		end
 
     end

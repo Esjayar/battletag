@@ -23,68 +23,78 @@ require "UTActivity.Ui.Menu"
 
 UTClass.UIAFP(UIMultiComponent)
 
--- default
-
-UIAFP.maxHeight = 630
-UIAFP.width = 380
-UIAFP.background = "base:texture/ui/afp_background01.tga"
-UIAFP.titleRectangle =  { 15, 23, 380, 60 }
-
---UIAFP.buttonMenuRectangle =  { 65, 572, 202, 606 }
-UIAFP.buttonMenuRectangle =  { 15, 582, 152, 616 }
-
--- timer box
-
-UIAFP.timer = {
-
-    backgroundRectangle = { 15, 65, 365, 175 },
-    titleRectangle = { 45, 65, 335, 100 },
-    textMinutePosition1 = { 43, 100},
-    textMinutePosition2 = { 100, 100},
-    textSecondPosition1 = { 188, 100},
-    textSecondPosition2 = { 245, 100},
-    textSecondRectangle = { 200, 100, 300, 175 },
-    textMinuteRectangle = { 45, 100, 200, 175 },
-    textSecondRectangle = { 200, 100, 300, 175 },
-    reflectionRectangle = { 15, 100, 365, 175 },
-
-    background = "base:texture/ui/afp_timerbackground.tga",
-    reflection = "base:texture/ui/afp_timerreflection.tga",
-    title = "Timer",
-
-}
-
--- event box
-
-UIAFP.eventsBox = {
-
-    rectangleWithoutTimer = { 15, 75, 365, 565 },
-    rectangleWithTimer = { 15, 195, 365, 565 },
-    headerRectangle = { 15, 0, 365, 30 },
-    textHeaderRectangle = { 55, 0, 325, 30 },
-    footerRectangle = { 15, 545, 365, 565 },
-    rowRectangle = { 15, 0, 365, 18 },
-    rowPadding = 1,
-    rowInitPosition = 526,
-    arrowRectangle = { 345, 527, 363, 543 },
-    iconRectangle = { 25, 9, 25 + 16, 9 + 16 },
-    textRectangle = { 55, 0, 325, 18 },
-
-    headerBackground = "base:texture/ui/afp_eventheader.tga",
-    footerBackground = "base:texture/ui/afp_eventfooter.tga",
-    rowBackground = "base:texture/ui/afp_eventline.tga",
-    arrow = "base:texture/ui/afp_eventarrow.tga",
-    textHeader = "Events",
-
-}
-
 -- __ctor ------------------------------------------------------------------
 
 function UIAFP:__ctor(noTimer)
 
+	-- default
+
+	if (game.settings.UiSettings.aspectratio == 2 and (#activity.teams == 2 and #activity.players > 16 or #activity.teams < 2 and #activity.players > 8)) then
+		UIAFP.timeroffset = -170
+		UIAFP.timeroffset2 = -30
+		UIAFP.timeroffset3 = 25
+		UIAFP.rowInitPositionoffset = 36
+	else
+		UIAFP.timeroffset = 0
+		UIAFP.timeroffset2 = 0
+		UIAFP.timeroffset3 = 0
+		UIAFP.rowInitPositionoffset = 0
+	end
+	UIAFP.maxHeight = 630 + UIAFP.rowInitPositionoffset
+	UIAFP.width = 380
+	UIAFP.background = "base:texture/ui/afp_background01.tga"
+	UIAFP.titleRectangle =  { 15 + UIAFP.timeroffset, 23 - UIAFP.timeroffset3, 380 + UIAFP.timeroffset, 60 - UIAFP.timeroffset3 }
+	UIAFP.buttonMenuRectangle =  { 15 + UIAFP.timeroffset, 582 - UIAFP.timeroffset2, 152 + UIAFP.timeroffset, 616 - UIAFP.timeroffset2}
+	UIAFP.buttonMenuRectangle2 =  { 227 + UIAFP.timeroffset, 582 - UIAFP.timeroffset2, 364 + UIAFP.timeroffset, 616 - UIAFP.timeroffset2 }
+
+	-- timer box
+
+	UIAFP.timer = {
+
+		backgroundRectangle = { 15 + UIAFP.timeroffset, 65 - UIAFP.timeroffset3, 365 + UIAFP.timeroffset, 175 - UIAFP.timeroffset3 },
+		titleRectangle = { 45 + UIAFP.timeroffset, 65 - UIAFP.timeroffset3, 335 + UIAFP.timeroffset, 100 - UIAFP.timeroffset3 },
+		textMinutePosition1 = { 43 + UIAFP.timeroffset, 100 - UIAFP.timeroffset3},
+		textMinutePosition2 = { 100 + UIAFP.timeroffset, 100 - UIAFP.timeroffset3},
+		textSecondPosition1 = { 188 + UIAFP.timeroffset, 100 - UIAFP.timeroffset3},
+		textSecondPosition2 = { 245 + UIAFP.timeroffset, 100 - UIAFP.timeroffset3},
+		textSecondRectangle = { 200 + UIAFP.timeroffset, 100 - UIAFP.timeroffset3, 300 + UIAFP.timeroffset, 175 - UIAFP.timeroffset3 },
+		textMinuteRectangle = { 45 + UIAFP.timeroffset, 100 - UIAFP.timeroffset3, 200 + UIAFP.timeroffset, 175 - UIAFP.timeroffset3 },
+		textSecondRectangle = { 200 + UIAFP.timeroffset, 100 - UIAFP.timeroffset3, 300 + UIAFP.timeroffset, 175 - UIAFP.timeroffset3 },
+		reflectionRectangle = { 15 + UIAFP.timeroffset, 100 - UIAFP.timeroffset3, 365 + UIAFP.timeroffset, 175 - UIAFP.timeroffset3 },
+
+		background = "base:texture/ui/afp_timerbackground.tga",
+		reflection = "base:texture/ui/afp_timerreflection.tga",
+		title = "Timer",
+
+	}
+
+	-- event box
+
+	UIAFP.eventsBox = {
+
+		rectangleWithoutTimer = { 15 + UIAFP.timeroffset, 75 - UIAFP.timeroffset2, 365 + UIAFP.timeroffset, 565 - UIAFP.timeroffset2 },
+		rectangleWithTimer = { 15 + UIAFP.timeroffset, 195 + UIAFP.timeroffset2, 365 + UIAFP.timeroffset, 565 + UIAFP.timeroffset2 },
+		headerRectangle = { 15 + UIAFP.timeroffset, 0, 365 + UIAFP.timeroffset, 30 + UIAFP.timeroffset3 + UIAFP.timeroffset2 },
+		textHeaderRectangle = { 55 + UIAFP.timeroffset, 0, 325 + UIAFP.timeroffset, 30 + UIAFP.timeroffset3 + UIAFP.timeroffset2 },
+		footerRectangle = { 15 + UIAFP.timeroffset, 545 - UIAFP.timeroffset2, 365 + UIAFP.timeroffset, 565 - UIAFP.timeroffset2 },
+		rowRectangle = { 15 + UIAFP.timeroffset, 0, 365 + UIAFP.timeroffset, 18 },
+		rowPadding = 1,
+		rowInitPosition = 526 + UIAFP.rowInitPositionoffset,
+		arrowRectangle = { 345 + UIAFP.timeroffset, 527 + UIAFP.rowInitPositionoffset, 363 + UIAFP.timeroffset, 543 + UIAFP.rowInitPositionoffset },
+		iconRectangle = { 25 + UIAFP.timeroffset, 9 - UIAFP.timeroffset2, 41 + UIAFP.timeroffset, 25 - UIAFP.timeroffset2 },
+		textRectangle = { 55 + UIAFP.timeroffset, 0 - UIAFP.timeroffset2, 325 + UIAFP.timeroffset, 18 - UIAFP.timeroffset2 },
+
+		headerBackground = "base:texture/ui/afp_eventheader.tga",
+		footerBackground = "base:texture/ui/afp_eventfooter.tga",
+		rowBackground = "base:texture/ui/afp_eventline.tga",
+		arrow = "base:texture/ui/afp_eventarrow.tga",
+		textHeader = "Events",
+
+	}
+
 	UIAFP.eventsBox.textHeader = l"titlemen018"
 	UIAFP.timer.title = l"titlemen017"
-    self.rectangle = { 0, 0, self.width, self.maxHeight }
+    self.rectangle = { UIAFP.timeroffset, UIAFP.timeroffset2, self.width + UIAFP.timeroffset, self.maxHeight }
     self.rows = {}
 
     self.uiPanel = self:AddComponent(UIPicture:New(), "uiPanel")
@@ -97,7 +107,7 @@ function UIAFP:__ctor(noTimer)
 
     -- compute the space available for the rows and the number of rows allowed
 
-    local spaceAvailable = (self.eventsBox.rectangle[4] - self.eventsBox.rectangle[2]) - self.eventsBox.headerRectangle[4] - (self.eventsBox.footerRectangle[4] - self.eventsBox.footerRectangle[2])
+    local spaceAvailable = (self.eventsBox.rectangle[4] - (UIAFP.timeroffset2 * 3) - self.eventsBox.rectangle[2]) - self.eventsBox.headerRectangle[4] - (self.eventsBox.footerRectangle[4] - self.eventsBox.footerRectangle[2])
     self.maxRows =  spaceAvailable / (self.eventsBox.rowRectangle[4] + self.eventsBox.rowPadding * 2)
 
     for i = 1, self.maxRows do
@@ -129,6 +139,20 @@ function UIAFP:__ctor(noTimer)
 			UIManager.stack:Push(activity.mainMenu) 
 		end
 
+	end
+	
+	if (game.settings.GameSettings.reconnect == 2) then
+	    self.uiButton2 = self:AddComponent(UIButton:New(), "uiButton2")
+	    self.uiButton2.rectangle = UIAFP.buttonMenuRectangle2
+		self.uiButton2.text = l"but028"
+		self.uiButton2.tip = l"tip194"
+	
+		self.uiButton2.OnAction = function (self) 
+	
+			for index, proxy in ipairs(engine.libraries.usb.proxies) do
+				proxy:Unlock()
+			end
+		end
 	end
 
 end

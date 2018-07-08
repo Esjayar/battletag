@@ -34,6 +34,8 @@ UTActivity.Ui.Details.TeamDetails = {
 	"texture/ui/Detail_TeamBlue.tga",
 	"texture/ui/Detail_TeamYellow.tga",
 	"texture/ui/Detail_TeamGreen.tga",
+	"texture/ui/Detail_TeamSilver.tga",
+	"texture/ui/Detail_TeamPurple.tga",
 }
 
 -- __ctor -------------------------------------------------------------------
@@ -51,7 +53,7 @@ function UTActivity.Ui.Details:__ctor(...)
 
     -- contents,
 
-    self:Reserve(8, --[[ --?? SCROLLBAR ]] true)
+    self:Reserve(9, --[[ --?? SCROLLBAR ]] true)
     
     -- activity description on the right side,
 
@@ -84,9 +86,13 @@ function UTActivity.Ui.Details:__ctor(...)
 
 	-- current player icon
 
+	self.uiPlayerIconbackground = self.uiWindows:AddComponent(UIPicture:New(), "uiPlayerIconbackground")
+	self.uiPlayerIconbackground.texture = ""
+	self.uiPlayerIconbackground.rectangle = { self.uiWindows.clientRectangle[1] - 15, self.uiWindows.clientRectangle[2] - 25, self.uiWindows.clientRectangle[1] + 83, self.uiWindows.clientRectangle[2] + 73}
+
 	self.uiPlayerIcon = self.uiWindows:AddComponent(UIPicture:New(), "uiPlayerIcon")
 	self.uiPlayerIcon.texture = ""
-	self.uiPlayerIcon.rectangle = { self.uiWindows.clientRectangle[1] - 40, self.uiWindows.clientRectangle[2] - 40, self.uiWindows.clientRectangle[1] - 40 + 128, self.uiWindows.clientRectangle[2] - 40 + 128}
+	self.uiPlayerIcon.rectangle = { self.uiWindows.clientRectangle[1] - 30, self.uiWindows.clientRectangle[2] - 40, self.uiWindows.clientRectangle[1] + 98, self.uiWindows.clientRectangle[2] + 88}
 
 	-- grid label : frag and team frag
 
@@ -111,15 +117,15 @@ function UTActivity.Ui.Details:__ctor(...)
 		UIMenuManager.stack:Pop()
     end
 
-    -- uiButton4: replay
+    -- uiButton5: replay
 
-    self.uiButton4 = self:AddComponent(UIButton:New(), "uiButton4")
-    self.uiButton4.rectangle = UIMenuWindow.buttonRectangles[4]
-    self.uiButton4.text = l"but022"
-	self.uiButton4.tip = l"tip067"
-	self.uiButton4.enabled = false
+    self.uiButton5 = self:AddComponent(UIButton:New(), "uiButton5")
+    self.uiButton5.rectangle = UIMenuWindow.buttonRectangles[5]
+    self.uiButton5.text = l"but022"
+	self.uiButton5.tip = l"tip067"
+	self.uiButton5.enabled = false
 
-    self.uiButton4.OnAction = function (self) 
+    self.uiButton5.OnAction = function (self) 
 
     	-- save team information
 
@@ -156,7 +162,14 @@ function UTActivity.Ui.Details:DisplaySelectedPlayer(player)
 		self.uiHeader.background = player.team.profile.detailsHeader
 	end
     self.uiPlayerName.text = player.profile.name
-    self.uiPlayerIcon.texture = "base:texture/avatars/256x/" .. player.profile.icon 
+	if (game.settings.UiSettings.teamribbon == 2 and player.profile.team > 0) then
+		self.uiPlayerIconbackground.texture = "base:texture/ui/pictograms/48x/Team_" .. player.profile.team .. "_Circle.tga"
+		self.uiPlayerIconbackground.rectangle = { self.uiWindows.clientRectangle[1] - 15, self.uiWindows.clientRectangle[2] - 25, self.uiWindows.clientRectangle[1] + 83, self.uiWindows.clientRectangle[2] + 73}
+    else
+        self.uiPlayerIconbackground.rectangle = nil
+	end
+	self.uiPlayerIcon.texture = "base:texture/avatars/256x/" .. player.profile.icon 
+
     self.player = player
 
     -- remove old components
@@ -183,7 +196,7 @@ function UTActivity.Ui.Details:DisplaySelectedPlayer(player)
 
 		-- pos and size and grid label !
 
-		self.uiDetails.fragLabel.rectangle = { 40, 105 }
+		self.uiDetails.fragLabel.rectangle = { 40, 90 }
 
 		-- player's information: panel, icon and value for each information needed
 
@@ -236,7 +249,7 @@ function UTActivity.Ui.Details:DisplaySelectedPlayer(player)
 				
 				self.uiInformation.details[i] = self.uiDetails:AddComponent(UIPicture:New(), "uiInformationIcon")
 				self.uiInformation.details[i].texture = descriptor.icon
-				self.uiInformation.details[i].rectangle = {rectangle[1], 25 + rectangle[2], rectangle[3], 25 + rectangle[4]}
+				self.uiInformation.details[i].rectangle = {rectangle[1], 10 + rectangle[2], rectangle[3], 10 + rectangle[4]}
 				if (descriptor.tip) then
 					self.uiInformation.details[i].tip = descriptor.tip
 					self.uiInformation.details[i].RegisterPickRegions = UIButton.RegisterPickRegions
@@ -312,30 +325,45 @@ end
 function UTActivity.Ui.Details:OnOpen()
 
     for i, player in ipairs(activity.players) do
+		if (not player.primary) then
+			_headerIcon = "base:texture/avatars/64x/" .. player.profile.icon
+			_headerIconBackground = "base:texture/ui/pictograms/48x/Team_" .. player.profile.team .. "_Circle.tga"
+			local properties
+			if (player.team) then
+				if (game.settings.UiSettings.teamribbon == 2 and player.profile.team > 0) then
+					properties = { iconText = i, iconColor = UIComponent.colors.white, iconCategory = self.TeamDetails[player.team.index], headerIcon = _headerIcon, headerIconBackground = _headerIconBackground, text = player.profile.name, userData = player }
+				else
+					properties = { iconText = i, iconColor = UIComponent.colors.white, iconCategory = self.TeamDetails[player.team.index], headerIcon = _headerIcon, text = player.profile.name, userData = player }
+				end
+			elseif (game.settings.UiSettings.teamribbon == 2 and player.profile.team > 0) then
+				properties = { iconText = i, iconColor = UIComponent.colors.darkgray, headerIcon = _headerIcon, headerIconBackground = _headerIconBackground, text = player.profile.name, userData = player }
+			else
+				properties = { iconText = i, iconColor = UIComponent.colors.darkgray, headerIcon = _headerIcon, text = player.profile.name, userData = player }
+			end
 
-		local properties
-		if (player.team) then
-			properties = { iconText = i, iconColor = UIComponent.colors.white, iconCategory = self.TeamDetails[player.team.index], headerIcon = "base:texture/avatars/64x/" .. player.profile.icon, text = player.profile.name, userData = player }
-		else
-			properties = { iconText = i, iconColor = UIComponent.colors.darkgray, headerIcon = "base:texture/avatars/64x/" .. player.profile.icon, text = player.profile.name, userData = player }
+			local item = self:AddItem(properties)
+
+			item.Action = function ()
+
+				if (item.userData) then
+					self:DisplaySelectedPlayer(item.userData)
+				end
+			end
 		end
-
-        local item = self:AddItem(properties)
-
-        item.Action = function ()
-
-            if (item.userData) then
-                self:DisplaySelectedPlayer(item.userData)
-            end
-
-        end
-
     end
 
     self.index = 1
     self:Scroll(0)
     self:DisplaySelectedPlayer(activity.players[1])
+	self:Activate()
+	UTActivity.Ui.FinalRankings.hasPopup = true
 
+end
+
+function UTActivity.Ui.Details:OnClose()
+
+	self:Deactivate()
+	UTActivity.Ui.FinalRankings.hasPopup = false
 end
 
 -- ScrollDetails -------------------------------------------------------------
@@ -347,7 +375,7 @@ function UTActivity.Ui.Details:ScrollDetails(value)
 	self.currentIndex = self.currentIndex + value
     if (self.currentIndex < 1) then
 	    self.currentIndex = 1
-	elseif (self.currentIndex > (#activity.players - 1 - self.maxSlot)) then
+	elseif (self.currentIndex > #activity.players - 1 - self.maxSlot) then
 		self.currentIndex = math.max(1, #activity.players - 1 - self.maxSlot + 1)
 	end
 
@@ -368,7 +396,7 @@ function UTActivity.Ui.Details:ScrollDetails(value)
 		i = i + 1
 		if (player) then
 
-			if (player ~= self.player) then
+			if (player ~= self.player and not player.primary and (player.team ~= self.player.team or activity.settings.teamFrag == 1 or #activity.teams < 2)) then
 
 				local index = 2 + math.mod(numTeamFrag,2)
 				numTeamFrag = numTeamFrag + 1
@@ -385,8 +413,8 @@ function UTActivity.Ui.Details:ScrollDetails(value)
 
 	-- set padding
 
-	self.uiGridFrag:MoveTo(40, 140)
-	self.uiGridFrag:SetRowsPadding(20)
+	self.uiGridFrag:MoveTo(40, 125)
+	self.uiGridFrag:SetRowsPadding(1)
 
 end
 
@@ -398,10 +426,55 @@ function UTActivity.Ui.Details:Update()
 
 	if (activity.states["finalrankings"].isReady) then 
 
-		self.uiButton4.enabled = true
+		self.uiButton5.enabled = true
 
 	end
 
 	self.uiScrollBarDetails:Update()
 
+end
+
+function UTActivity.Ui.Details:Activate()
+
+    if (not self.keyboardActive) then
+
+        --game._Char:Add(self, self.Char)
+        game._KeyDown:Add(self, self.KeyDown)
+        self.keyboardActive = true
+
+    end
+
+end
+
+function UTActivity.Ui.Details:Deactivate()
+
+    if (self.keyboardActive) then 
+    
+        --game._Char:Remove(self, self.Char)
+        game._KeyDown:Remove(self, self.KeyDown)
+        self.keyboardActive = false
+
+    end
+
+end
+
+function UTActivity.Ui.Details:KeyDown(virtualKeyCode, scanCode)
+		
+	if (13 == virtualKeyCode or 53 == virtualKeyCode) then
+
+		activity:SaveTeamInformation()	
+
+		quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
+		quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
+		quartz.framework.audio.playsound()
+		UIMenuManager.stack:Pop()
+		activity:PostStateChange("playersmanagement") 
+	end
+	if (27 == virtualKeyCode or 49 == virtualKeyCode) then
+
+		quartz.framework.audio.loadsound("base:audio/ui/back.wav")
+		quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
+		quartz.framework.audio.playsound()
+		UIMenuManager.stack:Pop()
+	end
 end

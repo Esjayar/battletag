@@ -1,7 +1,7 @@
 
 --[[--------------------------------------------------------------------------
 --
--- File:            UATeamFrag.Ui.RoundLoop.lua
+-- File:            UALiquidator.Ui.RoundLoop.lua
 --                  Copyright (c) Ubisoft Entertainment. All rights reserved.
 --
 -- Project:         Ubitoys.Tag
@@ -84,7 +84,8 @@ function UALiquidator.Ui.RoundLoop:__ctor(...)
 
 	end	
 	activity.teams = activity.match.challengers
-	if (#liquidators.players > 1) then liquidators.profile = self.profiles[3]
+	if (#liquidators.players > 1) then
+		liquidators.profile = self.profiles[3]
 	end
 
     ------------------------------------------------

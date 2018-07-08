@@ -63,6 +63,7 @@ function ULUsbDevice.Pinger:OnResumed()
 
         for _, device in pairs(devices) do
             device.timeout = 0
+            --device.timedout = false
         end
     end
 
@@ -86,8 +87,10 @@ function ULUsbDevice.Pinger:OnUpdate()
     if (self.protectedMode) then return
     end
 
-    assert(engine.libraries.usb.proxy)
-    assert(engine.libraries.usb.proxy.handle)
+    for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		assert(proxy)
+		assert(proxy.handle)
+	end
 
     local time = quartz.system.time.gettimemicroseconds()
     local elapsedTime = time - self.time
@@ -103,22 +106,33 @@ function ULUsbDevice.Pinger:OnUpdate()
 
             device.timeout = (device.timeout or 0) + elapsedTime
             if (device.timeout >= self.timeout.hi) then
+            	if (not device.timedout) then
+					quartz.framework.audio.loadsound("base:audio/ui/gundisconnected.wav")
+					quartz.framework.audio.loadvolume(game.settings.audio["volume:gd"])
+					quartz.framework.audio.playsound()
+            	end
+            	device.timedout = true
+            	if (device.timeout >= 80000000 and game.gameMaster.ingame or not game.gameMaster.ingame) then
 
-                -- device definitely timed out,
-                -- force disconnection
+                	-- device definitely timed out,
+                	-- force disconnection
 
-                if (not self.protectedMode) then
+                	if (not self.protectedMode and (not game.gameMaster.ingame or game.settings.GameSettings.protectedmode ~= 1)) then
 
-                    self.proxy:Unregister(device, "timedout")
-                    return
+                   		if (game.settings.GameSettings.unregister == 1 or game.gameMaster.ingame or unregisterguns) then
+                   			self.proxy:Unregister(device, "timedout")
+                   			return
+                   		end
 
-                else
+                	else
 
-                    -- under protected mode,
-                    -- just ignore the timeout and give the device another chance
-
-                    device.timeout = 0
-                    print("[protectedMode] device should have been disconnected", tostring(device.reference))
+                    	-- under protected mode,
+                   		-- just ignore the timeout and give the device another chance
+                   		
+                    	device.timeout = 0
+                    	--device.timedout = 0
+                    	print("[protectedMode] device should have been disconnected", tostring(device.reference))
+                    end
 
                 end
 
@@ -192,6 +206,7 @@ function ULUsbDevice.Pinger:Reset(lo, hi, interval, protectedMode)
 
         for _, device in pairs(devices) do
             device.timeout = 0
+            device.timedout = false
         end
     end
 

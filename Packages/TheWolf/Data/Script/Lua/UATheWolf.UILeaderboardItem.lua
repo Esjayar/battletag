@@ -52,7 +52,7 @@ function UATheWolf.UILeaderboardItem:Draw()
 
 	if(self.uiPanel) then
 		quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
-		if (activity.wolf == self.challenger) then
+		if (self.challenger.wolf) then
 			quartz.system.drawing.loadtexture("base:texture/ui/components/UILeaderboardWolfPanel.tga")
 		else
 			quartz.system.drawing.loadtexture(self.uiPanel.background)
@@ -69,10 +69,14 @@ function UATheWolf.UILeaderboardItem:Draw()
 
 	-- wolf
 
-	if (activity.wolf == self.challenger) then
+	if (self.challenger.wolf) then
 		quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
 		quartz.system.drawing.loadtexture("base:texture/ui/pictograms/128x/Wolf_Arrow.tga")
-		quartz.system.drawing.drawtexture(-128, offset - 44, -128 + 128, offset - 44 + 128)
+		if (#activity.players <= 8) then 
+			quartz.system.drawing.drawtexture(-128, offset - 44, 0, offset + 84)
+		else
+			quartz.system.drawing.drawtexture(230, -16, 314, 68)
+		end
 	end		
 
 	quartz.system.drawing.loadcolor4f(unpack(blendColor))
@@ -81,17 +85,23 @@ function UATheWolf.UILeaderboardItem:Draw()
 	else
 		quartz.system.drawing.loadtexture("base:texture/ui/pictograms/64x/hud_guest.tga")
 	end
-	quartz.system.drawing.drawtexture(55, offset + 6, 55 + 32, offset + 6 + 32)
+	quartz.system.drawing.drawtexture(55, offset + 6, 87, offset + 38)
+
+	if (game.settings.UiSettings.teamribbon == 2) then
+		quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
+		quartz.system.drawing.loadtexture("base:texture/ui/pictograms/48x/Team_" .. self.challenger.profile.team .. "_Circle.tga")
+		quartz.system.drawing.drawtexture(0, offset - 10, 60, offset + 50)
+	end
 
 	quartz.system.drawing.loadcolor4f(unpack(blendColor))
 	quartz.system.drawing.loadtexture("base:texture/Avatars/80x/" .. (self.challenger.data.heap.icon or self.challenger.profile.icon))
 	if (self.challenger.team) then
-		quartz.system.drawing.drawtexture(10, offset - 10, 10 + 60, offset + 50)
+		quartz.system.drawing.drawtexture(10, offset - 10, 70, offset + 50)
 	else
-		quartz.system.drawing.drawtexture(-10, offset - 20, -10 + 80, offset - 20 + 80)
+		quartz.system.drawing.drawtexture(-10, offset - 20, 70, offset + 60)
 	end
 
-	if (activity.wolf == self.challenger) then
+	if (self.challenger.wolf) then
 		quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
 	else
 		quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.darkgray))
@@ -108,7 +118,7 @@ function UATheWolf.UILeaderboardItem:Draw()
 
 				quartz.system.drawing.loadcolor4f(unpack(blendColor))
 				quartz.system.drawing.loadtexture(field.icon)
-				quartz.system.drawing.drawtexture(200 + offsetX, offset - 20, 200 + offsetX + 32, offset - 20 + 32)
+				quartz.system.drawing.drawtexture(200 + offsetX, offset - 20, 232 + offsetX, offset + 12)
 
 			end
 
@@ -116,9 +126,9 @@ function UATheWolf.UILeaderboardItem:Draw()
 			quartz.system.drawing.loadfont(field.font or UIComponent.fonts.default)
 							
 			if (field.font == UIComponent.fonts.header) then
-				quartz.system.drawing.drawtextjustified(self.data[field.key], field.justification or quartz.system.drawing.justification.center, unpack({(field.position or (200 + offsetX)) - 44, offset + 14, (field.position or (200 + offsetX)) + 72, offset + 14 + 22}))
+				quartz.system.drawing.drawtextjustified(self.data[field.key], field.justification or quartz.system.drawing.justification.center, unpack({(field.position or (200 + offsetX)) - 44, offset + 14, (field.position or (200 + offsetX)) + 72, offset + 36}))
 			else
-				quartz.system.drawing.drawtextjustified(self.data[field.key], field.justification or quartz.system.drawing.justification.center, unpack({(field.position or (200 + offsetX)) - 44, offset + 16, (field.position or (200 + offsetX)) + 72, offset + 16 + 22}))
+				quartz.system.drawing.drawtextjustified(self.data[field.key], field.justification or quartz.system.drawing.justification.center, unpack({(field.position or (200 + offsetX)) - 44, offset + 16, (field.position or (200 + offsetX)) + 72, offset + 38}))
 			end				
 
 			offsetX = offsetX + 40
@@ -127,12 +137,12 @@ function UATheWolf.UILeaderboardItem:Draw()
 
 	-- blood
 
-	if (activity.wolf == self.challenger) then
+	if (self.challenger.wolf) then
 
 		quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
 		quartz.system.drawing.loadtexture("base:texture/ui/Blood.tga")
 		local size = math.min(20 * (self.challenger.wolfTimer or 0) / 1500000, 20)
-		quartz.system.drawing.drawtexture(335, offset + 32, 335 + 20, offset + 32 + size)
+		quartz.system.drawing.drawtexture(335, offset + 32, 355, offset + 32 + size)
 
 	end
 

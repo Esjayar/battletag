@@ -109,10 +109,12 @@ function UAIntroduction.Ui.Seq_Pairing:OnOpen()
 
         -- !! START PAIRING
 
-        assert(engine.libraries.usb.proxy)
-        assert(engine.libraries.usb.proxy.handle)
+        for index, proxy in ipairs(engine.libraries.usb.proxies) do
+			assert(proxy)
+			assert(proxy.handle)
 
-        quartz.system.usb.sendmessage(engine.libraries.usb.proxy.handle, { 0x01, 0x00, 0x13, 0x01 })
+			quartz.system.usb.sendmessage(proxy.handle, { 0x01, 0x00, 0x13, 0x01 })
+		end
 
     end
 

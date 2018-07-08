@@ -39,8 +39,10 @@ function UAIntroduction.State.RoundLoop:Begin()
 
 	-- register	to proxy message received
 
-	engine.libraries.usb.proxy._DeviceRemoved:Add(self, UAIntroduction.State.RoundLoop.OnDeviceRemoved)	
-	engine.libraries.usb.proxy._DispatchMessage:Add(self, UAIntroduction.State.RoundLoop.OnDispatchMessage)	
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		proxy._DeviceRemoved:Add(self, UAIntroduction.State.RoundLoop.OnDeviceRemoved)
+		proxy._DispatchMessage:Add(self, UAIntroduction.State.RoundLoop.OnDispatchMessage)
+	end
 
     -- current bytecode stage
 
@@ -62,11 +64,13 @@ function UAIntroduction.State.RoundLoop:End()
 
 	-- unregister from proxy message received
 
-    if (engine.libraries.usb.proxy) then
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		if (proxy) then
 
-        engine.libraries.usb.proxy._DeviceRemoved:Remove(self, UAIntroduction.State.RoundLoop.OnDeviceRemoved)	
-	    engine.libraries.usb.proxy._DispatchMessage:Remove(self, UAIntroduction.State.RoundLoop.OnDispatchMessage)	
+			proxy._DeviceRemoved:Remove(self, UAIntroduction.State.RoundLoop.OnDeviceRemoved)	
+			proxy._DispatchMessage:Remove(self, UAIntroduction.State.RoundLoop.OnDispatchMessage)	
 
+		end
 	end
 
 end
@@ -236,8 +240,8 @@ function UAIntroduction.State.RoundLoop:OnDispatchMessage(device, addressee, com
                     for i = 1, difference do
 
                         -- the instigator scores the hit
-
-                        local device = engine.libraries.usb.proxy.devices.byRadioProtocolId[arg[6 + difference - i]]
+						local gun = activity.players[arg[6 + difference - i] - 1]
+						local device = gun.rfGunDevice
                         if (device) then
                             local player = device.owner
                             if (player) then
@@ -278,28 +282,30 @@ function UAIntroduction.State.RoundLoop:OnDispatchMessage(device, addressee, com
 
     elseif (0xc3 == command) then
 
-        if (engine.libraries.usb.proxy.radioProtocolId == addressee) then
+		for index, proxy in ipairs(engine.libraries.usb.proxies) do
+			if (proxy.radioProtocolId == addressee) then
 
-            -- score shoot & reward instigator
+				-- score shoot & reward instigator
 
-            local device = engine.libraries.usb.proxy.devices.byRadioProtocolId[arg[2]]
-            if (device) then
+				local device = engine.libraries.usb.proxy.devices.byRadioProtocolId[arg[2]]
+				if (device) then
 
-                local player = device.owner
-                if (player) then
-        
-					if (UAIntroduction.State.RoundLoop.ShootUbiconnect == true and 9 > self.shots) then			
-						UAIntroduction.State.RoundLoop.ShootUbiconnect = false
-						game.gameMaster:Play("base:audio/gamemaster/dlg_gm_init_22.wav", function () UAIntroduction.State.RoundLoop.ShootUbiconnect = true end)
+					local player = device.owner
+					if (player) then
+			
+						if (UAIntroduction.State.RoundLoop.ShootUbiconnect == true and 9 > self.shots) then			
+							UAIntroduction.State.RoundLoop.ShootUbiconnect = false
+							game.gameMaster:Play("base:audio/gamemaster/dlg_gm_init_22.wav", function () UAIntroduction.State.RoundLoop.ShootUbiconnect = true end)
+						end
+
+						self.shots = self.shots + 1
+						player.data.heap.shots = player.data.heap.shots + 1
+
 					end
+				end
 
-                    self.shots = self.shots + 1
-                    player.data.heap.shots = player.data.heap.shots + 1
-
-                end
-            end
-
-        end
+			end
+		end
 
     elseif (0x94 == command) then
 
@@ -352,7 +358,9 @@ function UAIntroduction.State.RoundLoop:Update()
 	                quartz.system.usb.sendmessage(engine.libraries.usb.proxy.handle, message)
                 end--]]
 
-	            quartz.system.usb.sendmessage(engine.libraries.usb.proxy.handle, message)
+				for index, proxy in ipairs(engine.libraries.usb.proxies) do
+					quartz.system.usb.sendmessage(proxy.handle, message)
+				end
             end
 
             self.messageCount = self.messageCount + 1

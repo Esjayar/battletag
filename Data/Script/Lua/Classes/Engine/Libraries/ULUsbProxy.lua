@@ -134,7 +134,7 @@ function ULUsbProxy:DispatchMessage(addressee, command, arg)
         if (device) then
 
             device:ProcessMessage(addressee, command, arg)
-            self:OnDispatchMessage(device, addressee, command, arg)
+            self:OnDispatchMessage(device, addressee, command, arg, self)
 
         end
     end
@@ -146,7 +146,7 @@ end
 function ULUsbProxy:Initialize(arg)
 
     assert(not self.initialized)
-    assert(arg and (type(arg) == "number") and (-1 < arg))
+    assert(arg and type(arg) == "number" and -1 < arg)
 
     self:Connect()
 
@@ -156,6 +156,10 @@ function ULUsbProxy:Initialize(arg)
 
         self.radioProtocolChannel = arg
         self.radioProtocolId = 0x01
+		for index, proxy in ipairs(engine.libraries.usb.proxies) do
+			proxy.ubiconnect = index
+		
+		end
 
         self:Register(self) -- register ourselves as a standard rf device
 
@@ -164,6 +168,12 @@ function ULUsbProxy:Initialize(arg)
         self:OnInitialized()
 
     end
+	
+	rfgundevices = {
+
+        byClass = {},
+        byRadioProtocolId = {},
+    }
 
 end
 
@@ -185,9 +195,9 @@ end
 
 -- OnDispatchMessage ---------------------------------------------------------
 
-function ULUsbProxy:OnDispatchMessage(device, addressee, command, arg)
+function ULUsbProxy:OnDispatchMessage(device, addressee, command, arg, self)
 
-    self._DispatchMessage:Invoke(device, addressee, command, arg)
+    self._DispatchMessage:Invoke(device, addressee, command, arg, self)
 
 end
 
@@ -281,7 +291,7 @@ function ULUsbProxy:ProcessMessage0x12(arg)
 
     -- discard request if the proxy does not accept connections
 
-    if (arg and (16 == #arg)) then
+    if (arg and 16 == #arg) then
 
         local deviceReference = UTReference:New(arg)
         local pairedReference = UTReference:New(arg, 8)
@@ -296,8 +306,11 @@ function ULUsbProxy:ProcessMessage0x12(arg)
             local reference = tostring(deviceReference)
             local whiteListedReference = self.whiteList[reference]
 
-            if (not self.locked or whiteListedReference) then
+            if (not self.locked or whiteListedReference and (not game.gameMaster.ingame or game.settings.GameSettings.reconnect == 1 or game.settings.GameSettings.reconnect == 3)) then
 
+                if (game.settings.GameSettings.reconnect == 3) then
+                    game.settings.GameSettings.reconnect = 2
+                end
                 if (whiteListedReference) then print(reference .. " *whitelisted*") end
 
                 -- make sure the device was not created yet,
@@ -311,11 +324,18 @@ function ULUsbProxy:ProcessMessage0x12(arg)
 
                         local message = { 0x0b, 0xff, 0x12, device.radioProtocolId, device.classId, self.radioProtocolId, unpack(device.reference.bytes) }
                         quartz.system.usb.sendmessage(self.handle, message)
+                        
+						if (game.gameMaster.ingame) then
+							device.gamedatablock = true
+							device.rejoin = true
+						end
+						device.timeout = 0
+						device.timedout = false
 
                         -- if the device was white-listed,
                         -- it comes handy to dispatch the connexion message
 
-                        if (whiteListedReference) then
+                        --[[if (whiteListedReference) then
 
                             local arg = { device.radioProtocolId, device.classId, self.radioProtocolId, unpack(device.reference.bytes) }
                             self:DispatchMessage(device.radioProtocolId, 0x12, arg)
@@ -328,7 +348,7 @@ function ULUsbProxy:ProcessMessage0x12(arg)
 
                             device:Restart()
 
-                        end
+                        end]]
 
                         return
 
@@ -344,7 +364,7 @@ function ULUsbProxy:ProcessMessage0x12(arg)
 
                 device:Reference(deviceReference.bytes)
 
-                if (whiteListedReference) then
+                --[[if (whiteListedReference) then
 
                     --print("//////////////////////////////////////////////////////////////////")
                     --print(self.devices.byRadioProtocolId[whiteListedReference.radioProtocolId])
@@ -358,7 +378,7 @@ function ULUsbProxy:ProcessMessage0x12(arg)
 
                     self:Register(device)
 
-                else
+                else]]
 
                     for radioProtocolId = 2, 254 do
 
@@ -369,12 +389,14 @@ function ULUsbProxy:ProcessMessage0x12(arg)
 
                             self:Register(device)
 
+                            self:WhiteList(reference, device)
+
                             break
 
                         end
                     end
 
-                end
+                --end
 
                 assert(device.radioProtocolChannel)
                 assert(device.radioProtocolId)
@@ -401,7 +423,7 @@ function ULUsbProxy:ProcessMessage0x22(arg)
 
     if (not self.connected) then
 
-        assert(arg and (0x0a == #arg))
+        assert(arg and 0x0a == #arg)
         self.revisionUpdate = quartz.system.bitwise.lshift(arg[1], 8) + arg[2]
 
         self:Connect()
@@ -410,7 +432,7 @@ function ULUsbProxy:ProcessMessage0x22(arg)
 
     else
 
-        assert(arg and (0x02 <= #arg))
+        assert(arg and 0x02 <= #arg)
         self.revisionUpdate = quartz.system.bitwise.lshift(arg[1], 8) + arg[2]
 
     end
@@ -422,11 +444,11 @@ end
 function ULUsbProxy:Register(device)
 
     assert(device and device:IsKindOf(ULUsbDevice))
-    assert(device.radioProtocolId and (type(device.radioProtocolId) == "number"))
+    assert(device.radioProtocolId and type(device.radioProtocolId) == "number")
 
     -- byRadioProtocolId
 
-    assert((not self.devices.byRadioProtocolId[device.radioProtocolId]) or (device == self.devices.byRadioProtocolId[device.radioProtocolId]))
+    assert(not self.devices.byRadioProtocolId[device.radioProtocolId] or device == self.devices.byRadioProtocolId[device.radioProtocolId])
     self.devices.byRadioProtocolId[device.radioProtocolId] = device
 
     -- byClass,
@@ -441,11 +463,31 @@ function ULUsbProxy:Register(device)
         self.devices.byClass[class] = self.devices.byClass[class] or {} -- may have to create new table there
 
         device.classId = 1
+        devicemodcount = 0
+		for index, proxy in ipairs(engine.libraries.usb.proxies) do
+			local devs = proxy.devices.byClass[0x02000020]
+			if (devs) then
+				for _, dev in pairs(devs) do
+					device.classId = device.classId + 1
+				end
+			end
+		end
         while (self.devices.byClass[class][device.classId]) do
             device.classId = device.classId + 1
+            if (game.settings.GameSettings.playernumbermod == 1 and device.classId == 10) then
+            	device.classId = 16
+            end
+            if (device.classId >= 10) then
+            	devicemodcount = devicemodcount + 1
+            	devicenumberflag = true
+            end
         end
 
         self.devices.byClass[class][device.classId] = device
+		--rfgundevices.Class[class][device.classId] = device
+		
+		device.ubiconnect = self.ubiconnect
+		device.host = self
 
         -- notify, only fully referenced devices ...
 
@@ -465,8 +507,10 @@ function ULUsbProxy:Register(device)
             self.processes.devicePinger:Resume()
 
         end
-
+    
     end
+    
+    device.teamdefault = true
 
 end
 
@@ -524,6 +568,12 @@ function ULUsbProxy:Unregister(device, reason)
     if (self.devices.byClass[class] and self.devices.byClass[class][device.classId]) then
 
         assert(self.devices.byClass[class][device.classId] == device)
+        if (device.classId >= 10) then
+        	devicemodcount = devicemodcount - 1
+        	if (devicemodcount == 0) then
+        		devicenumberflag = false
+        	end
+        end
         self.devices.byClass[class][device.classId] = nil
 
         -- destroy table if there are no remaining devices left
@@ -535,6 +585,7 @@ function ULUsbProxy:Unregister(device, reason)
 
         if (0 == remaining) then
             self.devices.byClass[class] = nil
+            nbgunsdisconnect = 0
         end
 
     end
@@ -617,8 +668,10 @@ end
 
 function ULUsbProxy:WhiteList(reference, device)
 
-    if (reference) then self.whiteList[reference] = device and reference
-    else self.whiteList = {}
+    if (reference) then
+        self.whiteList[reference] = device and reference
+    else
+        self.whiteList = {}
     end
 
 end

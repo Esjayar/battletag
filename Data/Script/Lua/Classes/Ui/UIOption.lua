@@ -23,12 +23,13 @@ UTClass.UIOption(UIMultiComponent)
 
     require "Ui/UIOption.RadioButton"
     require "Ui/UIOption.RadioButtonLarge"
+	require "Ui/UIOption.RadioButtonMedium"
 
 -- defaults
 
-UIOption.padding = { 5, 5 }
+UIOption.padding = { 2, 2 }
 UIOption.margin = 15
-UIOption.height = 24
+UIOption.height = 21
 
 -- mouse sensitivity,
 -- for tips
@@ -58,18 +59,27 @@ function UIOption:__ctor(option, value)
 
     self.buttons = {}
 
-    table.foreach(option.choices, function (_, content)
+    table.foreach(option.choices, function (index, content)
 
         -- create the good button according to the content's displayMode,
         -- some choices can be invisible if the condition is not satisfied
 
 	    if (type(content.conditional) == "nil" and true or option.condition(self)) then
+	    	if (type(content.conditional2) == "nil" and true or option.condition2(self)) then
+	    		if (type(content.conditional3) == "nil" and true or option.condition3(self)) then
+	    			if (type(content.conditional4) == "nil" and true or option.condition4(self)) then
 
-	        local class = UIOption.RadioButton.buttonDisplayModes[(content.displayMode or "small")]
-	        local uiRadioButton = self:AddButton(class, content)
+                        if (self.option.displayMode2 == "extend" and index == 5) then
+                            self.verticalOffset = self.verticalOffset + 26
+                            self.width = self.width - 288
+                        end
+                        local class = UIOption.RadioButton.buttonDisplayModes[(content.displayMode or "small")]
+	        			local uiRadioButton = self:AddButton(class, content)
 	        
-	        uiRadioButton.tip = self.tip or content.tip -- tips
-
+	        			uiRadioButton.tip = self.tip or content.tip -- tips
+	        		end
+	        	end
+			end
 	    end
 
 	end)

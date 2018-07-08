@@ -25,7 +25,7 @@ UTClass.UTPlayer(UTEntity)
 -- default
 
 UTPlayer.profiles = nil
-UTPlayer.maxProfile = 8
+UTPlayer.maxProfile = 32
 
 -- __ctor --------------------------------------------------------------------
 
@@ -33,14 +33,15 @@ function UTPlayer:__ctor(...)
 
     UTPlayer.profiles = UTPlayer.profiles or
 	{    
-		default = { icon = "bear.tga", name = "utplayer", public = false },
-		guest = { icon = "puma.tga", name = l"oth006", public = false },
+		default = { icon = "bear.tga", name = "utplayer", team = 0, public = false },
+		guest = { icon = "puma.tga", name = l"oth006", team = 0, public = false },
 	}
     -- profile
 
     self.profile = {}
     self.profile.icon = UTPlayer.profiles.guest.icon
     self.profile.name = UTPlayer.profiles.guest.name
+	self.profile.team = UTPlayer.profiles.guest.team
     self.profile.public = false
 
     -- the player inherits its data from the base entity (cf. "UTEntity"),
@@ -99,11 +100,13 @@ function UTPlayer:OnProfileUpdated(device, profile)
 
 		self.profile.name = profile.name
 		self.profile.icon = profile.icon
+		self.profile.team = profile.team
 
 	else
 
 		self.profile.name = UTPlayer.profiles.guest.name
 		self.profile.icon = UTPlayer.profiles.guest.icon
+		self.profile.team = UTPlayer.profiles.guest.team
 
 	end
 
@@ -126,7 +129,7 @@ end
 
 function UTPlayer:UnBindDevice(device)
 
-    if (device and (self.rfGunDevice == device)) then
+    if (device and self.rfGunDevice == device) then
         self:BindDevice()
     end
 

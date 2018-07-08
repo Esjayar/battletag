@@ -46,6 +46,6 @@ end
 
 function UTActivity.State.Begin:Update()
 
-    self:PostStateChange("loading", (not activity.forwardLocked and activity.forward) or "title")
+    self:PostStateChange("loading", (activity.forward or activity.forward2) or "title")
 
 end

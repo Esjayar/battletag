@@ -32,7 +32,10 @@ UTGame.Ui.Settings.TBoxesManagement.backgroundTexture = "base:texture/ui/Option_
 function UTGame.Ui.Settings.TBoxesManagement:__ctor()
 
 	UTGame.Ui.Settings.TBoxesManagement.options = UTGame.Ui.Settings.TBoxesManagement.options or {
-    [1] = { label = l"oth013", choices = { { value = 0, displayMode = "large", text = l"but002", tip = l"tip078" }, { value = 1, displayMode = "large", text = l"but001", tip = l"tip077"  } }, index = "medkitPack", },
+	
+    	[1] = { label = l"oth013", choices = { { value = 0, displayMode = "large", text = l"but002", tip = l"tip078" }, { value = 1, displayMode = "large", text = l"but001", tip = l"tip077"  } }, index = "medkitPack", },
+    	[2] = { label = l"oth096", choices = { { value = 0, displayMode = "large", text = l"but002", tip = l"tip159" }, { value = 1, displayMode = "large", text = l"but001", tip = l"tip158"  } }, index = "customPack", },
+	
 	}
 
     for i, option in ipairs(UTGame.Ui.Settings.TBoxesManagement.options) do
@@ -43,12 +46,34 @@ function UTGame.Ui.Settings.TBoxesManagement:__ctor()
 		self.uiOption.width = self.uiOption.width - 100
 
 		self.uiOption.ChangeValue = function(self, value)
-
-            game.settings.addons[self.option.index] = value
-
+            
+            if (game.settings.addons[self.option.index] ~= value) then
+            	game.settings.addons[self.option.index] = value
+            	if (self.option.index == "medkitPack") then
+            		if (value == 0) then
+            			if (activity) then
+            				activity.settings.respawnmode = 1
+            			end
+	            		if (game.settings.addons.customPack == 1) then
+		    				game.settings.addons.customPack = 0
+						end
+					end
+				elseif (value == 1 and game.settings.addons.medkitPack == 0) then
+    				game.settings.addons.medkitPack = 1
+    			end
+        	    game:SaveSettings()
+        	    uiSettingprev = 3
+	            if (activity) then
+	            	UIManager.stack:Pop()
+	            	UIManager.stack:Push(UTGame.Ui.Settings)
+	            else
+					game:PostStateChange("settings")
+				end
+			end
 		end
 
     end
+    
 end
 
 -- Draw ---------------------------------------------------------------------

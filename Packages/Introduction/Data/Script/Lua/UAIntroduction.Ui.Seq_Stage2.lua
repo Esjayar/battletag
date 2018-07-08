@@ -52,21 +52,21 @@ function UAIntroduction.Ui.Seq_Stage2:__ctor(state)
 
     -- buttons,
 
-	 -- uiButton4: next
+	 -- uiButton5: next
 
-    self.uiButton4 = self:AddComponent(UIButton:New(), "uiButton4")
-    self.uiButton4.rectangle = UIMenuWindow.buttonRectangles[4]
-	self.uiButton4.text = l "but006"
-	self.uiButton4.tip = l"tip005"
+    self.uiButton5 = self:AddComponent(UIButton:New(), "uiButton5")
+    self.uiButton5.rectangle = UIMenuWindow.buttonRectangles[5]
+	self.uiButton5.text = l "but006"
+	self.uiButton5.tip = l"tip005"
 
-	self.uiButton4.OnAction = function ()
+	self.uiButton5.OnAction = function ()
         state:Next()
 	end
 
     -- gm lock
 
-    self.uiButton4.enabled = false
-    game.gameMaster:Play("base:audio/gamemaster/dlg_gm_init_13.wav", function () self.uiButton4.enabled = true end)
+    self.uiButton5.enabled = false
+    game.gameMaster:Play("base:audio/gamemaster/dlg_gm_init_13.wav", function () self.uiButton5.enabled = true end)
 
 end
 

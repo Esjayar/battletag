@@ -30,10 +30,18 @@ UAOldFashionDuel.Ui.PlayersSetup = UTClass(UIMenuWindow)
 function UAOldFashionDuel.Ui.PlayersSetup:__ctor(...)
 
     assert(activity)
+    
+	-- animate	
+	
+	self.slideBegin = true
+	self.slideEnd = false
 
 	-- window settings
 
 	self.uiWindow.title = l"titlemen015"
+    UIPlayerSlotGrid.horizontalPadding = activity.horizontalPadding or 0
+    UIPlayerSlotGrid.slots = activity.slots or 0
+    UIPlayerSlotGrid.playeroffset = activity.playeroffset or 0
 
     -- main panel 
 
@@ -70,17 +78,17 @@ function UAOldFashionDuel.Ui.PlayersSetup:__ctor(...)
 
 		end
 
-		-- uiButton4: players ready for countdown
+		-- uiButton5: players ready for countdown
 
-		self.uiButton4 = self:AddComponent(UIButton:New(), "uiButton4")
-		self.uiButton4.rectangle = UIMenuWindow.buttonRectangles[4]
-		self.uiButton4.text = l"but008"
-		self.uiButton4.tip = l"tip020"
-		self.uiButton4.enabled = false
+		self.uiButton5 = self:AddComponent(UIButton:New(), "uiButton5")
+		self.uiButton5.rectangle = UIMenuWindow.buttonRectangles[5]
+		self.uiButton5.text = l"but008"
+		self.uiButton5.tip = l"tip020"
+		self.uiButton5.enabled = false
 
-		self.uiButton4.OnAction = function(self)
+		self.uiButton5.OnAction = function(self)
 		
-			if (activity.settings and (1 == activity.settings.gameLaunch)) then
+			if (activity.settings and 1 == activity.settings.gameLaunch) then
 				UIManager.stack:Push(UTActivity.Ui.ManualLaunch)
 			else
 				activity:PostStateChange("beginmatch") 
@@ -89,6 +97,8 @@ function UAOldFashionDuel.Ui.PlayersSetup:__ctor(...)
 		end
 	
 	self.setupFailed = false
+	uploadbytecode = false
+	gametypeloaded = directoryselected
 	
 end
 
@@ -197,7 +207,7 @@ function UAOldFashionDuel.Ui.PlayersSetup:OnOpen()
 
 	-- check if a device has been removed anywhere
 
-	if ((not self.player[1].rfGunDevice) or (not self.player[2].rfGunDevice)) then
+	if (not self.player[1].rfGunDevice or not self.player[2].rfGunDevice) then
 
 		if (not self.setupFailed) then	self:ErrorMessage()	
 		end
@@ -226,7 +236,7 @@ function UAOldFashionDuel.Ui.PlayersSetup:OnOpen()
 	self.uiVsLabel = self.uiNextMatchPanel:AddComponent(UILabel:New(), "uiVsLabel")
 	self.uiVsLabel.font = UIComponent.fonts.larger
 	self.uiVsLabel.fontColor = UIComponent.colors.orange
-	self.uiVsLabel.rectangle = { 675 * 0.5 - 35, 80 }
+	self.uiVsLabel.rectangle = { 302.5, 80 }
 	self.uiVsLabel.text = "VS"
 
 	-- get first last three matchs 
@@ -240,17 +250,17 @@ function UAOldFashionDuel.Ui.PlayersSetup:OnOpen()
 		local player = match.challengers[1]
 		self.uiMatchSlot[i][1] = self.uiMatchListPanel:AddComponent(UIPlayerSlot:New() ,"uiMatchSlot" .. i)
 		self.uiMatchSlot[i][1]:SetPlayer(player)
-		self.uiMatchSlot[i][1]:MoveTo(10, 40 + (50 * (i - 1)))
+		self.uiMatchSlot[i][1]:MoveTo(0, 40 + 50 * (i - 1))
 		
 		player = match.challengers[2]
 		self.uiMatchSlot[i][2] = self.uiMatchListPanel:AddComponent(UIPlayerSlot:New() ,"uiMatchSlot" .. i)
 		self.uiMatchSlot[i][2]:SetPlayer(player)
-		self.uiMatchSlot[i][2]:MoveTo(675 - 290, 40 + (50 * (i - 1)))
+		self.uiMatchSlot[i][2]:MoveTo(375, 40 + 50 * (i - 1))
 
 		self.uiMatchVsLabel[i] = self.uiMatchListPanel:AddComponent(UILabel:New(), "uiVsLabel")
 		self.uiMatchVsLabel[i].font = UIComponent.fonts.header
 		self.uiMatchVsLabel[i].fontColor = UIComponent.colors.orange
-		self.uiMatchVsLabel[i].rectangle = { 675 * 0.5 - 22, 50 * i }
+		self.uiMatchVsLabel[i].rectangle = { 315.5, 50 * i }
 		self.uiMatchVsLabel[i].text = "VS"
 
 	end		
@@ -274,10 +284,10 @@ function UAOldFashionDuel.Ui.PlayersSetup:Update()
 
 	-- display harness if needed by activity
 
-	self.uiButton4.enabled = self.introductionVoiceDone
+	self.uiButton5.enabled = self.introductionVoiceDone
 	for i, player in ipairs(activity.match.players) do
 
-		if (player.rfGunDevice and not player.data.heap.harnessOn) then self.uiButton4.enabled = false
+		if (player.rfGunDevice and not player.data.heap.harnessOn) then self.uiButton5.enabled = false
 		end
 
 	end

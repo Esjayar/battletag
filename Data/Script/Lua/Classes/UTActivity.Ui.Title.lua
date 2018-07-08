@@ -26,7 +26,8 @@ UTActivity.Ui.Title.textRules = {
 
     font = UIComponent.fonts.default,
     fontColor = UIComponent.colors.gray,
-    fontJustification = quartz.system.drawing.justification.topleft + quartz.system.drawing.justification.wordbreak,
+    fontJustificationleft = quartz.system.drawing.justification.topleft + quartz.system.drawing.justification.wordbreak,
+    fontJustificationcenter = quartz.system.drawing.justification.center + quartz.system.drawing.justification.wordbreak,
 
     -- 96, 33, 396, 58
     rectangle = { 20, 70, 640, 260 },
@@ -52,8 +53,8 @@ function UTActivity.Ui.Title:__ctor(...)
     
 	-- animate	
 	
-	self.slideBegin = true
-	self.slideEnd = true
+	self.slideBegin = game.settings.UiSettings.slideBegin
+	self.slideEnd = game.settings.UiSettings.slideEnd
 
 	-- window settings
 
@@ -126,21 +127,22 @@ function UTActivity.Ui.Title:__ctor(...)
 			end			
 	end
 
-    -- uiButton4:
+    -- uiButton5:
     -- settings, but don't get there if there aren't any ...
 
-    self.uiButton4 = self:AddComponent(UIButton:New(), "uiButton3")
-    self.uiButton4.text = l"but006"
-    self.uiButton4.tip = l"tip016"
-    self.uiButton4.rectangle = UIMenuWindow.buttonRectangles[4]
+    self.uiButton5 = self:AddComponent(UIButton:New(), "uiButton5")
+    self.uiButton5.text = l"but006"
+    self.uiButton5.tip = l"tip016"
+    self.uiButton5.rectangle = UIMenuWindow.buttonRectangles[5]
 
 --    if (activity.settings --[[ ?? DON'T GET TO SETTINGS IF THERE AREN'T ANY --]] or true) then
 
-	    self.uiButton4.OnAction = function (self) 
+	    self.uiButton5.OnAction = function (self) 
 	    
 			quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
 			quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
 			quartz.framework.audio.playsound()
+			UTActivity.Ui.Settings.slideBegin = true
 			
 			activity:PostStateChange("settings") 
 	    
@@ -148,7 +150,7 @@ function UTActivity.Ui.Title:__ctor(...)
 
  --   else
 
- --       self.uiButton4.enabled = false
+ --       self.uiButton5.enabled = false
 
 --	end
 	
@@ -175,24 +177,31 @@ function UTActivity.Ui.Title:Draw()
 
                 quartz.system.drawing.loadcolor3f(unpack(self.textRules.fontColor))
                 quartz.system.drawing.loadfont(self.textRules.font)
-                quartz.system.drawing.drawtextjustified(activity.textRules, self.textRules.fontJustification, unpack(self.textRules.rectangle) )
+                quartz.system.drawing.drawtextjustified(activity.textRules, self.textRules.fontJustificationleft, unpack(self.textRules.rectangle) )
 
                 quartz.system.drawing.pop()
                 
 				if (activity.scoringField) then
 				
 					local baseY = 132
+                    local offsetX = 0
 					local offsetY = 0
 					local rectangleIcon = {self.textRules.rectangle[1] + 80, baseY + 8 + self.scoringOffset, self.textRules.rectangle[3] + 80 , baseY + 48 + self.scoringOffset}
 					
-					--table.foreachi(self.uiLeaderboard.fields, function(index, field)
 					for i, field in ipairs(activity.scoringField) do
 					
-						if (field[2]) then
+						if (i == 4) then
+                            offsetX = 250
+                            offsetY = 0
+						    rectangleIcon[2] = rectangleIcon[2] - 108
+						    rectangleIcon[4] = rectangleIcon[4] - 108
+                        end
+                        
+                        if (field[2]) then
 
 							quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
 							quartz.system.drawing.loadtexture(field[2])
-							quartz.system.drawing.drawtexture(40, baseY + offsetY + self.scoringOffset)
+							quartz.system.drawing.drawtexture(40 + offsetX, baseY + offsetY + self.scoringOffset)
 
 						end			
 						
@@ -200,8 +209,11 @@ function UTActivity.Ui.Title:Draw()
 						
 							quartz.system.drawing.loadcolor3f(unpack(self.textRules.fontColor))
 							quartz.system.drawing.loadfont(self.textRules.font)
-							quartz.system.drawing.drawtextjustified(field[3], self.textRules.fontJustification, unpack(rectangleIcon) )
-							
+                            if (i >= 4) then
+                                quartz.system.drawing.drawtextjustified(field[3], self.textRules.fontJustificationcenter, unpack(rectangleIcon) )
+                            else
+                                quartz.system.drawing.drawtextjustified(field[3], self.textRules.fontJustificationleft, unpack(rectangleIcon) )
+                            end
 						end
 
 						rectangleIcon[2] = rectangleIcon[2] + 36
@@ -233,5 +245,63 @@ function UTActivity.Ui.Title:Draw()
         end
 
     end
+
+end
+
+function UTActivity.Ui.Title:OnOpen()
+
+	self:Activate()
+end
+
+function UTActivity.Ui.Title:OnClose()
+
+	self:Deactivate()
+end
+
+function UTActivity.Ui.Title:Activate()
+
+    if (not self.keyboardActive) then
+
+        --game._Char:Add(self, self.Char)
+        game._KeyDown:Add(self, self.KeyDown)
+        self.keyboardActive = true
+
+    end
+
+end
+
+function UTActivity.Ui.Title:Deactivate()
+
+    if (self.keyboardActive) then 
+    
+        --game._Char:Remove(self, self.Char)
+        game._KeyDown:Remove(self, self.KeyDown)
+        self.keyboardActive = false
+
+    end
+
+end
+
+function UTActivity.Ui.Title:KeyDown(virtualKeyCode, scanCode)
+		
+	if (27 == virtualKeyCode or 49 == virtualKeyCode) then
+		
+		quartz.framework.audio.loadsound("base:audio/ui/back.wav")
+		quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
+		quartz.framework.audio.playsound()
+		
+		if (activity.advertised) then game:PostStateChange("title") 
+		else game:PostStateChange("selector") 
+		end	
+	end
+	if (13 == virtualKeyCode or 53 == virtualKeyCode) then
+		
+		quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
+		quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
+		quartz.framework.audio.playsound()
+		UTActivity.Ui.Settings.slideBegin = true
+			
+		activity:PostStateChange("settings") 
+	end
 
 end

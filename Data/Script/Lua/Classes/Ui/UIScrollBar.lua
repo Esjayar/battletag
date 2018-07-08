@@ -201,8 +201,9 @@ end
 function UIScrollBar:SetSize(number, max)
 
 	self.maxIndex = math.max(0, number - max)
-	self.offset = self.height * 0.1
-	self.liftSize = math.max(48 + (self.height * 0.05), self.height - (self.maxIndex * self.offset))
+	--self.offset = self.height * 0.1
+	self.offset = self.height * (1/(number - max + 6))
+	self.liftSize = math.max(48 + (self.height * 0.05), self.height - self.maxIndex * self.offset)
 	self.uiButtonLift.rectangle = { 
 		self.location[1], 
 		self.location[2] + self.uiButtonLift.posY, 

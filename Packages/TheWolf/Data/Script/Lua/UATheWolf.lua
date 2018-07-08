@@ -29,10 +29,8 @@ UATheWolf.State = {}
 
 -- default
 
-UATheWolf.bytecodePath = "game:../packages/thewolf/data/script/bytecode/UATheWolf.ByteCode.lua"
 UATheWolf.bitmap = "base:texture/ui/loading_thewolf.tga"
 
-UATheWolf.maxNumberOfPlayer = 8
 UATheWolf.minNumberOfPlayer = 3
 
 -- __ctor --------------------------------------------------------------------
@@ -43,6 +41,7 @@ function UATheWolf:__ctor(...)
 
     self.name = l"title015"
     self.category = UTActivity.categories.closed
+	self.nodual = true
 
     self.textScoring = l"score009"
     self.Ui.Title.textScoring.rectangle = { 20, 50, 640, 210 }
@@ -61,9 +60,8 @@ function UATheWolf:__ctor(...)
 
         [1] = { title = l"titlemen006", options = {
 
-            [1] = { displayMode = nil, label = l"goption001", tip = l"tip027", choices = { { value = 5 }, { value = 10 }, }, index = "playtime", },
-            [2] = { label = l"goption002", tip = l"tip025", choices = { { value = 0, displayMode = "large", text = "Auto"}, { value = 1, displayMode = "large", text = l"oth032" } }, index = "gameLaunch" },
-            [3] = { label = l"goption003", tip = l"tip026", choices = { { value = 1, icon = "base:texture/ui/components/uiradiobutton_house.tga" }, { value = 2 }, { value = 3}, { value = 4 }, { value = 5, icon = "base:texture/ui/components/uiradiobutton_sun.tga" } }, index = "beamPower" },
+            [1] = { displayMode = nil, label = l"goption001", tip = l"tip027", choices = { { value = 2 }, { value = 5 }, { value = 6 }, { value = 7 }, { value = 8 }, { value = 10 }, { value = 15 }, { value = 20 }, { value = 30 } }, index = "playtime", },
+			[2] = { displayMode = nil, label = l"goption029", tip = l"tip142", choices = { { value = 1 }, { value = 2 }, { value = 3 }, { value = 4 }, { value = 5 } }, index = "nbwolves", },
 
             },
         },
@@ -71,8 +69,7 @@ function UATheWolf:__ctor(...)
         -- keyed settings
 
         playtime = 5,
-        gameLaunch = 0,
-        beamPower = 3,      
+		nbwolves = 1,
 
 		-- no team
 
@@ -110,14 +107,14 @@ function UATheWolf:__ctor(...)
 
     self.states["roundloop"] = UATheWolf.State.RoundLoop:New(self)
     
-    -- ?? LES SETTINGS SONT RENSEIGNÉS DANS LE CONSTRUCTEUR DE L'ACTIVITÉ
-    -- ?? LES PARAMÈTRES (DISPLAYMODE, TEXTE, ICONE...) DES COLONES DE GRID SONT RENSEIGNÉS DANS LE COMPOSANT DÉDIÉ DU LEADERBOARD
-    -- ?? LES ATTRIBUTS - HEAP, BAKED - DES ENTITÉS SONT RENSEIGNÉS PAR 2 APPELS DE FONCTION DÉDIÉS DANS L'ACTIVITÉ (À SURCHARGER)
-    -- ?? POUR LES DONNÉES DE CONFIGURATION DE BYTECODE, CE SERA SUREMENT PAREIL QUE POUR LES ATTRIBUTS = FONCTION DÉDIÉ (À SURCHARGER)
+    -- ?? LES SETTINGS SONT RENSEIGNï¿½S DANS LE CONSTRUCTEUR DE L'ACTIVITï¿½
+    -- ?? LES PARAMï¿½TRES (DISPLAYMODE, TEXTE, ICONE...) DES COLONES DE GRID SONT RENSEIGNï¿½S DANS LE COMPOSANT Dï¿½DIï¿½ DU LEADERBOARD
+    -- ?? LES ATTRIBUTS - HEAP, BAKED - DES ENTITï¿½S SONT RENSEIGNï¿½S PAR 2 APPELS DE FONCTION Dï¿½DIï¿½S DANS L'ACTIVITï¿½ (ï¿½ SURCHARGER)
+    -- ?? POUR LES DONNï¿½ES DE CONFIGURATION DE BYTECODE, CE SERA SUREMENT PAREIL QUE POUR LES ATTRIBUTS = FONCTION Dï¿½DIï¿½ (ï¿½ SURCHARGER)
     -- ?? POUR LE LEADERBOARD:
     -- ??       - SURCHARGER LA PAGE QUI UTILISE LE LEADERBOARD STANDARD,
-    -- ??       - RAJOUTER DES PARAMÈTRES (DISPLAYMODE, TEXTE, ICONE...) DES COLONES DE GRID SI NÉCESSAIRE EN + DE CEUX PAR DÉFAUT (LIFE, HIT, AMMO...)
-    -- ??       - RENSEIGNER QUELS ATTRIBUTS ON SOUHAITE REPRÉSENTER PARMIS CEUX EXISTANT EN HEAP
+    -- ??       - RAJOUTER DES PARAMï¿½TRES (DISPLAYMODE, TEXTE, ICONE...) DES COLONES DE GRID SI Nï¿½CESSAIRE EN + DE CEUX PAR Dï¿½FAUT (LIFE, HIT, AMMO...)
+    -- ??       - RENSEIGNER QUELS ATTRIBUTS ON SOUHAITE REPRï¿½SENTER PARMIS CEUX EXISTANT EN HEAP
 
 end
 
@@ -143,16 +140,20 @@ function UATheWolf:InitEntityHeapData(entity, ranking)
 
     -- !! INITIALIZE ALL HEAP DATA (RELEVANT DURING ONE MATCH ONLY)
 
-	entity.data.heap.score = 0
-	entity.data.heap.ranking = ranking
-	entity.data.heap.nbHit = 0
-	entity.data.heap.nbShot = 0
-	if (entity.rfGunDevice) then
-		entity.data.heap.id = entity.rfGunDevice.classId
-	else
-		entity.data.heap.id = ranking
+	entity.data.heap.wolfTimer = 0
+	if (not game.gameMaster.ingame) then
+		entity.gameplayData = { 0x00, 0x00 }
+		entity.data.heap.score = 0
+		entity.data.heap.ranking = ranking
+		entity.data.heap.nbHit = 0
+		entity.data.heap.nbHitbackup = 0
+		if (entity.rfGunDevice) then
+			entity.data.heap.id = entity.rfGunDevice.classId
+		else
+			entity.data.heap.id = ranking
+		end
+		entity.data.heap.last_rfid = 0
 	end
-	entity.data.heap.last_rfid = 0
 
     UTActivity:InitEntityHeapData(entity, ranking)
 

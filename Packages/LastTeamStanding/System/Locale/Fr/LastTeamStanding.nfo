@@ -10,7 +10,7 @@ local nfo = {
 
 
     ["difficulty"] = 50,
-    ["flags"] = { "2-8 joueurs", "2-4 équipes",},
+    ["flags"] = { "2-32 joueurs", "2-6 équipes",},
     ["materials"] = { 0x03000030, 0x03000031, 0x03000040, 0x03000041, },
 
 }

@@ -34,7 +34,6 @@ UAOldFashionDuel.State = {}
     
 -- default
 
-UAOldFashionDuel.bytecodePath = "game:../packages/oldfashionduel/data/script/bytecode/UAOldFashionDuel.ByteCode.lua"
 UAOldFashionDuel.bitmap = "base:texture/ui/Loading_OldFashionDuel.tga"
 
 UAOldFashionDuel.countdownDuration = 5
@@ -42,6 +41,12 @@ UAOldFashionDuel.countdownDuration = 5
 UAOldFashionDuel.gameoverTexture = "base:texture/ui/text_roundover.tga"
 
 UAOldFashionDuel.gameoverSound = {"base:audio/gamemaster/DLG_GM_GLOBAL_120.wav"}
+
+UAOldFashionDuel.horizontalPadding = 36
+
+UAOldFashionDuel.slots = 9
+
+UAOldFashionDuel.playeroffset = 17
 
 -- SD07 snd
 UAOldFashionDuel.gameoverSnd = { 0x53, 0x44, 0x30, 0x37 }
@@ -54,6 +59,7 @@ function UAOldFashionDuel:__ctor(...)
 
     self.name = l"title006"
     self.category = UTActivity.categories.open
+	self.nodual = true
 
     self.textScoring = l"score003"
     self.textRules = l"rules004"
@@ -65,7 +71,7 @@ function UAOldFashionDuel:__ctor(...)
 
         [1] = { title = l"titlemen006", options = {
 
-            [1] = { label = l"goption003", tip = l"tip026", choices = { { value = 1, icon = "base:texture/ui/components/uiradiobutton_house.tga" }, { value = 2 }, { value = 3}, { value = 4 }, { value = 5, icon = "base:texture/ui/components/uiradiobutton_sun.tga" } }, index = "beamPower" },
+            [1] = { label = l"goption003", tip = l"tip026", choices = { { value = 1 }, { value = 3 }, { value = 5 } }, index = "numberOfRound" },
 
             },
         },
@@ -73,8 +79,6 @@ function UAOldFashionDuel:__ctor(...)
         -- keyed settings
 
         numberOfRound = 5,
-        gameLaunch = 0,
-        beamPower = 3,
         playtime = nil,
 
 		-- no team
@@ -108,18 +112,16 @@ function UAOldFashionDuel:__ctor(...)
     self.states["roundloop"] = UAOldFashionDuel.State.RoundLoop:New(self)
     self.states["playerssetup"] = UAOldFashionDuel.State.PlayersSetup:New(self)
 
-    -- ?? LES SETTINGS SONT RENSEIGNÉS DANS LE CONSTRUCTEUR DE L'ACTIVITÉ
-    -- ?? LES PARAMÈTRES (DISPLAYMODE, TEXTE, ICONE...) DES COLONES DE GRID SONT RENSEIGNÉS DANS LE COMPOSANT DÉDIÉ DU LEADERBOARD
-    -- ?? LES ATTRIBUTS - HEAP, BAKED - DES ENTITÉS SONT RENSEIGNÉS PAR 2 APPELS DE FONCTION DÉDIÉS DANS L'ACTIVITÉ (À SURCHARGER)
-    -- ?? POUR LES DONNÉES DE CONFIGURATION DE BYTECODE, CE SERA SUREMENT PAREIL QUE POUR LES ATTRIBUTS = FONCTION DÉDIÉ (À SURCHARGER)
+    -- ?? LES SETTINGS SONT RENSEIGNï¿½S DANS LE CONSTRUCTEUR DE L'ACTIVITï¿½
+    -- ?? LES PARAMï¿½TRES (DISPLAYMODE, TEXTE, ICONE...) DES COLONES DE GRID SONT RENSEIGNï¿½S DANS LE COMPOSANT Dï¿½DIï¿½ DU LEADERBOARD
+    -- ?? LES ATTRIBUTS - HEAP, BAKED - DES ENTITï¿½S SONT RENSEIGNï¿½S PAR 2 APPELS DE FONCTION Dï¿½DIï¿½S DANS L'ACTIVITï¿½ (ï¿½ SURCHARGER)
+    -- ?? POUR LES DONNï¿½ES DE CONFIGURATION DE BYTECODE, CE SERA SUREMENT PAREIL QUE POUR LES ATTRIBUTS = FONCTION Dï¿½DIï¿½ (ï¿½ SURCHARGER)
     -- ?? POUR LE LEADERBOARD:
     -- ??       - SURCHARGER LA PAGE QUI UTILISE LE LEADERBOARD STANDARD,
-    -- ??       - RAJOUTER DES PARAMÈTRES (DISPLAYMODE, TEXTE, ICONE...) DES COLONES DE GRID SI NÉCESSAIRE EN + DE CEUX PAR DÉFAUT (LIFE, HIT, AMMO...)
-    -- ??       - RENSEIGNER QUELS ATTRIBUTS ON SOUHAITE REPRÉSENTER PARMIS CEUX EXISTANT EN HEAP
+    -- ??       - RAJOUTER DES PARAMï¿½TRES (DISPLAYMODE, TEXTE, ICONE...) DES COLONES DE GRID SI Nï¿½CESSAIRE EN + DE CEUX PAR Dï¿½FAUT (LIFE, HIT, AMMO...)
+    -- ??       - RENSEIGNER QUELS ATTRIBUTS ON SOUHAITE REPRï¿½SENTER PARMIS CEUX EXISTANT EN HEAP
 
 	-- gameplay data
-
-	self.gameplayData = { 0x00, 0x00 }
 
 end
 
@@ -145,10 +147,14 @@ function UAOldFashionDuel:InitEntityHeapData(entity, ranking)
 
 	UTActivity:InitEntityHeapData(entity, ranking)
 
-	entity.data.heap.score = 0
-	entity.data.heap.ranking = ranking
-	entity.data.heap.nbHits = 0
+	if (not game.gameMaster.ingame) then
+		entity.data.heap.score = 0
+		entity.data.heap.ranking = ranking
+		entity.data.heap.nbHits = 0
+	end
 	entity.data.heap.ammunitions = 6
+
+	entity.gameplayData = { 0x00, 0x00 }
 
 end
 

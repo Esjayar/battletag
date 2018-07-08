@@ -51,16 +51,16 @@ function UAIntroduction.Ui.Seq_Ready:__ctor(...)
 
     -- buttons,
 
-    -- uiButton4: next
+    -- uiButton5: next
 
-    self.uiButton4 = self:AddComponent(UIButton:New(), "uiButton4")
-    self.uiButton4.rectangle = { UIMenuWindow.buttonRectangles[4][1] - 10, UIMenuWindow.buttonRectangles[4][2], UIMenuWindow.buttonRectangles[4][3], UIMenuWindow.buttonRectangles[4][4], }
-	self.uiButton4.text = l"but020"
-	self.uiButton4.tip = l"tip007"
-	self.uiButton4.direction = DIR_HORIZONTAL
-	self.uiButton4.enabled = false
+    self.uiButton5 = self:AddComponent(UIButton:New(), "uiButton5")
+    self.uiButton5.rectangle = { UIMenuWindow.buttonRectangles[5][1] - 10, UIMenuWindow.buttonRectangles[5][2], UIMenuWindow.buttonRectangles[5][3], UIMenuWindow.buttonRectangles[5][4], }
+	self.uiButton5.text = l"but020"
+	self.uiButton5.tip = l"tip007"
+	self.uiButton5.direction = DIR_HORIZONTAL
+	self.uiButton5.enabled = false
 
-	self.uiButton4.OnAction = function ()
+	self.uiButton5.OnAction = function ()
 
         game.settings.registers.firstTime = false
         REG_FIRSTTIME = false
@@ -113,14 +113,14 @@ end
 function UAIntroduction.Ui.Seq_Ready:Update()
 
     local empty = true
-    self.uiButton4.enabled = not self.gmLocked
+    self.uiButton5.enabled = not self.gmLocked
 
     for _, player in pairs(activity.players) do
         if not (player.rfGunDevice) then
             -- if a player has no device (is disconnected) then he does not count
         elseif not (player.data.heap.gameover) then
             -- else if the player did not receive the gameover message then we shall wait a little bit longer
-            self.uiButton4.enabled = false
+            self.uiButton5.enabled = false
             return
         else
             -- else this player is ready to move on
@@ -129,7 +129,7 @@ function UAIntroduction.Ui.Seq_Ready:Update()
     end
 
     if (empty) then
-        self.uiButton4.OnAction()
+        self.uiButton5.OnAction()
     end
 
 end

@@ -41,9 +41,11 @@ function UTActivity.State.Revision:Begin(arg)
 print("0000000000")
 
     assert(engine.libraries.usb)
-    assert(engine.libraries.usb.proxy)
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		assert(proxy)
 
-    self.flashMemoryManager = engine.libraries.usb.proxy.processes.deviceFlashMemoryManager
+		self.flashMemoryManager = proxy.processes.deviceFlashMemoryManager
+	end
     assert(self.flashMemoryManager)
 
     -- check for major revisions,
@@ -99,7 +101,9 @@ print("0000000000")
 
     --
 
-    engine.libraries.usb.proxy._DeviceRemoved:Add(self, UTActivity.State.Revision.OnDeviceRemoved)
+    for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		proxy._DeviceRemoved:Add(self, UTActivity.State.Revision.OnDeviceRemoved)
+	end
 
     if (self.majorRevisionDevices) then
 
@@ -124,16 +128,18 @@ function UTActivity.State.Revision:End()
     UIManager.stack:Popa()
     UIMenuManager.stack:Popa()
 
-    if (engine.libraries.usb.proxy) then
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		if (proxy) then
 
-        engine.libraries.usb.proxy._DeviceRemoved:Remove(self, UTActivity.State.Revision.OnDeviceRemoved)
+			proxy._DeviceRemoved:Remove(self, UTActivity.State.Revision.OnDeviceRemoved)
 
-        -- clear the whitelist,
-        -- definitely forbid any new connections
+			-- clear the whitelist,
+			-- definitely forbid any new connections
 
-        engine.libraries.usb.proxy:WhiteList()
+			proxy:WhiteList()
 
-    end
+		end
+	end
 
 end
 
@@ -190,7 +196,7 @@ function UTActivity.State.Revision:Update()
 
                 -- buttons
 
-                self.uiPopup.uiButton2 = self.uiPopup:AddComponent(UIButton:New(), "uiButton2")
+                --[[self.uiPopup.uiButton2 = self.uiPopup:AddComponent(UIButton:New(), "uiButton2")
                 self.uiPopup.uiButton2.rectangle = UIPopupWindow.buttonRectangles[2]
                 self.uiPopup.uiButton2.text = l "but019"
 
@@ -202,7 +208,7 @@ function UTActivity.State.Revision:Update()
                     else self:PostStateChange("bytecode")
                     end
 
-                end
+                end]]
 
                 UIManager.stack:Push(self.uiPopup)
 

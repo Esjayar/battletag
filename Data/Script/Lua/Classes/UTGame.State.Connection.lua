@@ -104,8 +104,8 @@ function UTGame.State.Connection:Update()
     end
 
     local time = quartz.system.time.gettimemicroseconds()
-    if ((time - self.time) > 4000000 and not self.gmLockedOnce) then
-        self.gmLocked = true
+    if (time - self.time > 4000000 and not self.gmLockedOnce) then
+        --self.gmLocked = true
         self.gmLockedOnce = true
         game.gameMaster:Play("base:audio/gamemaster/dlg_gm_init_02.wav", function () self.gmLocked = false end)
     end

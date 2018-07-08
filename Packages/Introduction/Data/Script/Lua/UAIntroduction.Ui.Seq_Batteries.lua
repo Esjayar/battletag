@@ -59,14 +59,14 @@ function UAIntroduction.Ui.Seq_Batteries:__ctor(...)
 
     -- buttons,
 
-    -- uiButton4: next
+    -- uiButton5: next
 
-    self.uiButton4 = self:AddComponent(UIButton:New(), "uiButton4")
-    self.uiButton4.rectangle = UIMenuWindow.buttonRectangles[4]
-	self.uiButton4.text = l"but006"
-	self.uiButton4.tip = l"tip005"
+    self.uiButton5 = self:AddComponent(UIButton:New(), "uiButton5")
+    self.uiButton5.rectangle = UIMenuWindow.buttonRectangles[5]
+	self.uiButton5.text = l"but006"
+	self.uiButton5.tip = l"tip005"
 
-	self.uiButton4.OnAction = function ()
+	self.uiButton5.OnAction = function ()
 
         self.stage = self.stage + 1
         
@@ -81,10 +81,10 @@ function UAIntroduction.Ui.Seq_Batteries:__ctor(...)
         
             local stage = self.stages[self.stage]
             if (stage and stage.gmFile) then
-                self.uiButton4.enabled = false
-                game.gameMaster:Play(stage.gmFile, function () self.uiButton4.enabled = true end)
+                self.uiButton5.enabled = false
+                game.gameMaster:Play(stage.gmFile, function () self.uiButton5.enabled = true end)
             else
-                self.uiButton4.enabled = true
+                self.uiButton5.enabled = true
             end
         
         end
@@ -94,10 +94,10 @@ function UAIntroduction.Ui.Seq_Batteries:__ctor(...)
 
     local stage = self.stages[1]
     if (stage and stage.gmFile) then
-        self.uiButton4.enabled = false
-        game.gameMaster:Play(stage.gmFile, function () self.uiButton4.enabled = true end)
+        self.uiButton5.enabled = false
+        game.gameMaster:Play(stage.gmFile, function () self.uiButton5.enabled = true end)
     else
-        self.uiButton4.enabled = true
+        self.uiButton5.enabled = true
     end
     
 end

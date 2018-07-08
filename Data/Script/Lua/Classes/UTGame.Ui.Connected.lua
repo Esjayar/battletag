@@ -106,42 +106,44 @@ end
 
 function UTGame.Ui.Connected:CheckForRevisionCandidate()
 
-    assert(engine.libraries.usb.proxy)
-    assert(engine.libraries.usb.proxy.revision)
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		assert(proxy)
+		assert(proxy.revision)
 
-    print("candidate:", engine.libraries.usb.proxy.revisionCandidate)
+		print("candidate:", proxy.revisionCandidate)
 
-    if (engine.libraries.usb.proxy.revisionCandidate) then
+		if (proxy.revisionCandidate) then
 
-        -- if revision candidate is major then ask for user confirmation,
-        -- else proceed with revision update
+			-- if revision candidate is major then ask for user confirmation,
+			-- else proceed with revision update
 
-        local confirmation = false
+			local confirmation = false
 
-        if (confirmation) then
-        end
+			if (confirmation) then
+			end
 
-        -- switch de proxy device into bootloading mode ...
+			-- switch de proxy device into bootloading mode ...
 
-        engine.libraries.usb.proxy:PostStateChange("bootloader")
+			proxy:PostStateChange("bootloader")
 
-        -- ... then warn the user the device must be unplugged
+			-- ... then warn the user the device must be unplugged
 
-        local uiPopup = UIPopupWindow:New()
-        uiPopup.icon = "base:video/uianimatedbutton_settings.avi"
+			local uiPopup = UIPopupWindow:New()
+			uiPopup.icon = "base:video/uianimatedbutton_settings.avi"
 
-        uiPopup.title = l "con006"
-        uiPopup.text = l "con007"
+			uiPopup.title = l "con006"
+			uiPopup.text = l "con007"
 
-        UIManager.stack:Push(uiPopup)
-        game.gameMaster:Play("base:audio/gamemaster/dlg_gm_init_03.wav")
+			UIManager.stack:Push(uiPopup)
+			game.gameMaster:Play("base:audio/gamemaster/dlg_gm_init_03.wav")
 
-    elseif (self.uiButton4) then
+		elseif (self.uiButton4) then
 
-        self.uiButton4.enabled = false
-        game.gameMaster:Play("base:audio/gamemaster/dlg_gm_init_04.wav", function () self.uiButton4.enabled = true end)
+			self.uiButton4.enabled = false
+			game.gameMaster:Play("base:audio/gamemaster/dlg_gm_init_04.wav", function () self.uiButton4.enabled = true end)
 
-    end
+		end
+	end
 
 end
 
@@ -185,65 +187,67 @@ end
 
 function UTGame.Ui.Connected:OnOpen()
 
-    -- if the proxy device is waiting for a revision update,
-    -- push a notification and confirmation window
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		-- if the proxy device is waiting for a revision update,
+		-- push a notification and confirmation window
 
-    if (engine.libraries.usb.proxy.revisionUpdate) then
+		if (proxy.revisionUpdate) then
 
-        assert(not engine.libraries.usb.proxy.initialized)
-        assert(0 == engine.libraries.usb.proxy.revisionUpdate)
+			assert(not proxy.initialized)
+			assert(0 == proxy.revisionUpdate)
 
-        if (self.uiButton4) then self.uiButton4.enabled = false end
+			if (self.uiButton4) then self.uiButton4.enabled = false end
 
-        local uiPopup = UIPopupWindow:New()
-        uiPopup.icon = "base:video/uianimatedbutton_settings.avi"
+			local uiPopup = UIPopupWindow:New()
+			uiPopup.icon = "base:video/uianimatedbutton_settings.avi"
 
-        uiPopup.title = l "con006"
-        uiPopup.text = l "con009"
+			uiPopup.title = l "con006"
+			uiPopup.text = l "con009"
 
-        -- buttons
+			-- buttons
 
-        uiPopup.uiButton2 = uiPopup:AddComponent(UIButton:New(), "uiButton2")
-        uiPopup.uiButton2.rectangle = UIPopupWindow.buttonRectangles[2]
-        uiPopup.uiButton2.text = l "but019"
+			uiPopup.uiButton2 = uiPopup:AddComponent(UIButton:New(), "uiButton2")
+			uiPopup.uiButton2.rectangle = UIPopupWindow.buttonRectangles[2]
+			uiPopup.uiButton2.text = l "but019"
 
-        uiPopup.uiButton2.OnAction = function ()
-            game:PostStateChange("revision")
-        end
+			uiPopup.uiButton2.OnAction = function ()
+				game:PostStateChange("revision")
+			end
 
-        UIManager.stack:Push(uiPopup)
-        --game.gameMaster:Play("base:audio/gamemaster/dlg_gm_init_03.wav")
+			UIManager.stack:Push(uiPopup)
+			--game.gameMaster:Play("base:audio/gamemaster/dlg_gm_init_03.wav")
 
-    elseif (not engine.libraries.usb.proxy.revision) then
+		elseif (not proxy.revision) then
 
-    -- if we did not retrieve the proxy's firmware revision yet,
-    -- push a notification window
+		-- if we did not retrieve the proxy's firmware revision yet,
+		-- push a notification window
 
-        local uiPopup = UIPopupWindow:New()
-        uiPopup.icon = "base:video/uianimatedbutton_settings.avi"
+			local uiPopup = UIPopupWindow:New()
+			uiPopup.icon = "base:video/uianimatedbutton_settings.avi"
 
-        uiPopup.title = l "con006"
-        uiPopup.text = l "con008"
+			uiPopup.title = l "con006"
+			uiPopup.text = l "con008"
 
-        uiPopup.Update = function ()
+			uiPopup.Update = function ()
 
-            -- wait for the revision ...
+				-- wait for the revision ...
 
-            if (engine.libraries.usb.proxy and engine.libraries.usb.proxy.revision) then
+				if (proxy and proxy.revision) then
 
-                UIManager.stack:Pop()
-                self:CheckForRevisionCandidate()
+					UIManager.stack:Pop()
+					self:CheckForRevisionCandidate()
 
-            end
-        end
+				end
+			end
 
-        UIManager.stack:Push(uiPopup)
+			UIManager.stack:Push(uiPopup)
 
-    else
+		else
 
-        self:CheckForRevisionCandidate()
+			self:CheckForRevisionCandidate()
 
-    end
+		end
+	end
 
 end
 
@@ -281,13 +285,15 @@ function UTGame.Ui.Connected:Update()
 
 				-- send a ping message to check fake gun and REBOOT
 
-				if (math.mod(self.counter, 2) == 0) then
-					quartz.system.usb.sendmessage(engine.libraries.usb.proxy.handle, {0x01, 0xff, 0x86, 0x00})
-				else
-					quartz.system.usb.sendmessage(engine.libraries.usb.proxy.handle, {0x00, 0xff, 0x06})
+				for index, proxy in ipairs(engine.libraries.usb.proxies) do
+					if (math.mod(self.counter, 2) == 0) then
+						quartz.system.usb.sendmessage(proxy.handle, {0x01, 0xff, 0x86, 0x00})
+					else
+						quartz.system.usb.sendmessage(proxy.handle, {0x00, 0xff, 0x06})
+					end
 				end
 
-				self.timer = 250000
+				self.timer = 500000
 				self.counter = self.counter - 1
 
 			end

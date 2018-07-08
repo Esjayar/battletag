@@ -79,12 +79,56 @@ function UTGame:__ctor(...)
         ["l-volume:music"] = 5, ["volume:music"] = 0.357,
         ["l-volume:sfx"] = 2, ["volume:sfx"] = 0.25,
         ["l-volume:gm"] = 5, ["volume:gm"] = 0.625,
+        ["gmtalkative"] = 1,
+        ["l-volume:gd"] = 8, ["volume:gd"] = 0.625,
         ["l-volume:blaster"] = 0, ["volume:blaster"] = 0,
+        
     }
 
     self.settings.addons = {
 
         ["medkitPack"] = 0,
+        ["customPack"] = 0,
+    }
+    
+    self.settings.GameSettings = {
+
+        ["protectedmode"] = 1,
+        ["playernumbermod"] = 0,
+        ["unregister"] = 0,
+        ["reconnect"] = 2,
+		["vestdisconnect"] = 1,
+    }
+    
+    self.settings.ActivitySettings = {
+
+        ["beamPower"] = 3,
+		["teampoints"] = 2,
+        ["playerpoints"] = 1,
+        ["assist"] = 1,
+        ["preventlaunch"] = 1,
+        ["teamdefaults"] = 0,
+        ["gameLaunch"] = 1,
+		["countdown"] = 10,
+    }
+    
+    self.settings.UiSettings = {
+
+        ["slideBegin"] = true,
+        ["slideEnd"] = false,
+        ["playerslotgrid"] = 0,
+        ["nbplayerslot"] = 12,
+        ["teamribbon"] = 0,
+		["aspectratio"] = 0,
+		["teamcolors"] = 0,
+		["finalranking"] = 0,
+		["lastgame"] = 1,
+    }
+
+    self.settings.TestSettings = {
+
+        ["roundloopcycle"] = 100000,
+        ["bytecodeoverride"] = 0,
     }
 
     self.settings.registers = {
@@ -93,6 +137,10 @@ function UTGame:__ctor(...)
     }
     
     self.settings.activities = {
+    
+    }
+    
+    self.settings.advactivities = {
     
     }
 
@@ -281,6 +329,50 @@ local settings = {
 	for key, value in pairs(self.settings.addons) do
 		settingsString = settingsString .. '        ["' .. key  .. '"] = ' .. tostring(value) .. ',\n'
 	end
+	
+    -- Game Settings
+
+	settingsString = settingsString .. [[
+	},
+	GameSettings = {
+]]
+
+	for key, value in pairs(self.settings.GameSettings) do
+		settingsString = settingsString .. '        ["' .. key  .. '"] = ' .. tostring(value) .. ',\n'
+	end
+	
+    -- Activity Settings
+
+	settingsString = settingsString .. [[
+	},
+	ActivitySettings = {
+]]
+
+	for key, value in pairs(self.settings.ActivitySettings) do
+		settingsString = settingsString .. '        ["' .. key  .. '"] = ' .. tostring(value) .. ',\n'
+	end
+	
+    -- Ui Settings
+
+	settingsString = settingsString .. [[
+	},
+	UiSettings = {
+]]
+
+	for key, value in pairs(self.settings.UiSettings) do
+		settingsString = settingsString .. '        ["' .. key  .. '"] = ' .. tostring(value) .. ',\n'
+	end
+
+    -- Test Settings
+
+	settingsString = settingsString .. [[
+	},
+	TestSettings = {
+]]
+
+	for key, value in pairs(self.settings.TestSettings) do
+		settingsString = settingsString .. '        ["' .. key  .. '"] = ' .. tostring(value) .. ',\n'
+	end
 
 	-- registers
 
@@ -310,6 +402,27 @@ local settings = {
 		settingsString = settingsString .. '        ["' .. key  .. '"] = {'
 
 		for key, value in pairs(self.settings.activities[key]) do
+			settingsString = settingsString .. '        ["' .. key  .. '"] = ' .. tostring(value) .. ','
+		end
+
+	    settingsString = settingsString .. '},\n'
+
+	end
+
+    settingsString = settingsString .. [[
+	}, 
+	advactivities = {
+]]
+
+    if (not self.settings.advactivities) then
+        self.settings.advactivities = {}
+    end
+
+	for key, value in pairs(self.settings.advactivities) do
+
+		settingsString = settingsString .. '        ["' .. key  .. '"] = {'
+
+		for key, value in pairs(self.settings.advactivities[key]) do
 			settingsString = settingsString .. '        ["' .. key  .. '"] = ' .. tostring(value) .. ','
 		end
 

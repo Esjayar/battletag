@@ -76,19 +76,21 @@ function UTActivity.State.Bytecode:Begin()
 	-- register	to proxy message received
 
     assert(engine.libraries.usb)
-    assert(engine.libraries.usb.proxy)
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		assert(proxy)
 
-    -- decrease the timings on the device pinger,
-    -- so that we can detect device deconnections a little bit faster
+		-- decrease the timings on the device pinger,
+		-- so that we can detect device deconnections a little bit faster
 
-    assert(engine.libraries.usb.proxy.processes.devicePinger)
-    --engine.libraries.usb.proxy.processes.devicePinger:Reset(2000000, 4000000, 500000)
-    engine.libraries.usb.proxy.processes.devicePinger:Reset(4000000, 8000000, 500000)
+		assert(proxy.processes.devicePinger)
+		--proxy.processes.devicePinger:Reset(2000000, 4000000, 500000)
+		proxy.processes.devicePinger:Reset(4000000, 8000000, 500000)
 
-	-- event from proxy
+		-- event from proxy
 
-	engine.libraries.usb.proxy._DispatchMessage:Add(self, UTActivity.State.Bytecode.OnMessageReceived)	
-    engine.libraries.usb.proxy._DeviceRemoved:Add(self, UTActivity.State.Bytecode.OnDeviceRemoved)
+		proxy._DispatchMessage:Add(self, UTActivity.State.Bytecode.OnMessageReceived)	
+		proxy._DeviceRemoved:Add(self, UTActivity.State.Bytecode.OnDeviceRemoved)
+	end
 
 	-- stop bytecode sending
 
@@ -127,7 +129,7 @@ function UTActivity.State.Bytecode:CreateNextMessage()
 		-- write msg
 		for i = 1, msgSize do
 
-			if ((i + self.offset) <= #self.TOC) then
+			if (i + self.offset <= #self.TOC) then
 				self.msg[i + 6] = self.TOC[i]
 			else
 				self.msg[i + 6] = self.byteCode[i + self.offset - #self.TOC]
@@ -162,16 +164,18 @@ function UTActivity.State.Bytecode:End()
 
     -- reset the timings on the device pinger,
 
-    if (engine.libraries.usb.proxy) then
-    
-		assert(engine.libraries.usb.proxy.processes.devicePinger)
-		engine.libraries.usb.proxy.processes.devicePinger:Reset()
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		if (proxy) then
 		
-		-- unregister to proxy message received
+			assert(proxy.processes.devicePinger)
+			proxy.processes.devicePinger:Reset()
+			
+			-- unregister to proxy message received
 
-		engine.libraries.usb.proxy._DispatchMessage:Remove(self, UTActivity.State.Bytecode.OnMessageReceived)	
-		engine.libraries.usb.proxy._DeviceRemoved:Remove(self, UTActivity.State.Bytecode.OnDeviceRemoved)
+			proxy._DispatchMessage:Remove(self, UTActivity.State.Bytecode.OnMessageReceived)	
+			proxy._DeviceRemoved:Remove(self, UTActivity.State.Bytecode.OnDeviceRemoved)
 
+		end
 	end
 	-- pop menu
 
@@ -183,13 +187,13 @@ end
 
 function UTActivity.State.Bytecode:OnDeviceRemoved(device)
 
-	-- a device from my list has been removde : STOP right now and go back to main menu
+	-- a device from my list has been removed : STOP right now and go back to main menu
 
 	if (not self.stopSending) then
 
 		for _, player in ipairs(activity.players) do
 		
-			if (player.rfGunDevice and (player.rfGunDevice == device)) then
+			if (player.rfGunDevice and player.rfGunDevice == device) then
 				
 					self.uiPopup = UIPopupWindow:New()
 
@@ -252,10 +256,11 @@ function UTActivity.State.Bytecode:OnMessageReceived(device, addressee, command,
 
             local acknowledge = true
 	        for _, player in ipairs(activity.players) do
-
+				self.message = player.profile.name
         		if (player.rfGunDevice and not player.rfGunDevice.acknowledge) then 
 
         		    acknowledge = false
+					
         		    break
 
 		        end
@@ -317,9 +322,13 @@ function UTActivity.State.Bytecode:Update()
 	-- send msg each 250ms
 
 	local interval = 250000
-	if (#activity.players > 8) then
-		interval = 350000
+    local numberOfPlayers = 0
+	for _, player in ipairs(activity.players) do
+		if (not player.rfGunDevice.timedout) then
+		    numberOfPlayers = numberOfPlayers + 1
+		end
 	end
+	interval = 21000 + (numberOfPlayers*16000)
 
     local elapsedTime = quartz.system.time.gettimemicroseconds() - self.timer
     if (elapsedTime > interval) then
@@ -327,7 +336,9 @@ function UTActivity.State.Bytecode:Update()
 		-- send current msg
 
 		self.timer = quartz.system.time.gettimemicroseconds()
-		quartz.system.usb.sendmessage(engine.libraries.usb.proxy.handle, self.msg)
+		for index, proxy in ipairs(engine.libraries.usb.proxies) do
+			quartz.system.usb.sendmessage(proxy.handle, self.msg)
+		end
 
     end
 

@@ -27,6 +27,8 @@ UITeamPanel.headers = {
     blue = "base:texture/ui/leaderboard_blueline.tga",
     yellow = "base:texture/ui/leaderboard_yellowline.tga",
     green = "base:texture/ui/leaderboard_greenline.tga",
+    silver = "base:texture/ui/leaderboard_silverline.tga",
+    purple = "base:texture/ui/leaderboard_purpleline.tga",
 
 }
 

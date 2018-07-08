@@ -23,7 +23,7 @@
 
 --[[ Dependencies ----------------------------------------------------------]]
 
--- ?? QUELLE CONVENTION DE NOMAGE POUR LES ACTIVITÉS,
+-- ?? QUELLE CONVENTION DE NOMAGE POUR LES ACTIVITï¿½S,
 -- ?? ON N'UTILISE PAS DE UNDERSCORE NULLE PART AILLEURS
 
 --require "UAWip"
@@ -65,6 +65,8 @@ end
 
     local directory = "game:../packages/" .. self.nfo.__directory .. "/data/"
     quartz.system.filesystem.registerpath(directory)
+    
+    directoryselected = directory
 
     require(self.nfo.class)
 
@@ -81,14 +83,25 @@ end
 
 			activity.settings[key] = value
 
-			if ((game.settings.addons.medkitPack == 0) and (key == "numberOfBase" or key == "numberOfTeams") and (value > 2)) then
+			if (game.settings.addons.medkitPack == 0 and key == "numberOfBase" or key == "numberOfTeams" and value > 2) then
 				activity.settings[key] = 2
 			end
-			
-			if ((game.settings.addons.medkitPack == 0) and (key == "medkit") and (value > 0)) then
+			if (game.settings.addons.customPack == 0 and key == "numberOfBase" or key == "numberOfTeams" and value > 4) then
+				activity.settings[key] = 4
+			end
+			if (game.settings.addons.medkitPack == 0 and key == "medkit" and value > 0) then
 				activity.settings[key] = 0
 			end
 
+        end
+        
+        if (game.settings.advactivities and game.settings.advactivities[activity.name]) then
+        	for key, value in pairs(game.settings.advactivities[activity.name]) do
+
+				activity.advancedsettings[key] = value
+
+        	end
+        	
         end
 
     end  
@@ -104,6 +117,8 @@ end
         -- skips title after loading
 
         if (arg[2] == "playersmanagement") then activity.forward = "playersmanagement"
+            print("FORWARD")
+        elseif (arg[2] == "settings") then activity.forward2 = "settings"
             print("FORWARD")
         elseif (arg[2] == "advertised") then activity.advertised = true
             print("ADVERTISED")

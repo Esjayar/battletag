@@ -34,7 +34,9 @@ end
 function UTGame.State.Connected:Begin()
 
     assert(engine.libraries.usb)
-    assert(engine.libraries.usb.proxy)
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		assert(proxy)
+	end
 
     print("UTGame.State.Connected:Begin()")
 
@@ -56,5 +58,9 @@ function UTGame.State.Connected:End()
 
     UIMenuManager.stack:Popa()
     UIManager.stack:Popa()
+    
+    for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		proxy:Unlock()
+	end
 
 end

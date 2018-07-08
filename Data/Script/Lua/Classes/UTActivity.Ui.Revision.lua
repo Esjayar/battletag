@@ -33,8 +33,8 @@ function UTActivity.Ui.Revision:__ctor(...)
 
 	-- animate	
 	
-	self.slideBegin = true
-	self.slideEnd = true
+	self.slideBegin = game.settings.UiSettings.slideBegin
+	self.slideEnd = game.settings.UiSettings.slideEnd
 	
 	-- window settings
 
@@ -71,20 +71,22 @@ function UTActivity.Ui.Revision:__ctor(...)
     self.uiGlobalProgress.color = UIComponent.colors.red
 
     assert(engine.libraries.usb)
-    assert(engine.libraries.usb.proxy)
-    assert(engine.libraries.usb.proxy.handle)
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		assert(proxy)
+		assert(proxy.handle)
+	end
 
     -- buttons,
 
-    -- uiButton4: continue
+    -- uiButton5: continue
 
-    self.uiButton4 = self:AddComponent(UIButton:New(), "uiButton4")
-    self.uiButton4.rectangle = UIMenuWindow.buttonRectangles[4]
-    self.uiButton4.text = l"but019"
+    self.uiButton5 = self:AddComponent(UIButton:New(), "uiButton5")
+    self.uiButton5.rectangle = UIMenuWindow.buttonRectangles[5]
+    self.uiButton5.text = l"but019"
 
-    self.uiButton4.enabled = false
+    self.uiButton5.enabled = false
 
-    self.uiButton4.OnAction = function (self) game:PostStateChange("bytecode") end
+    self.uiButton5.OnAction = function (self) game:PostStateChange("bytecode") end
 
 end
 
@@ -126,9 +128,11 @@ end
 
 function UTActivity.Ui.Revision:OnClose()
 
-    if (engine.libraries.usb.proxy) then
-        engine.libraries.usb.proxy._DeviceRemoved:Remove(self, UTActivity.Ui.Revision.OnDeviceRemoved)
-    end
+    for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		if (proxy) then
+			proxy._DeviceRemoved:Remove(self, UTActivity.Ui.Revision.OnDeviceRemoved)
+		end
+	end
 
 end
 
@@ -141,7 +145,9 @@ end
 
 function UTActivity.Ui.Revision:OnFocus()
 
-    self.flashMemoryManager = engine.libraries.usb.proxy.processes.deviceFlashMemoryManager
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		self.flashMemoryManager = proxy.processes.deviceFlashMemoryManager
+	end
     assert(self.flashMemoryManager)
 
     self.uiGlobalProgress.minimum = 0
@@ -158,8 +164,10 @@ function UTActivity.Ui.Revision:OnOpen()
 
     -- check for disconnected devices
 
-    assert(engine.libraries.usb.proxy)
-    engine.libraries.usb.proxy._DeviceRemoved:Add(self, UTActivity.Ui.Revision.OnDeviceRemoved)
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		assert(proxy)
+		proxy._DeviceRemoved:Add(self, UTActivity.Ui.Revision.OnDeviceRemoved)
+	end
 
 end
 

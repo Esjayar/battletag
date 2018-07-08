@@ -73,18 +73,18 @@ function UAIntroduction.Ui.Title:__ctor(...)
 
 	end
 
-	-- uiButton4:
+	-- uiButton5:
 	-- move forward to batteries sequence
 
-    self.uiButton4 = self:AddComponent(UIButton:New(), "uiButton4")
-	self.uiButton4.rectangle = UIMenuWindow.buttonRectangles[4]
-	self.uiButton4.text = l"but006"
-	self.uiButton4.tip = l"tip005"
+    self.uiButton5 = self:AddComponent(UIButton:New(), "uiButton5")
+	self.uiButton5.rectangle = UIMenuWindow.buttonRectangles[5]
+	self.uiButton5.text = l"but006"
+	self.uiButton5.tip = l"tip005"
 
-	self.uiButton4.OnAction = function (self) activity:PostStateChange("ui", UAIntroduction.Ui.Seq_Batteries) end
+	self.uiButton5.OnAction = function (self) activity:PostStateChange("ui", UAIntroduction.Ui.Seq_Batteries) end
 
-	self.uiButton4.enabled = false
-	game.gameMaster:Play("base:audio/gamemaster/dlg_gm_init_01.wav", function () self.uiButton4.enabled = true end)
+	self.uiButton5.enabled = false
+	game.gameMaster:Play("base:audio/gamemaster/dlg_gm_init_01.wav", function () self.uiButton5.enabled = true end)
 
 end
 

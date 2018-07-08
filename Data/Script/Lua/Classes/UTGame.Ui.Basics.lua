@@ -58,7 +58,7 @@ function UTGame.Ui.Basics:__ctor(...)
 
 		uiBasic.rectangle = self.uiWindows.clientRectangle
 		uiBasic.rectangleBitmap = {-14 + uiBasic.rectangle[1],20 + uiBasic.rectangle[2],-14 + uiBasic.rectangle[1] + 400,20 + uiBasic.rectangle[2] + 231}
-		uiBasic.rectangleText = {uiBasic.rectangle[1] + 16, uiBasic.rectangle[4] - 150, uiBasic.rectangle[3] - 16, uiBasic.rectangle[4]}
+		uiBasic.rectangleText = {uiBasic.rectangle[1] + 16, uiBasic.rectangle[4] - 170, uiBasic.rectangle[3] - 16, uiBasic.rectangle[4]}
 		uiBasic.title = UTBasics.slides[index].title
 		uiBasic.visible = false
 

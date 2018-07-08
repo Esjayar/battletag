@@ -48,7 +48,9 @@ function UATheWolf.State.RoundLoop:Begin()
 	game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_WOLF_01_alt.wav",
 											"base:audio/gamemaster/DLG_GM_WOLF_01.wav",}, priority = 4 })
 
-	game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_45.wav"},offset = activity.settings.playtime * 60 - 60,})
+	if (activity.settings.playtime >= 2) then
+		game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_45.wav"},offset = activity.settings.playtime * 60 - 60,})
+	end
 						 
 	game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_48.wav",
 											 "base:audio/gamemaster/DLG_GM_GLOBAL_49.wav"},
@@ -79,11 +81,14 @@ function UATheWolf.State.RoundLoop:Begin()
 	for i, player in ipairs(activity.match.players) do
 		table.insert(self.list, math.random(i), player)
 	end
-	local player = self.list[1]
-	activity.wolf = player
-	activity.gameplayData = { 0x00, activity.wolf.data.heap.id, 0x00, 0x00 }	
+	for i = 1, activity.settings.nbwolves do
+		self.list[i].wolf = true
+		self.list[i].gameplayData[2] = 1
+		activity.uiAFP:PushLine(self.list[i].profile.name .. " " .. l"ingame032", UIComponent.colors.gray, "base:texture/Ui/Icons/16x/wolf.tga")
+	end
+	activity.gameplayData = { 0x00, 0x00 }
+	game.gameplayData = { 0x00, 0x00, 0x00, 0x00 }
 	self.wolfTime = quartz.system.time.gettimemicroseconds()
-	activity.uiAFP:PushLine(player.profile.name .. " " .. l"ingame032", UIComponent.colors.gray, "base:texture/Ui/Icons/16x/wolf.tga")
 	game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_WOLF_02.wav"}, priority = 1 })
 											
 end
@@ -105,19 +110,34 @@ function UATheWolf.State.RoundLoop:OnDispatchMessage(device, addressee, command,
 			-- nb hit
 		
 			local nbHit = (arg[2] * 256) + arg[3]
+			if (nbHit == 0) then
+				device.owner.data.heap.nbHitbackup = device.owner.data.heap.nbHit
+			end
 
-			if (nbHit > device.owner.data.heap.nbHit) then
+			if (nbHit + device.owner.data.heap.nbHitbackup > device.owner.data.heap.nbHit) then
 
 				-- set new wolf
-
-				activity.wolf = device.owner
-				activity.wolf.wolfTimer = 0
-				local bonus = (arg[6] * 256) + arg[7]
-				activity.gameplayData = { 0x00, activity.wolf.data.heap.id, 0x00, bonus }
-				activity.uiAFP:PushLine(device.owner.profile.name .. " " .. l"ingame032", UIComponent.colors.gray, "base:texture/Ui/Icons/16x/wolf.tga")
-				game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_WOLF_02.wav"}, priority = 1 })
-				device.owner.data.heap.nbHit = nbHit
-
+				local curIndex = math.max(0, nbHit + device.owner.data.heap.nbHitbackup - device.owner.data.heap.nbHit)
+				while (curIndex > 0 ) do
+					local shooter = activity.players[arg[math.min(12, curIndex + 7)] - 1]
+					local shooterDevice = shooter.rfGunDevice
+					curIndex = curIndex - 1
+					if (shooterDevice and shooterDevice.owner) then
+						-- get shooter
+						local shooter = shooterDevice.owner
+						if (shooter.gameplayData[2] == 1 and device.owner.gameplayData[2] == 0) then
+							device.owner.gameplayData[2] = 1
+							shooter.gameplayData[2] = 0
+							device.owner.wolf = true
+							shooter.wolf = false
+							device.owner.wolfTimer = 0
+							local bonus = (arg[6] * 256) + arg[7]
+							activity.gameplayData[2] = bonus
+							activity.uiAFP:PushLine(device.owner.profile.name .. " " .. l"ingame032", UIComponent.colors.gray, "base:texture/Ui/Icons/16x/wolf.tga")
+							game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_WOLF_02.wav"}, priority = 1 })
+						end
+					end
+				end
 			else
 
 				-- scoring
@@ -140,6 +160,7 @@ function UATheWolf.State.RoundLoop:OnDispatchMessage(device, addressee, command,
 				end
 
 			end
+			device.owner.data.heap.nbHit = nbHit + device.owner.data.heap.nbHitbackup
 
 		end
 
@@ -164,22 +185,24 @@ function UATheWolf.State.RoundLoop:Update()
     local wolfElapsedTime = quartz.system.time.gettimemicroseconds() - self.wolfTime
     self.wolfTime = quartz.system.time.gettimemicroseconds()
     
-	if (activity.wolf) then
-		local newTimer = (activity.wolf.wolfTimer or 0) + wolfElapsedTime
-		if (activity.wolf.rfGunDevice) then
-			local checkTimer = {10, 5, 20}
-			local index = 2
-			if (newTimer > (7 * 1000000)) then index = 1
+	for _, player in ipairs(activity.match.challengers) do
+		if (player.wolf and activity.settings.nbwolves == 1) then
+			local newTimer = (player.wolfTimer or 0) + wolfElapsedTime
+			if (player.rfGunDevice) then
+				local checkTimer = {10, 5, 20}
+				local index = 2
+				if (newTimer > 7 * 1000000) then index = 1
+				end
+				if (newTimer > 15 * 1000000) then index = 3
+				end
+				local playerId = 2 + player.rfGunDevice.classId 
+				if (newTimer > checkTimer[index] * 1000000 and player.wolfTimer < checkTimer[index] * 1000000) then
+					game.gameMaster:RegisterSound({paths = {"base:audio/gamemaster/DLG_GM_WOLF_0" .. playerId .. ".wav"}, priority = 0 })
+					game.gameMaster:RegisterSound({paths = {"base:audio/gamemaster/DLG_GM_WOLF_1" .. index .. ".wav"}, priority = 1})
+				end
 			end
-			if (newTimer > (15 * 1000000)) then index = 3
-			end
-			local playerId = 2 + activity.wolf.rfGunDevice.classId 
-			if ((newTimer > checkTimer[index] * 1000000) and (activity.wolf.wolfTimer < checkTimer[index] * 1000000)) then
-				game.gameMaster:RegisterSound({paths = {"base:audio/gamemaster/DLG_GM_WOLF_0" .. playerId .. ".wav"}, priority = 0 })
-				game.gameMaster:RegisterSound({paths = {"base:audio/gamemaster/DLG_GM_WOLF_1" .. index .. ".wav"}, priority = 1})
-			end
+			player.wolfTimer = newTimer
 		end
-		activity.wolf.wolfTimer = newTimer
 	end
 
 end

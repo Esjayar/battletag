@@ -33,10 +33,15 @@ UATagThenShoot.State = {}
 
 UATagThenShoot.minNumberOfPlayer = 1
 
-UATagThenShoot.bytecodePath = "game:../packages/tagthenshoot/data/script/bytecode/UATagThenShoot.ByteCode.lua"
 UATagThenShoot.bitmap = "base:texture/ui/loading_tagnshoot.tga"
 
 UATagThenShoot.countdownDuration = 3
+
+UATagThenShoot.horizontalPadding = 36
+
+UATagThenShoot.slots = 9
+
+UATagThenShoot.playeroffset = 17
 
 -- SD07 snd
 UATagThenShoot.gameoverSnd = { 0x53, 0x44, 0x30, 0x37 }
@@ -49,6 +54,7 @@ function UATagThenShoot:__ctor(...)
 
     self.name = l"title001"
     self.category = UTActivity.categories.single
+	self.nodual = true
 
     self.textScoring = l"score001"
     self.textRules = l"rules006"
@@ -60,9 +66,8 @@ function UATagThenShoot:__ctor(...)
 
         [1] = { title = l"titlemen006", options = {
 
-            [1] = { label = l"goption015", tip = l "tip029", choices = { { value = 2 }, { value = 4, conditional = true } }, index = "numberOfBase", condition = function (self) return (1 == game.settings.addons.medkitPack) end },
-            [2] = { label = l"goption003", tip = l "tip026", choices = { { value = 1, icon = "base:texture/ui/components/uiradiobutton_house.tga" }, { value = 2 }, { value = 3}, { value = 4 }, { value = 5, icon = "base:texture/ui/components/uiradiobutton_sun.tga" } }, index = "beamPower" },
-            [3] = { label = l"goption014", tip = l "tip004", choices = { { value = 0, displayMode = "large", text = l"oth076"}, { value = 1, displayMode = "large", text = l"oth075" } }, index = "assist" },
+            [1] = { displayMode = nil, label = l"goption001", tip = l"tip027", choices = { { value = 1 }, { value = 2 }, { value = 3 }, { value = 4 }, { value = 5 }, { value = 6 } }, index = "playtime", },
+            [2] = { label = l"goption015", tip = l "tip029", choices = { { value = 2 }, { value = 4, conditional = true } }, index = "numberOfBase", condition = function (self) return (1 == game.settings.addons.medkitPack) end },
 
             },
      --   },
@@ -73,11 +78,8 @@ function UATagThenShoot:__ctor(...)
 
         -- keyed settings
 
-        playtime = 1,
+        playtime = 3,
         numberOfBase = 2 + 2 * game.settings.addons.medkitPack,
-        gameLaunch = 1,
-        beamPower = 3,
-        assist = 1,
 
 		-- no team
 
@@ -116,7 +118,6 @@ function UATagThenShoot:__ctor(...)
 
     self.configData = {
 		"numberOfBase",
-		"assist",
     }
 
     -- details columms descriptor
@@ -128,14 +129,14 @@ function UATagThenShoot:__ctor(...)
     self.states["roundloop"] = UATagThenShoot.State.RoundLoop:New(self)
     self.states["playerssetup"] = UATagThenShoot.State.PlayersSetup:New(self)
 
-    -- ?? LES SETTINGS SONT RENSEIGNÉS DANS LE CONSTRUCTEUR DE L'ACTIVITÉ
-    -- ?? LES PARAMÈTRES (DISPLAYMODE, TEXTE, ICONE...) DES COLONES DE GRID SONT RENSEIGNÉS DANS LE COMPOSANT DÉDIÉ DU LEADERBOARD
-    -- ?? LES ATTRIBUTS - HEAP, BAKED - DES ENTITÉS SONT RENSEIGNÉS PAR 2 APPELS DE FONCTION DÉDIÉS DANS L'ACTIVITÉ (À SURCHARGER)
-    -- ?? POUR LES DONNÉES DE CONFIGURATION DE BYTECODE, CE SERA SUREMENT PAREIL QUE POUR LES ATTRIBUTS = FONCTION DÉDIÉ (À SURCHARGER)
+    -- ?? LES SETTINGS SONT RENSEIGNï¿½S DANS LE CONSTRUCTEUR DE L'ACTIVITï¿½
+    -- ?? LES PARAMï¿½TRES (DISPLAYMODE, TEXTE, ICONE...) DES COLONES DE GRID SONT RENSEIGNï¿½S DANS LE COMPOSANT Dï¿½DIï¿½ DU LEADERBOARD
+    -- ?? LES ATTRIBUTS - HEAP, BAKED - DES ENTITï¿½S SONT RENSEIGNï¿½S PAR 2 APPELS DE FONCTION Dï¿½DIï¿½S DANS L'ACTIVITï¿½ (ï¿½ SURCHARGER)
+    -- ?? POUR LES DONNï¿½ES DE CONFIGURATION DE BYTECODE, CE SERA SUREMENT PAREIL QUE POUR LES ATTRIBUTS = FONCTION Dï¿½DIï¿½ (ï¿½ SURCHARGER)
     -- ?? POUR LE LEADERBOARD:
     -- ??       - SURCHARGER LA PAGE QUI UTILISE LE LEADERBOARD STANDARD,
-    -- ??       - RAJOUTER DES PARAMÈTRES (DISPLAYMODE, TEXTE, ICONE...) DES COLONES DE GRID SI NÉCESSAIRE EN + DE CEUX PAR DÉFAUT (LIFE, HIT, AMMO...)
-    -- ??       - RENSEIGNER QUELS ATTRIBUTS ON SOUHAITE REPRÉSENTER PARMIS CEUX EXISTANT EN HEAP
+    -- ??       - RAJOUTER DES PARAMï¿½TRES (DISPLAYMODE, TEXTE, ICONE...) DES COLONES DE GRID SI Nï¿½CESSAIRE EN + DE CEUX PAR Dï¿½FAUT (LIFE, HIT, AMMO...)
+    -- ??       - RENSEIGNER QUELS ATTRIBUTS ON SOUHAITE REPRï¿½SENTER PARMIS CEUX EXISTANT EN HEAP
 
 
     -- gameplay data send
@@ -170,16 +171,19 @@ function UATagThenShoot:InitEntityHeapData(entity, ranking)
 
     UTActivity:InitEntityHeapData(entity, ranking)
 
-	entity.data.heap.score = 0
-	entity.data.heap.ranking = ranking
+	entity.gameplayData = { 0x00, 0x00 }
 	
-	-- init entity specific data
+	if (not game.gameMaster.ingame) then
+		entity.data.heap.score = 0
+		entity.data.heap.ranking = ranking
+	
+		-- init entity specific data
 
-	entity.data.heap.nbHit = 0
-	entity.data.heap.state = 0
-	entity.data.heap.tagging = 1
-	entity.data.heap.numberOfBase = activity.settings.numberOfBase
-	entity.data.heap.assist = activity.settings.assist
+		entity.data.heap.nbHit = 0
+		entity.data.heap.state = 0
+		entity.data.heap.tagging = 1
+		entity.data.heap.numberOfBase = activity.settings.numberOfBase
+	end
 
 end
 

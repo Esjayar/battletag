@@ -93,13 +93,15 @@ function UAStarterFrag.State.RoundLoop:OnDispatchMessage(device, addressee, comm
 			local ammunitions = (arg[4] * 256) + arg[5]
 						
 			if (ammunitions == 3) then
-				-- throw "We need Ammo! Now" sound		
-				game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_22.wav","base:audio/gamemaster/DLG_GM_GLOBAL_23.wav"},priority = 3,})
+				if (game.settings.audio.gmtalkative == 1) then
+					-- throw "We need Ammo! Now" sound		
+					game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_22.wav","base:audio/gamemaster/DLG_GM_GLOBAL_23.wav"},priority = 3,})
+				end
 			end
 			
 			local clips = (arg[6] * 256) + arg[7]
 
-			if ((device.owner.data.heap.ammunitions < ammunitions and device.owner.data.heap.clips <= clips) or device.owner.data.heap.clips < clips) then
+			if (device.owner.data.heap.ammunitions < ammunitions and device.owner.data.heap.clips <= clips or device.owner.data.heap.clips < clips) then
 				device.owner.data.heap.nbAmmoPack = device.owner.data.heap.nbAmmoPack + 1
 				activity.uiAFP:PushLine(device.owner.profile.name .. " " .. l"ingame006", UIComponent.colors.gray, "base:texture/Ui/Icons/16x/Ammunition.tga")
 			end
@@ -108,8 +110,10 @@ function UAStarterFrag.State.RoundLoop:OnDispatchMessage(device, addressee, comm
 				device.owner.data.heap.nbShot = device.owner.data.heap.nbShot + (device.owner.data.heap.ammunitions - ammunitions)
 				device.owner.data.heap.hitLost = device.owner.data.heap.hitLost + 1
 				if (device.owner.data.heap.hitLost == 5) then
-					-- throw "T'es aveugle" sound	
-					game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_43.wav","base:audio/gamemaster/DLG_GM_GLOBAL_44.wav"},priority = 2,})
+					if (game.settings.audio.gmtalkative == 1) then
+						-- throw "T'es aveugle" sound	
+						game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_43.wav","base:audio/gamemaster/DLG_GM_GLOBAL_44.wav"},priority = 2,})
+					end
 					device.owner.data.heap.hitLost = 0
 				end
 				if (device.owner.data.heap.hitLost >= 2) then
@@ -142,8 +146,10 @@ function UAStarterFrag.State.RoundLoop:OnDispatchMessage(device, addressee, comm
 						local time = quartz.system.time.gettimemicroseconds()
 					
 						if (time - self.shootCountTime < 10 * 1000000) then
-							-- ouais jsuis a donf
-							game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_24.wav","base:audio/gamemaster/DLG_GM_GLOBAL_25.wav","base:audio/gamemaster/DLG_GM_GLOBAL_121.wav","base:audio/gamemaster/DLG_GM_GLOBAL_133.wav","base:audio/gamemaster/DLG_GM_GLOBAL_134.wav",}, priority = 2, proba = 0.25})
+							if (game.settings.audio.gmtalkative == 1) then
+								-- ouais jsuis a donf
+								game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_24.wav","base:audio/gamemaster/DLG_GM_GLOBAL_25.wav","base:audio/gamemaster/DLG_GM_GLOBAL_121.wav","base:audio/gamemaster/DLG_GM_GLOBAL_133.wav","base:audio/gamemaster/DLG_GM_GLOBAL_134.wav",}, priority = 2, proba = 0.25})
+							end
 						end			
 						
 						self.shootCountTime = time			
@@ -152,14 +158,14 @@ function UAStarterFrag.State.RoundLoop:OnDispatchMessage(device, addressee, comm
 					
 				end
 
-				local curIndex = 7 + nbHit - device.owner.data.heap.nbHit
-				while (device.owner.data.heap.nbHit < nbHit) do
+				local curIndex = math.max(0, nbHit - device.owner.data.heap.nbHit)
+				while (curIndex > 0) do
 
 					-- loose one life
 					device.owner.data.heap.nbHit = device.owner.data.heap.nbHit + 1
 
 					-- get device that shot me
-					local shooterDevice = engine.libraries.usb.proxy.devices.byRadioProtocolId[arg[math.min(12, curIndex)]]
+					local shooterDevice = engine.libraries.usb.proxy.devices.byRadioProtocolId[arg[math.min(12, curIndex + 7)]]
 					curIndex = curIndex - 1			
 					if (shooterDevice) then
 
@@ -173,8 +179,10 @@ function UAStarterFrag.State.RoundLoop:OnDispatchMessage(device, addressee, comm
 							if (shooter.data.heap.lastPlayerShooted == device.owner) then
 								shooter.data.heap.nbHitLastPlayerShooted = shooter.data.heap.nbHitLastPlayerShooted + 1
 								if (shooter.data.heap.nbHitLastPlayerShooted == 3) then
-									-- throw "Tireur d'élite" sound	
-									game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_26.wav","base:audio/gamemaster/DLG_GM_GLOBAL_122.wav","base:audio/gamemaster/DLG_GM_GLOBAL_123.wav","base:audio/gamemaster/DLG_GM_GLOBAL_124.wav",}, priority = 3, proba = 0.33})	
+									if (game.settings.audio.gmtalkative == 1) then
+										-- throw "Tireur d'ï¿½lite" sound	
+										game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_26.wav","base:audio/gamemaster/DLG_GM_GLOBAL_122.wav","base:audio/gamemaster/DLG_GM_GLOBAL_123.wav","base:audio/gamemaster/DLG_GM_GLOBAL_124.wav",}, priority = 3, proba = 0.33})	
+									end
 									shooter.data.heap.nbHitLastPlayerShooted = 0
 								end
 							else

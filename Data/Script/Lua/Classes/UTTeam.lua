@@ -39,6 +39,10 @@ function UTTeam:__ctor(...)
 		details = "base:texture/ui/Detail_LineYellowTeam.tga", detailsHeader = "base:texture/ui/Detail_HeaderYellow.tga" },
     [4] = { icon = "base:texture/ui/leaderboard_greenteam.tga", name = l"oth036", teamColor = "green", color = { 0.05, 0.64, 0.08 }, 
 		details = "base:texture/ui/Detail_LineGreenTeam.tga", detailsHeader = "base:texture/ui/Detail_HeaderGreen.tga" },
+    [5] = { icon = "base:texture/ui/leaderboard_silverteam.tga", name = l"oth092", teamColor = "silver", color = { 0.75, 0.75, 0.75 }, 
+		details = "base:texture/ui/Detail_LineSilverTeam.tga", detailsHeader = "base:texture/ui/Detail_HeaderSilver.tga" },
+    [6] = { icon = "base:texture/ui/leaderboard_purpleteam.tga", name = l"oth093", teamColor = "purple", color = { 0.50, 0.00, 0.50 }, 
+		details = "base:texture/ui/Detail_LinePurpleTeam.tga", detailsHeader = "base:texture/ui/Detail_HeaderPurple.tga" },
     
     default = { icon = "base:texture/ui/leaderboard_redteam.tga", name = "UTTeam", teamColor = "red", color = { 0.85, 0.15, 0.04 },
 		details = "base:texture/ui/Detail_LineRedTeam.tga", detailsHeader = "base:texture/ui/Detail_HeaderRed.tga" },
@@ -50,6 +54,8 @@ function UTTeam:__ctor(...)
     -- listof players within the team
 
     self.players = {}
+
+    UTTeam.profilesbak = UTTeam.profiles
 
 end
 

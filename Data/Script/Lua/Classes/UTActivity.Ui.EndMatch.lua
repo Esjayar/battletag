@@ -197,8 +197,7 @@ function UTActivity.Ui.EndMatch:Update()
 
 	-- button
 
-	--if (self.displayGameover and activity.states["endmatch"].isReady) then self.uiButton1.visible = true
-	if (self.displayGameover) then self.uiButton1.visible = true
-	end
-
+	if (self.displayGameover and activity.states["endmatch"].isReady) then
+        self.uiButton1.visible = true
+    end
 end

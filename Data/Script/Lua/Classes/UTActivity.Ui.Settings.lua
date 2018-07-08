@@ -37,8 +37,9 @@ function UTActivity.Ui.Settings:__ctor(...)
     
 	-- animate	
     
-	self.slideBegin = true
-	self.slideEnd = true
+	self.slideBegin = game.settings.UiSettings.slideBegin and slideanimation
+	self.slideEnd = game.settings.UiSettings.slideEnd and slideanimation
+	slideanimation = true
 	
     -- holds the UIOptions to retrieve them easily
 
@@ -53,7 +54,7 @@ function UTActivity.Ui.Settings:__ctor(...)
     self.uiMultiComponent.rectangle = self.clientRectangle
     
 	self.uiWindow.uiPanel = self.uiMultiComponent:AddComponent(UIPanel:New(), "uiPanel")
-	self.uiWindow.uiPanel.rectangle = { 0, 0, 715, 455 }
+	self.uiWindow.uiPanel.rectangle = { -10, 0, 725, 455 }
 
     -- two pass algorithm
 
@@ -76,6 +77,60 @@ function UTActivity.Ui.Settings:__ctor(...)
 
 	        table.insert(self.uiOptions, uiOption)	        
 	        table.insert(entry.uiOptions, uiOption)
+			uiOption.ChangeValue = function(self, value)
+
+				if (activity.settings[self.option.index] ~= value) then
+					activity.settings[self.option.index] = value
+					if (self.option.index == "energymode" or self.option.index == "respawnhit") then
+						uploadbytecode = true
+						game.settings.TestSettings.bytecodeoverride = 0
+					end
+            		if (self.option.index == "numberOfTeams") then
+            			if (0 == game.settings.addons.medkitPack) then	
+           					if (value > 2 or activity.name == "King of the Hill") then
+            					activity.settings.respawnmode = 1
+            				end
+            			else
+            				if (value > 3 and activity.name == "King of the Hill" and 0 == game.settings.addons.customPack) then
+            					activity.settings.respawnmode = 1
+            				end
+            			end
+            			if (value > 4) then
+            				activity.settings.teamFrag = 1
+            				if (0 == game.settings.addons.customPack) then
+           						activity.settings.respawnmode = 1
+            				end
+            			end
+            			if (value > 2 and game.settings.addons.customPack == 0) then
+            				activity.settings.flagNumber = 0
+            			end
+					end
+					if (self.option.index == "teamFrag" and value == 0 and activity.settings.numberOfTeams > 4 and game.settings.addons.customPack == 0) then
+						activity.settings.numberOfTeams = 4
+					end
+					if (self.option.index == "flagNumber" and game.settings.addons.customPack == 0 and value == 1 and activity.settings.numberOfTeams > 2) then
+						activity.settings.numberOfTeams = 2
+					end
+					if (self.option.index == "bonusmin" and value == 0) then
+						activity.settings.bonusmax = 0
+					end
+					if (self.option.index == "bonusmax" and value > 0) then
+						activity.settings.bonusmin = 25
+					end
+					if (self.option.index == "lifePoints" and activity.advancedsettings.healthhandicap > value) then
+						activity.advancedsettings.healthhandicap = 0
+					end
+					if (self.option.index == "ammunitions" and activity.advancedsettings.ammohandicap > value) then
+						activity.advancedsettings.ammohandicap = 0
+					end
+					if (self.option.index == "clips" and activity.advancedsettings.clipshandicap > value) then
+						activity.advancedsettings.clipshandicap = 0
+					end
+					slideanimation = false
+            		game:SaveSettings()
+					activity:PostStateChange("settings")
+				end
+			end
 
 	    end )
 
@@ -89,7 +144,7 @@ function UTActivity.Ui.Settings:__ctor(...)
 
         -- the height of the panel depends on the number of uiOptions
 
-	    entry.uiPanel.rectangle =  { 0, 0, 695, 30 + (30 * math.ceil(#entry.uiOptions / 2)) + self.optionMargin[2] }
+	    entry.uiPanel.rectangle =  { 0, 0, 715, 30 + 30 * math.ceil(#entry.uiOptions / 2) + self.optionMargin[2] }
 	    entry.uiPanel:MoveTo(position[1], position[2])
 
 	    position[2] = entry.uiPanel.rectangle[4] + self.categoryOffset
@@ -99,10 +154,10 @@ function UTActivity.Ui.Settings:__ctor(...)
 	    table.foreachi(entry.uiOptions, function (index, option)
 
 	        --offset[1] = (index > math.ceil(#entry.uiOptions / 2) and 350) or 10	        
-	        --offset[2] = ((index - 1) == math.ceil(#entry.uiOptions / 2) and 30) or offset[2] + 30
+	        --offset[2] = (index - 1 == math.ceil(#entry.uiOptions / 2) and 30) or offset[2] + 30
 
-            offset[1] = (math.mod(index, 2) == 0 and 350) or 10
-            offset[2] = math.floor((index-1) / 2) * self.optionOffset[2]
+            offset[1] = (math.mod(index, 2) == 0 and 285) or -35
+            offset[2] = math.floor((index - 1) / 2) * self.optionOffset[2]
 
 	        option:MoveTo(offset[1], entry.uiPanel.headerSize + self.optionMargin[2] + offset[2])
 
@@ -131,63 +186,157 @@ function UTActivity.Ui.Settings:__ctor(...)
 		quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
 		quartz.framework.audio.playsound()
     		
-	    activity:PostStateChange("title") 
+	    if (activity.forward2) then
+            game:PostStateChange("selector") 
+		else
+            activity:PostStateChange("title") 
+		end
 	
 	end
+	
+	if (activity.advancedsettings[1]) then
+		self.uiButton2 = self:AddComponent(UIButton:New(), "uiButton2")
+		self.uiButton2.rectangle = UIMenuWindow.buttonRectangles[2]
+		self.uiButton2.text = l"but027"
+		self.uiButton2.tip = l"tip189"
+		
+		local __self = self
+		
+		self.uiButton2.OnAction = function ()
+		
+		    self:Save(self)
+			activity:PostStateChange("advancedsettings")
 
-	-- uiButton4: accept changes, get back to title screen
+		end
+	end
+	
+	-- uiButton5: accept changes, get back to title screen
 
-    self.uiButton4 = self:AddComponent(UIButton:New(), "uiButton4")
-    self.uiButton4.rectangle = UIMenuWindow.buttonRectangles[4]
-	self.uiButton4.text = l "but006"
-    self.uiButton4.tip = l"tip017"
+    self.uiButton5 = self:AddComponent(UIButton:New(), "uiButton5")
+    self.uiButton5.rectangle = UIMenuWindow.buttonRectangles[5]
+	self.uiButton5.text = l "but006"
+    self.uiButton5.tip = l"tip017"
 
     local __self = self
 
-	self.uiButton4.OnAction = function (self) 
+	self.uiButton5.OnAction = function () 
 
-	    table.foreach(__self.uiOptions, function (_, uiOption)
+		self:Save(self)
 
-	        activity.settings[uiOption.option.index] = uiOption.value
-	        --print(uiOption.option.index.." "..activity.settings[uiOption.option.index].." "..uiOption.value)
+	    if (activity.forward2) then
+            activity:PostStateChange("playersmanagement")
+        else
+            activity:PostStateChange("playground")
+        end
 
-	    end )
+	end
 
-		quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
+end
+
+function UTActivity.Ui.Settings:OnOpen()
+
+	self:Activate()
+end
+
+function UTActivity.Ui.Settings:OnClose()
+
+	self:Deactivate()
+end
+
+function UTActivity.Ui.Settings:Save(__self)
+
+	table.foreach(__self.uiOptions, function (_, uiOption)
+		
+		activity.settings[uiOption.option.index] = uiOption.value
+		--print(uiOption.option.index.." "..activity.settings[uiOption.option.index].." "..uiOption.value)
+		
+	end )
+		
+	quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
+	quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
+	quartz.framework.audio.playsound()
+		    
+	if (game and game.settings) then
+		
+		if (not game.settings.activities) then
+					
+			game.settings.activities = {}
+					
+		end
+				
+		if (not game.settings.activities[activity.name]) then
+					
+			game.settings.activities[activity.name] = {}
+						
+		end
+					
+		local settings = game.settings.activities[activity.name]
+		
+		for key, value in pairs(activity.settings) do
+						
+			if (type(activity.settings[key]) ~= "table") then
+						
+				settings[key] = activity.settings[key]
+							
+			end
+		end
+			        
+		game:SaveSettings()
+					
+	end
+end
+
+function UTActivity.Ui.Settings:Activate()
+
+    if (not self.keyboardActive) then
+
+        --game._Char:Add(self, self.Char)
+        game._KeyDown:Add(self, self.KeyDown)
+        self.keyboardActive = true
+
+    end
+
+end
+
+function UTActivity.Ui.Settings:Deactivate()
+
+    if (self.keyboardActive) then 
+    
+        --game._Char:Remove(self, self.Char)
+        game._KeyDown:Remove(self, self.KeyDown)
+        self.keyboardActive = false
+
+    end
+
+end
+
+function UTActivity.Ui.Settings:KeyDown(virtualKeyCode, scanCode)
+		
+	if (27 == virtualKeyCode or 49 == virtualKeyCode) then
+		
+		quartz.framework.audio.loadsound("base:audio/ui/back.wav")
 		quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
 		quartz.framework.audio.playsound()
-    
-		if (game and game.settings) then
-
-			if (not game.settings.activities) then
-			
-				game.settings.activities = {}
-			
-			end
-		
-			if (not game.settings.activities[activity.name]) then
-			
-				game.settings.activities[activity.name] = {}
-				
-			end
-			
-			local settings = game.settings.activities[activity.name]
-
-			for key, value in pairs(activity.settings) do
-				
-				if (type(activity.settings[key]) ~= "table") then
-				
-					settings[key] = activity.settings[key]
-					
-				end
-			end
-	        
-			game:SaveSettings()
-			
+    		
+	    if (activity.forward2) then
+            game:PostStateChange("selector") 
+		else
+            activity:PostStateChange("title") 
 		end
+	end
+	if (50 == virtualKeyCode) then
 
-	    activity:PostStateChange("playground") 
-
+		self:Save(self)
+		activity:PostStateChange("advancedsettings")
+	end
+	if (13 == virtualKeyCode or 53 == virtualKeyCode) then
+		
+	    self:Save(self)
+		if (activity.forward2) then
+            activity:PostStateChange("playersmanagement")
+        else
+            activity:PostStateChange("playground")
+        end
 	end
 
 end

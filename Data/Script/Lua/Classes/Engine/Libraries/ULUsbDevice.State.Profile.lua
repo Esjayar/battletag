@@ -35,9 +35,11 @@ function ULUsbDevice.State.Profile:Begin()
     print("ULUsbDevice.State.Profile:Begin")
 
     assert(engine.libraries.usb)
-    assert(engine.libraries.usb.proxy)
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		assert(proxy)
 
-    self.proxy = engine.libraries.usb.proxy
+		self.proxy = proxy
+	end
 
     self.device.playerProfile = nil
 
@@ -72,6 +74,8 @@ function ULUsbDevice.State.Profile:Update()
 
     -- keep querying the device profile ...
 
-    quartz.system.usb.sendmessage(self.proxy.handle, self.message)
+    for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		quartz.system.usb.sendmessage(proxy.handle, self.message)
+	end
 
 end

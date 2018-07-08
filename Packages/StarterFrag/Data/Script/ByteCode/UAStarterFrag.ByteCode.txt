@@ -5,11 +5,8 @@ VAR nb_ammo		SEND
 VAR nb_clip		SEND
 VAR scan_ok
 VAR lastrfid_type
-VAR assist		CONFIG
 VAR max_ammo	CONFIG
 VAR max_clip		CONFIG
-VAR local
-VAR auto_reload
 
 
 FUNCTION hud
@@ -21,232 +18,21 @@ ELSE
 END_IF
 HUD_JAUGE	nb_clip
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-END_FUNCTION
-
-FUNCTION respawn
-SET	nb_clip		max_clip
-DEC 	nb_clip
-SET	nb_ammo		max_ammo
-hud
-GOTO	game
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-END_FUNCTION
-
-FUNCTION get_hit
-MOTOR		30
-INC	nb_hit
-SND	HURT
-LED_ON		30	1
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 END_FUNCTION
 
 FUNCTION reload
 SET	nb_clip	max_clip
+DEC 	nb_clip
+SET	nb_ammo		max_ammo
+GOTO	game
 
+END_FUNCTION
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+FUNCTION get_hit
+INC	nb_hit
+MOTOR		30
+SND	HURT
+LED_ON		30	1
 
 END_FUNCTION
 
@@ -259,71 +45,7 @@ TIMER		100
 SET_HARNESS		1
 SET	nb_hit		0
 SND	START
-SET	local 		0
-respawn
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+reload
 
 END_EVENT
 
@@ -333,305 +55,52 @@ STATE game
 
 EVENT BUTTON_2_JUST_PRESSED
 IF	nb_ammo		SUP	0
-	DEC		nb_ammo
-	SND		SHOOT
+	IF	max_ammo	DIFF	20	
+		DEC		nb_ammo
+	ELSE
+		ANIM		ASHT
+	END_IF
+	SND_PRIO	SHOOT
 	FLASH_ORANGE	1
 	IR
-
-	IF	nb_ammo		COMP	0
-		IF nb_clip SUP 0
-			SET	auto_reload	1
-		END_IF
-	END_IF
-
-ELSE
-
-	IF nb_clip COMP 0
-		IF assist	COMP 1
-			INC local 
-			IF	local	SUP	5
-				SND_PRIO	ASSIST_SCANAMMO
-				SET local 0
-			ELSE
-				SND		EMPTY
-			END_IF
-		ELSE
-			SND		EMPTY
-		END_IF
-	END_IF
-
 END_IF
 hud
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+SND		EMPTY
 
 END_EVENT
 
 EVENT BUTTON_3_JUST_PRESSED
 RFID_SCAN	scan_ok
-SET local	0
 IF	scan_ok		COMP	1
-
 	RFID_TYPE_MAJOR	lastrfid_type
-
 	IF lastrfid_type COMP RFID_AMMO_PACK
-		SET local	1
 		FLASH_GREEN	1
 		GOTO	reload
 	END_IF
-
 END_IF
-
-IF local COMP	0
-	SND	SCAN_BAD
-END_IF
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+SND	SCAN_BAD
 
 END_EVENT
 
 EVENT HIT
 get_hit
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 END_EVENT
 
 EVENT ENTER_STATE
-SET	auto_reload	0
 hud
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 END_EVENT
 
 EVENT TIMER
-IF	auto_reload	COMP	1
-	DEC 	nb_clip
-	SND	RELOAD
-	SET	nb_ammo		max_ammo
-	hud
-	SET	auto_reload	0
+IF	nb_ammo		COMP	0
+	IF nb_clip SUP 0
+		DEC 	nb_clip
+		SND	RELOAD
+		SET	nb_ammo		max_ammo
+		hud
+	END_IF
 END_IF
-
-
-
-
-
-
-
-
-
-
 
 END_EVENT
 
@@ -643,188 +112,16 @@ EVENT ENTER_STATE
 SND	RELOAD_CLIP
 FLASH_GREEN	1
 ANIM ARAM
-	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 END_EVENT
 
 EVENT ANIM_FINISHED
 reload
-DEC 	nb_clip
-SET	nb_ammo		max_ammo
-IF assist COMP	1
-	SND_PRIO	OK
-END_IF
-hud
-GOTO	game
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 END_EVENT
 
 EVENT HIT
-reload
-DEC 	nb_clip
-SET	nb_ammo		max_ammo
-ANIM_OFF
 get_hit
-GOTO	game
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 END_EVENT
 

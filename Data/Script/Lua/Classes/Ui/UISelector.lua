@@ -61,7 +61,7 @@ function UISelector:__ctor(...)
     -- left panel
 
     self.uiSelector = self.uiPanel:AddComponent(UITitledPanel:New(), "uiSelector")
-    self.uiSelector.rectangle = { 20, 20, 315, 435 }
+    self.uiSelector.rectangle = { 20, 20, 315, 450 }
     self.uiSelector.title = "Selector"
 
         -- !! ADD SUPPORT FOR SCROLLBAR & FILTER
@@ -88,7 +88,7 @@ function UISelector:__ctor(...)
 
     -- right windows
 
-    self.uiPanel.clientRectangle = { 330, 20, 695, 445 }
+    self.uiPanel.clientRectangle = { 330, 20, 695, 450 }
 
     self.uiWindows = self.uiPanel:AddComponent(UIMultiComponent:New(), "uiWindows")
     self.uiWindows.rectangle = self.uiPanel.clientRectangle
@@ -100,7 +100,7 @@ function UISelector:__ctor(...)
 
 	-- scroll bar
 
-	self.uiScrollBar = self:AddComponent(UIScrollBar:New({ 415, 200 }, 350), "uiScrollBar")
+	self.uiScrollBar = self:AddComponent(UIScrollBar:New({ 415, 200 }, 380), "uiScrollBar")
 	self.uiScrollBar.OnActionUp = function(_self) self:Scroll(-1) end
 	self.uiScrollBar.OnActionDown = function(_self)	self:Scroll(1) end
 
@@ -113,7 +113,7 @@ function UISelector:AddItem(properties)
     local item = {}
 
     if (properties and (properties.headerIcon or properties.headerText)) then
-        item.header = { icon = properties.headerIcon, text = properties.headerText }
+        item.header = { icon = properties.headerIcon, iconbackground = properties.headerIconBackground, text = properties.headerText }
     end
 
     item.color = properties and properties.color
@@ -133,6 +133,7 @@ function UISelector:AddItem(properties)
 	-- scroll bar
 
 	self.uiScrollBar:SetSize(#self.items, #self.uiItems)
+	self.uiScrollBar.offset = self.uiScrollBar.height * (1/(#self.items - 3))
 
     return item
 
@@ -164,7 +165,7 @@ function UISelector:Reserve(capacity, iconType)
 
     self.uiItems = {}
 
-    local dx, dy = 10, --[[ uititledpanel.header --]] 25 + 0 + --[[ uiarrowup.height --]] 0 + 10    
+    local dx, dy = 10, --[[ uititledpanel.header --]] 15 + 0 + --[[ uiarrowup.height --]] 0 + 10    
 
     for i = 1, self.capacity do
 
@@ -216,7 +217,7 @@ end
 
 function UISelector:Scroll(number)
 
-    assert(self.uiItems and (0 < #self.uiItems))
+    assert(self.uiItems and 0 < #self.uiItems)
 
     self.index = self.index + number
     if (self.index < 1) then
@@ -232,8 +233,12 @@ function UISelector:Scroll(number)
 	-- no selection yet ? so give one
 
 	local selectedIndex = nil
-	if (not self.selectedItem) then 
-		self.selectedItem = self.items[1]
+	if (not self.selectedItem) then
+		if (activity) then
+			self.selectedItem = self.items[uiSettingprev or 1]
+		else
+			self.selectedItem = self.items[uiSettingprev or game.settings.UiSettings.lastgame or 1]
+		end
 	end
 
 	-- reinit selection
@@ -271,7 +276,7 @@ function UISelector:Scroll(number)
 			end
 
 			--uiItem.color = item.color or UIComponent.colors.red
-            --uiItem.pictogram = (item.pictogram  and ("base:texture/ui/pictograms/32x/" .. item.pictogram)) or "base:texture/ui/pictograms/32x/empty.tga"
+            --uiItem.pictogram = item.pictogram  and ("base:texture/ui/pictograms/32x/" .. item.pictogram) or "base:texture/ui/pictograms/32x/empty.tga"
             --uiItem.text = item.name or item.__directory
 
         else

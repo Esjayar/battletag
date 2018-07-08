@@ -46,7 +46,6 @@ function UTActivity.Ui.IntermediateRankings:__ctor(...)
 	self.uiButton1.rectangle = UIMenuWindow.buttonRectangles[1]
 	self.uiButton1.text = l"but018"
 	self.uiButton1.tip = l"tip007"
-	self.uiButton1.enabled = false
 
 	self.uiButton1.OnAction = function (self) 
 		activity:PostStateChange("end") 
@@ -54,16 +53,15 @@ function UTActivity.Ui.IntermediateRankings:__ctor(...)
 	end
 
 
-	-- uiButton4: next match button 
+	-- uiButton5: next match button 
 	
-    self.uiButton4 = self:AddComponent(UIButton:New(), "uiButton4")
-	self.uiButton4.rectangle = {UIMenuWindow.buttonRectangles[4][1], UIMenuWindow.buttonRectangles[4][2], UIMenuWindow.buttonRectangles[4][3], UIMenuWindow.buttonRectangles[4][4]}
-	self.uiButton4.rectangle[1] = self.uiButton4.rectangle[1] - 20
-	self.uiButton4.text = l"oth016"
-	self.uiButton4.tip = l"tip020"
-	self.uiButton4.enabled = false
+    self.uiButton5 = self:AddComponent(UIButton:New(), "uiButton5")
+	self.uiButton5.rectangle = UIMenuWindow.buttonRectangles[5]
+	self.uiButton5.text = l"oth016"
+	self.uiButton5.tip = l"tip020"
+	self.uiButton5.enabled = false
 
-	self.uiButton4.OnAction = function (self) activity:PostStateChange("matchmaking") end
+	self.uiButton5.OnAction = function (self) activity:PostStateChange("matchmaking") end
 
     -- standard leaderboard
     -- !! with teams a visual pb may appears ....
@@ -117,8 +115,7 @@ function UTActivity.Ui.IntermediateRankings:Update()
 
 		if (activity.states["intermediaterankings"].isReady) then 
 
-			self.uiButton1.enabled = true
-			self.uiButton4.enabled = true
+			self.uiButton5.enabled = true
 
 		end
 

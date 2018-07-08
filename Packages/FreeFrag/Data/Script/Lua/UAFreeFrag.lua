@@ -29,7 +29,6 @@ UAFreeFrag.State = {}
 
 -- default
 
-UAFreeFrag.bytecodePath = "game:../packages/freefrag/data/script/bytecode/UAFreeFrag.ByteCode.lua"
 UAFreeFrag.bitmap = "base:texture/ui/loading_freefrag.tga"
 
 -- __ctor --------------------------------------------------------------------
@@ -40,6 +39,7 @@ function UAFreeFrag:__ctor(...)
 
     self.name = l"title005"
     self.category = UTActivity.categories.closed
+	self.nodual = true
     
     self.textScoring = l"score003"
     self.textRules = l"rules002"
@@ -57,9 +57,7 @@ function UAFreeFrag:__ctor(...)
 
         [1] = { title = l "titlemen006", options = {
 
-            [1] = { label = l "goption001", tip = l "tip027", choices = { { value = 5 }, { value = 10 } }, index = "playtime", },
-            [2] = { label = l "goption002", tip = l "tip025", choices = { { value = 0, displayMode = "large", text = "Auto"}, { value = 1, displayMode = "large", text = l"oth032" } }, index = "gameLaunch" },
-            [3] = { label = l "goption003", tip = l "tip026", choices = { { value = 1, icon = "base:texture/ui/components/uiradiobutton_house.tga" }, { value = 2 }, { value = 3}, { value = 4 }, { value = 5, icon = "base:texture/ui/components/uiradiobutton_sun.tga" } }, index = "beamPower" },
+            [1] = { label = l "goption001", tip = l "tip027", choices = { { value = 2 }, { value = 5 }, { value = 6 }, { value = 7 }, { value = 8 }, { value = 10 }, { value = 15 }, { value = 20 }, { value = 30 } }, index = "playtime", },
 
             },
         },
@@ -78,8 +76,8 @@ function UAFreeFrag:__ctor(...)
         -- keyed settings
 
         playtime = 5,
-        gameLaunch = 0,
-        beamPower = 3,
+        ammunitions = -1,
+        lifePoints = -1,
 
 		-- no team
 
@@ -119,14 +117,14 @@ function UAFreeFrag:__ctor(...)
 
     self.states["roundloop"] = UAFreeFrag.State.RoundLoop:New(self)
 
-    -- ?? LES SETTINGS SONT RENSEIGNÉS DANS LE CONSTRUCTEUR DE L'ACTIVITÉ
-    -- ?? LES PARAMÈTRES (DISPLAYMODE, TEXTE, ICONE...) DES COLONES DE GRID SONT RENSEIGNÉS DANS LE COMPOSANT DÉDIÉ DU LEADERBOARD
-    -- ?? LES ATTRIBUTS - HEAP, BAKED - DES ENTITÉS SONT RENSEIGNÉS PAR 2 APPELS DE FONCTION DÉDIÉS DANS L'ACTIVITÉ (À SURCHARGER)
-    -- ?? POUR LES DONNÉES DE CONFIGURATION DE BYTECODE, CE SERA SUREMENT PAREIL QUE POUR LES ATTRIBUTS = FONCTION DÉDIÉ (À SURCHARGER)
+    -- ?? LES SETTINGS SONT RENSEIGNï¿½S DANS LE CONSTRUCTEUR DE L'ACTIVITï¿½
+    -- ?? LES PARAMï¿½TRES (DISPLAYMODE, TEXTE, ICONE...) DES COLONES DE GRID SONT RENSEIGNï¿½S DANS LE COMPOSANT Dï¿½DIï¿½ DU LEADERBOARD
+    -- ?? LES ATTRIBUTS - HEAP, BAKED - DES ENTITï¿½S SONT RENSEIGNï¿½S PAR 2 APPELS DE FONCTION Dï¿½DIï¿½S DANS L'ACTIVITï¿½ (ï¿½ SURCHARGER)
+    -- ?? POUR LES DONNï¿½ES DE CONFIGURATION DE BYTECODE, CE SERA SUREMENT PAREIL QUE POUR LES ATTRIBUTS = FONCTION Dï¿½DIï¿½ (ï¿½ SURCHARGER)
     -- ?? POUR LE LEADERBOARD:
     -- ??       - SURCHARGER LA PAGE QUI UTILISE LE LEADERBOARD STANDARD,
-    -- ??       - RAJOUTER DES PARAMÈTRES (DISPLAYMODE, TEXTE, ICONE...) DES COLONES DE GRID SI NÉCESSAIRE EN + DE CEUX PAR DÉFAUT (LIFE, HIT, AMMO...)
-    -- ??       - RENSEIGNER QUELS ATTRIBUTS ON SOUHAITE REPRÉSENTER PARMIS CEUX EXISTANT EN HEAP
+    -- ??       - RAJOUTER DES PARAMï¿½TRES (DISPLAYMODE, TEXTE, ICONE...) DES COLONES DE GRID SI Nï¿½CESSAIRE EN + DE CEUX PAR Dï¿½FAUT (LIFE, HIT, AMMO...)
+    -- ??       - RENSEIGNER QUELS ATTRIBUTS ON SOUHAITE REPRï¿½SENTER PARMIS CEUX EXISTANT EN HEAP
 
 end
 
@@ -147,6 +145,7 @@ function UAFreeFrag:InitEntityBakedData(entity, ranking)
 	entity.data.baked.accuracy = 0
 	entity.data.baked.nbShot = 0
 	entity.data.baked.hit = 0
+	entity.data.baked.nbHit = 0
 	entity.data.baked.hitByName = {}
 
 end
@@ -157,21 +156,29 @@ function UAFreeFrag:InitEntityHeapData(entity, ranking)
 
 	UTActivity:InitEntityHeapData(entity, ranking)
 
-	entity.data.heap.score = 0
-	entity.data.heap.ranking = ranking
+	if (not game.gameMaster.ingame) then
+		entity.data.heap.score = 0
+		entity.data.heap.ranking = ranking
+	end
 
-	-- statistics
+	entity.gameplayData = { 0x00, 0x00 }
 
-	entity.data.heap.nbShot = 0
-	entity.data.heap.hit = 0
-	entity.data.heap.nbHit = 0
-	entity.data.heap.accuracy = 0
-	entity.data.heap.hitByName = {}
+	if (not game.gameMaster.ingame) then
+		-- statistics
 
-	-- gameMaster
+		entity.data.heap.nbShot = 0
+		entity.data.heap.nbShotbackup = 0
+		entity.data.heap.hit = 0
+		entity.data.heap.nbHit = 0
+		entity.data.heap.nbHitbackup = 0
+		entity.data.heap.accuracy = 0
+		entity.data.heap.hitByName = {}
 
-	entity.data.heap.lastPlayerShooted = {}
-	entity.data.heap.nbHitLastPlayerShooted = 0
+		-- gameMaster
+
+		entity.data.heap.lastPlayerShooted = {}
+		entity.data.heap.nbHitLastPlayerShooted = 0
+	end
 
 end
 
@@ -185,6 +192,7 @@ function UAFreeFrag:UpdateEntityBakedData(entity, ranking)
 
 	entity.data.baked.nbShot = (entity.data.baked.nbShot or 0) + entity.data.heap.nbShot
 	entity.data.baked.hit = (entity.data.baked.hit or 0) + entity.data.heap.hit
+	entity.data.baked.nbHit = (entity.data.baked.nbHit or 0) + entity.data.heap.nbHit
 	if (entity.data.baked.nbShot > 0) then
 		entity.data.baked.accuracy = (100 * entity.data.baked.hit / entity.data.baked.nbShot)
 	else

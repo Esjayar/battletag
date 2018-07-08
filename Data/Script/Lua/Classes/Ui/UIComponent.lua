@@ -47,20 +47,17 @@ UIComponent.colors = {
 
     black = { 0.00, 0.00, 0.00 },
     blue = { 0.05, 0.53, 0.84 },
-    
     darkgray = { 0.51, 0.51, 0.51 },
-    
     gray = { 0.55, 0.50, 0.50 },
     green = { 0.05, 0.64, 0.08 },
-    
     lightgray = { 0.89, 0.89, 0.89 },
-    
     backcolor = { 0.57, 0.59, 0.68 },
-
     orange = { 0.97, 0.40, 0.08 },
     red = { 0.85, 0.15, 0.04 },
     yellow = { 0.95, 0.72, 0.00 },
     white = { 1.00, 1.00, 1.00 },
+    silver = { 0.75, 0.75, 0.75 },
+    purple = { 0.50, 0.00, 0.50 },
     
 }
 
@@ -215,7 +212,7 @@ function UIComponent:RemoveComponent(component)
 
 			-- by index
 
-			if ((0 < component) and (component <= #self.components)) then
+			if (0 < component and component <= #self.components) then
 
 				self.components[component].parent = nil
 				table.remove(self.components, i)

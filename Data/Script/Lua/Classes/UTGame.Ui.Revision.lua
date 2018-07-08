@@ -59,8 +59,10 @@ function UTGame.Ui.Revision:__ctor(...)
     self.uiProgress.rectangle = { 20, self.uiContents.rectangle[4] - 28 - 30, 655, self.uiContents.rectangle[4] - 30 }
 
     assert(engine.libraries.usb)
-    assert(engine.libraries.usb.proxy)
-    assert(engine.libraries.usb.proxy.revisionUpdate)
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		assert(proxy)
+		assert(proxy.revisionUpdate)
+	end
 
     -- buttons,
 
@@ -119,15 +121,17 @@ end
 
 function UTGame.Ui.Revision:Update()
 
-    if (engine.libraries.usb.proxy and engine.libraries.usb.proxy.revisionCandidate) then
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		if (proxy and proxy.revisionCandidate) then
 
-        self.uiProgress.minimum = 0
-        self.uiProgress.maximum = engine.libraries.usb.proxy.revisionCandidate.checked
+			self.uiProgress.minimum = 0
+			self.uiProgress.maximum = proxy.revisionCandidate.checked
 
-        self.uiProgress:SetValue(engine.libraries.usb.proxy.revisionUpdate)
-        self.uiContents.title = string.format("%02d%%", self.uiProgress.progress)
+			self.uiProgress:SetValue(proxy.revisionUpdate)
+			self.uiContents.title = string.format("%02d%%", self.uiProgress.progress)
 
-    end
+		end
+	end
 
     UIMenuWindow.Update(self)
  

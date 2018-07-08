@@ -528,7 +528,8 @@ UTGameMaster.updatePriority[4] = function(self, voice, time)
 	
 	end	
 
-	if (time > self.nextFreeTime + 10 * 1000000 and time > self.lastActionTime + 10 * 1000000 and IsPriorityZeroArea == false ) then -- to be played only if 10 sec of silence and nothing happens	
+	--time > self.lastActionTime + 10 * 1000000
+	if (time > self.nextFreeTime + 10 * 1000000 and IsPriorityZeroArea == false ) then -- to be played only if 10 sec of silence and nothing happens	
 	
 		local randValue = math.random()
 		

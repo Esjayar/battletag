@@ -31,10 +31,18 @@ UATagThenShoot.Ui.PlayersSetup = UTClass(UIMenuWindow)
 function UATagThenShoot.Ui.PlayersSetup:__ctor(...)
 
     assert(activity)
+    
+	-- animate	
+	
+	self.slideBegin = true
+	self.slideEnd = false
 
 	-- window settings
 
-	self.uiWindow.title = l"titlemen015" 
+	self.uiWindow.title = l"titlemen015"
+    UIPlayerSlotGrid.horizontalPadding = activity.horizontalPadding or 0
+    UIPlayerSlotGrid.slots = activity.slots or 0
+    UIPlayerSlotGrid.playeroffset = activity.playeroffset or 0
 
     -- main panel 
 
@@ -71,26 +79,30 @@ function UATagThenShoot.Ui.PlayersSetup:__ctor(...)
 
 		end
 
-		-- uiButton4: players ready for countdown
+		-- uiButton5: players ready for countdown
 
-		self.uiButton4 = self:AddComponent(UIButton:New(), "uiButton4")
-		self.uiButton4.rectangle = UIMenuWindow.buttonRectangles[4]
-		self.uiButton4.text = l"but008"
-		self.uiButton4.tip = l"tip020"
-		self.uiButton4.enabled = false
+		self.uiButton5 = self:AddComponent(UIButton:New(), "uiButton5")
+		self.uiButton5.rectangle = UIMenuWindow.buttonRectangles[5]
+		self.uiButton5.text = l"but008"
+		self.uiButton5.tip = l"tip020"
+		self.uiButton5.enabled = false
 
-		self.uiButton4.OnAction = function(self)
+		self.uiButton5.OnAction = function(self)
 		
-			if (activity.settings and (1 == activity.settings.gameLaunch)) then
+			--if (activity.settings and 1 == activity.settings.gameLaunch) then
+				activity.settings.gameLaunch = 1
+				UATagThenShoot.Ui.PlayersSetup.hasPopup = true
 				UIManager.stack:Push(UTActivity.Ui.ManualLaunch)
-			else
-				activity:PostStateChange("beginmatch") 
-			end
+			--else
+				--activity:PostStateChange("beginmatch") 
+			--end
 			self.enabled = false
 
 		end
 
 	self.setupFailed = false
+	uploadbytecode = false
+	gametypeloaded = directoryselected
 
 end
 
@@ -109,6 +121,13 @@ end
 -- OnDeviceRemoved -----------------------------------------------------------
 
 function UATagThenShoot.Ui.PlayersSetup:OnDeviceRemoved(device)
+
+	if (disconnectsoundenabled) then
+		quartz.framework.audio.loadsound("base:audio/ui/gundisconnected.wav")
+		quartz.framework.audio.loadvolume(game.settings.audio["volume:gd"])
+		quartz.framework.audio.playsound()
+		disconnectsoundenabled = false
+	end
 
 -- !! stop carrying about deconnection here ...
 --[[
@@ -163,7 +182,7 @@ function UATagThenShoot.Ui.PlayersSetup:OnOpen()
 
 	-- next player : generic component
 
-	self.uiNextPlayerPanel = self.uiNextMatchPanel:AddComponent(UIPlayerPanel:New(self.player, { (675 * 0.5) - UIPlayerPanel.width, 40 }), "uiNextPlayerPanel")
+	self.uiNextPlayerPanel = self.uiNextMatchPanel:AddComponent(UIPlayerPanel:New(self.player, { 337.5 - UIPlayerPanel.width, 40 }), "uiNextPlayerPanel")
 
 	-- tell player to take a gun
 
@@ -174,12 +193,7 @@ function UATagThenShoot.Ui.PlayersSetup:OnOpen()
 		self.uiHudPicture = self.uiNextMatchPanel:AddComponent(UIPicture:New(), "uiHudPicture")
 		self.uiHudPicture.color = UIComponent.colors.white
 		self.uiHudPicture.texture = "base:texture/ui/pictograms/128x/Hud_" .. self.player.rfGunDevice.classId .. ".tga"
-		self.uiHudPicture.rectangle = {
-			450,
-			40,
-			450 + 128,
-			40 + 128,
-		}
+		self.uiHudPicture.rectangle = { 450, 40, 578, 168 }
 
 		-- text
 
@@ -188,12 +202,7 @@ function UATagThenShoot.Ui.PlayersSetup:OnOpen()
 		self.uiHudLabel.fontColor = UIComponent.colors.orange
 		self.uiHudLabel.fontJustification = quartz.system.drawing.justification.center + quartz.system.drawing.justification.wordbreak
 		self.uiHudLabel.text = l"oth061" .. self.player.rfGunDevice.classId
-		self.uiHudLabel.rectangle = {
-			450,
-			170,
-			450 + 128,
-			170 + 50,
-		}
+		self.uiHudLabel.rectangle = { 450, 170, 578, 220 }
 
 	end
 
@@ -206,7 +215,7 @@ function UATagThenShoot.Ui.PlayersSetup:OnOpen()
 		local player = match.challengers[1]
 		self.uiMatchSlot[i] = self.uiMatchListPanel:AddComponent(UIPlayerSlot:New() ,"uiMatchSlot" .. i)
 		self.uiMatchSlot[i]:SetPlayer(player)
-		self.uiMatchSlot[i]:MoveTo((675 - 280) * 0.5, 40 + (50 * (i - 1)))
+		self.uiMatchSlot[i]:MoveTo(197.5, 40 + 50 * (i - 1))
 
 	end	
 
@@ -220,6 +229,6 @@ function UATagThenShoot.Ui.PlayersSetup:Update()
 
 	-- end of configuration 
 
-	self.uiButton4.enabled = activity.states["playerssetup"].configDone
+	self.uiButton5.enabled = activity.states["playerssetup"].configDone
 
 end

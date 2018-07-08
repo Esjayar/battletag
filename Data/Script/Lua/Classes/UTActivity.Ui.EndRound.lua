@@ -35,11 +35,11 @@ function UTActivity.Ui.RoundEnd:__ctor(...)
 
     -- fake skip button to end match
     
-    self.uiButton4 = self:AddComponent(UIButton:New(), "uiButton4")
-    self.uiButton4.rectangle = { 410, 420, 547, 454 }
-    self.uiButton4.text = "Skip to End Match"
+    self.uiButton5 = self:AddComponent(UIButton:New(), "uiButton5")
+    self.uiButton5.rectangle = { 410, 420, 547, 454 }
+    self.uiButton5.text = "Skip to End Match"
     
-    self.uiButton4.OnAction = function (self) activity:PostStateChange("endmatch") end
+    self.uiButton5.OnAction = function (self) activity:PostStateChange("endmatch") end
     
     -- fake skip button to round begin
     

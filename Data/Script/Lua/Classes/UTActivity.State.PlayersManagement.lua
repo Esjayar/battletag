@@ -51,17 +51,19 @@ function UTActivity.State.PlayersManagement:Begin()
     -- register for the device added event
 
     assert(engine.libraries.usb)
-    assert(engine.libraries.usb.proxy)
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		assert(proxy)
 
-    engine.libraries.usb.proxy._DeviceAdded:Add(self, UTActivity.State.PlayersManagement.OnDeviceAdded)
-    engine.libraries.usb.proxy._DeviceRemoved:Add(self, UTActivity.State.PlayersManagement.OnDeviceRemoved)
-    engine.libraries.usb.proxy:Unlock()
+		proxy._DeviceAdded:Add(self, UTActivity.State.PlayersManagement.OnDeviceAdded)
+		proxy._DeviceRemoved:Add(self, UTActivity.State.PlayersManagement.OnDeviceRemoved)
+		proxy:Unlock()
 
-    -- decrease the timings on the device pinger,
-    -- so that we can detect device deconnections a little bit faster
+		-- decrease the timings on the device pinger,
+		-- so that we can detect device deconnections a little bit faster
 
-    assert(engine.libraries.usb.proxy.processes.devicePinger)
-    engine.libraries.usb.proxy.processes.devicePinger:Reset(2000000, 4000000, 500000)
+		assert(proxy.processes.devicePinger)
+		proxy.processes.devicePinger:Reset(2000000, 4000000, 500000)
+	end
 
     -- reset the list of matches,
     -- when we get back to the players management we are going to go through the match making right after ...
@@ -108,33 +110,35 @@ function UTActivity.State.PlayersManagement:Begin()
     -- some guns may already have been registered (previous games),
 	-- check all connected devices and add players
 
-	if (engine.libraries.usb.proxy.devices.byClass[0x02000020]) then
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		if (proxy.devices.byClass[0x02000020]) then
 
-		-- create player with old profile ...
+			-- create player with old profile ...
 
-		for i, device in pairs(engine.libraries.usb.proxy.devices.byClass[0x02000020]) do
+			for i, device in pairs(proxy.devices.byClass[0x02000020]) do
 
-			local team = nil
-			if (activity.teamBackup and activity.teamBackup[device]) then
-				team = activity.teams[activity.teamBackup[device]]
-			end 
-			self:CreatePlayer(device, device.playerProfile, team)
-			if (device.owner) then
-			    device.owner._ProfileUpdated:Invoke(device.owner)
+				local team = nil
+				if (activity.teamBackup and activity.teamBackup[device]) then
+					team = activity.teams[activity.teamBackup[device]]
+				end 
+				self:CreatePlayer(device, device.playerProfile, team)
+				if (device.owner) then
+					device.owner._ProfileUpdated:Invoke(device.owner)
+				end
+				device.teamdefault = true
 			end
 
+			-- rearrange ui's player slot grid ?
+
+
+
+			-- need to check number of player ...
+
+			--if (self.ui.CheckNumberOfPlayers) then
+			--    self.ui:CheckNumberOfPlayers()
+			--end
+			
 		end
-
-		-- rearrange ui's player slot grid ?
-
-
-
-		-- need to check number of player ...
-
-        --if (self.ui.CheckNumberOfPlayers) then
-		--    self.ui:CheckNumberOfPlayers()
-		--end
-		
 	end
 
 end
@@ -148,6 +152,7 @@ function UTActivity.State.PlayersManagement:ChangeTeam(player, teamIndex)
 	-- next team
 
 	local newTeamIndex = teamIndex or (player.team.index + 1)
+	
 	if (newTeamIndex > #activity.teams) then
 		newTeamIndex = 1
 	end
@@ -176,7 +181,7 @@ function UTActivity.State.PlayersManagement:ChangeTeam(player, teamIndex)
 
 	-- rearrange player slot grid
 
-	self.ui.slotGrid:Rearrange()	
+	self.ui.slotGrid:Rearrange()
 
 	--if (self.ui.CheckNumberOfPlayers) then
 	--	self.ui:CheckNumberOfPlayers()
@@ -198,7 +203,7 @@ function UTActivity.State.PlayersManagement:CreatePlayer(device, profile, team)
 
 			local playerWithGun = 0
 			table.foreachi(activity.players, function(index, player)
-				playerWithGun = playerWithGun + ((player.rfGunDevice and 1) or 0)
+				playerWithGun = playerWithGun + (player.rfGunDevice and 1 or 0)
 			end )
 
 			assert(playerWithGun < activity.maxNumberOfPlayer, "Too many guns connected : ")
@@ -215,7 +220,12 @@ function UTActivity.State.PlayersManagement:CreatePlayer(device, profile, team)
 
 			player.profile.name = UTPlayer.profiles.guest.name
 			player.profile.icon = UTPlayer.profiles.guest.icon
+			player.profile.team = UTPlayer.profiles.guest.team
 
+		end
+		
+		if (activity.advancedsettings.classes) then
+			player.class = 1
 		end
 
 		-- the game has teams !
@@ -317,18 +327,25 @@ function UTActivity.State.PlayersManagement:End()
     -- lock the usb proxy so as to refuse any further connection requests,
     -- unregister for the device added event
 
-    if (engine.libraries.usb.proxy) then
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		if (proxy) then
 
-        engine.libraries.usb.proxy:Lock()
-        engine.libraries.usb.proxy._DeviceAdded:Remove(self, UTActivity.State.PlayersManagement.OnDeviceAdded)
-        engine.libraries.usb.proxy._DeviceRemoved:Remove(self, UTActivity.State.PlayersManagement.OnDeviceRemoved)
+			--if (game.settings.GameSettings.unregister == 1) then
+				proxy:Lock()
+			--end
+			proxy._DeviceAdded:Remove(self, UTActivity.State.PlayersManagement.OnDeviceAdded)
+			proxy._DeviceRemoved:Remove(self, UTActivity.State.PlayersManagement.OnDeviceRemoved)
 
-        -- reset the timings on the device pinger
+			-- reset the timings on the device pinger
 
-        assert(engine.libraries.usb.proxy.processes.devicePinger)
-        engine.libraries.usb.proxy.processes.devicePinger:Reset()
+			assert(proxy.processes.devicePinger)
+			--proxy.processes.devicePinger:Reset()
 
-    end
+		end
+	end
+    
+    MultiColumn = game.settings.UiSettings.aspectratio == 2 and #activity.players > 16 and #activity.teams > 1 and #activity.teams < 5
+    activity:SaveTeamInformation()
 
 end
 
@@ -342,7 +359,7 @@ function UTActivity.State.PlayersManagement:LookupTeam()
 	local number = nil
 	for _, team in ipairs(activity.teams) do
 
-		if (not number or (#team.players < number)) then
+		if (not number or #team.players < number) then
 
 			number = #team.players
 			selectedTeam = team
@@ -366,6 +383,8 @@ function UTActivity.State.PlayersManagement:OnDeviceAdded(device)
 
 	if (device.owner) then device.owner:UpdateProfile()
 	end
+	
+	uploadbytecode = true
 
 end
 

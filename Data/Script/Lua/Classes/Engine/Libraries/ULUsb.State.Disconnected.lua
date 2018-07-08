@@ -42,7 +42,7 @@ function ULUsb.State.Disconnected:Begin()
     -- make it a complete reset
 
     engine.libraries.usb:Reset()
-    self.proxies = {}
+    engine.libraries.usb.proxies = {}
 
     -- foreach handle,
     -- create new empty proxy
@@ -67,8 +67,8 @@ function ULUsb.State.Disconnected:End()
 
     -- release all pending proxies
 
-    table.foreachi(self.proxies, function (index, proxy) proxy:Delete() end)
-    self.proxies = {}
+    --table.foreachi(engine.libraries.usb.proxies, function (index, proxy) proxy:Delete() end)
+    --engine.libraries.usb.proxies = {}
 
     -- cancel registration,
     -- further devices proxies are just ignored
@@ -92,7 +92,7 @@ function ULUsb.State.Disconnected:RegisterHandle(handle)
     -- create new empty proxy
 
     local proxy = ULUsbProxy:New(handle)
-    table.insert(self.proxies, proxy)
+    table.insert(engine.libraries.usb.proxies, proxy)
 
 end
 
@@ -105,7 +105,7 @@ function ULUsb.State.Disconnected:Update()
     -- update proxies,
     -- until one gets fully initialized
 
-    for index, proxy in ipairs(self.proxies) do
+    for index, proxy in ipairs(engine.libraries.usb.proxies) do
 
         proxy:Update()
 
@@ -113,10 +113,10 @@ function ULUsb.State.Disconnected:Update()
 
             -- promote proxy
 
-            table.remove(self.proxies, index)
+           -- table.remove(engine.libraries.usb.proxies, index)
             engine.libraries.usb:Connect(proxy)
 
-            break
+            --break
 
         end
     end

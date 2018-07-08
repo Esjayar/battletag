@@ -49,10 +49,10 @@ function UATagThenShoot.State.RoundLoop:Begin()
 						 
 	game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_48.wav",
 											 "base:audio/gamemaster/DLG_GM_GLOBAL_49.wav"},
-									offset = activity.settings.playtime * 60  - 27,priority = 3, proba = 0.333})
+									offset = activity.settings.playtime * 60 - 27, priority = 3, proba = 0.333})
 						 
 	game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_47.wav"},
-									offset = activity.settings.playtime * 60  - 15,})
+									offset = activity.settings.playtime * 60 - 15,})
 						 
 	game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_GLOBAL_48.wav",
 											 "base:audio/gamemaster/DLG_GM_GLOBAL_49.wav"},
@@ -81,7 +81,7 @@ end
 
 function UATagThenShoot.State.RoundLoop:OnDeviceRemoved(device)
 
-	if (self.canBeStopped and (self.player.rfGunDevice == device)) then
+	if (self.canBeStopped and self.player.rfGunDevice == device) then
 
 		self.uiPopup = UIPopupWindow:New()
 
@@ -167,24 +167,27 @@ function UATagThenShoot.State.RoundLoop:OnDispatchMessage(device, addressee, com
 
         -- ubiconnect hit
 
-        if (engine.libraries.usb.proxy.radioProtocolId == addressee) then
+		for index, proxy in ipairs(engine.libraries.usb.proxies) do
+			if (proxy.radioProtocolId == addressee) then
 
-            local device = engine.libraries.usb.proxy.devices.byRadioProtocolId[arg[2]]
-            if (not (self.player.data.heap.state) and device) then
+				local shooter = activity.players[arg[2] - 1]
+				local device = shooter.rfGunDevice
+				if (not (self.player.data.heap.state) and device) then
 
-                local player = device.owner
-                if (player == self.player) then
+					local player = device.owner
+					if (player == self.player) then
 
-					--self.player.data.heap.state = self.currentBase
-                    self.player.data.heap.nbHit = self.player.data.heap.nbHit + 1
-                    activity.gameplayData =  {quartz.system.bitwise.bitwiseand(self.player.data.heap.nbHit, 0xff00) / 256, quartz.system.bitwise.bitwiseand(self.player.data.heap.nbHit, 0x00ff)}
-                    --activity.gameplayData = { 0x00, self.player.data.heap.nbHit }
+						--self.player.data.heap.state = self.currentBase
+						self.player.data.heap.nbHit = self.player.data.heap.nbHit + 1
+						activity.gameplayData =  {quartz.system.bitwise.bitwiseand(self.player.data.heap.nbHit, 0xff00) / 256, quartz.system.bitwise.bitwiseand(self.player.data.heap.nbHit, 0x00ff)}
+						--activity.gameplayData = { 0x00, self.player.data.heap.nbHit }
 
-                end
+					end
 
-            end
+				end
 
-        end
+			end
+		end
 
 	end	
 

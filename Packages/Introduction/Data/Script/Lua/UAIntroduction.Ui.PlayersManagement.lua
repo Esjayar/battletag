@@ -117,15 +117,15 @@ if not (REG_FIRSTTIME) then
 	
 end
 
-	-- uiButton4:
+	-- uiButton5:
 	-- move forward to bytecode upload
 
-    self.uiButton4 = self:AddComponent(UIButton:New(), "uiButton4")
-	self.uiButton4.rectangle = UIMenuWindow.buttonRectangles[4]
-	self.uiButton4.text = l"but006"
-	self.uiButton4.tip = l"tip005"
+    self.uiButton5 = self:AddComponent(UIButton:New(), "uiButton5")
+	self.uiButton5.rectangle = UIMenuWindow.buttonRectangles[5]
+	self.uiButton5.text = l"but006"
+	self.uiButton5.tip = l"tip005"
 
-	self.uiButton4.OnAction = function (self)
+	self.uiButton5.OnAction = function (self)
 
         -- switch to next state when two guns are connected,
         -- else invite the lone player to switch on the second gun
@@ -145,7 +145,9 @@ end
 
                 -- lock the usb proxy so as to refuse any further connection requests
 
-                engine.libraries.usb.proxy:Lock()
+                for index, proxy in ipairs(engine.libraries.usb.proxies) do
+					proxy:Lock()
+				end
 
                 -- create a popup to warn user(s) about the pending updates
                 -- the popup offers no other choice than to accept the updates
@@ -203,7 +205,7 @@ end
     
     self.gmLocked = true
     if (self.uiButton1) then self.uiButton1.enabled = false end
-    self.uiButton4.enabled = false
+    self.uiButton5.enabled = false
 
 end
 
@@ -238,12 +240,14 @@ function UAIntroduction.Ui.PlayersManagement:OnClose()
 
 	-- stop pairing
 
-    if (engine.libraries.usb.proxy) then
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		if (proxy) then
 
-        assert(engine.libraries.usb.proxy.handle)
-        quartz.system.usb.sendmessage(engine.libraries.usb.proxy.handle, { 0x01, 0x00, 0x13, 0x00 })
+			assert(proxy.handle)
+			quartz.system.usb.sendmessage(proxy.handle, { 0x01, 0x00, 0x13, 0x00 })
 
-    end
+		end
+	end
 
 	-- check updating profile
 
@@ -302,7 +306,7 @@ function UAIntroduction.Ui.PlayersManagement:OnPlayerRemoved(player)
 		slot.profileUpdated = false
 	end
 	
-	self.uiButton4.enabled = activity.players and (0 < #activity.players) and not self.gmLocked
+	self.uiButton5.enabled = activity.players and (0 < #activity.players) and not self.gmLocked
 
 	-- !! TO CORRECT AFTER RELEASE : unlock proxy 
 
@@ -315,7 +319,7 @@ end
 
 function UAIntroduction.Ui.PlayersManagement:OnProfileUpdated(slot)
 
-    self.uiButton4.enabled = activity.players and (0 < #activity.players) and not self.gmLocked
+    self.uiButton5.enabled = activity.players and (0 < #activity.players) and not self.gmLocked
 
 	-- !! TO CORRECT AFTER RELEASE :  lock proxy 
 
@@ -336,7 +340,7 @@ function UAIntroduction.Ui.PlayersManagement:Update()
 
             self.gmLocked = false
             if (self.uiButton1) then self.uiButton1.enabled = true end
-            self.uiButton4.enabled = activity.players and (0 < #activity.players)
+            self.uiButton5.enabled = activity.players and (0 < #activity.players)
 			-- self.uiButton1.enabled = true
 
         end

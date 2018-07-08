@@ -25,6 +25,8 @@ require "Ui/UIEditBox"
 UTGame.Ui = UTGame.Ui or {}
 UTGame.Ui.Associate = UTClass(UIPopupLargeWindow)
 
+profilenames = {}
+
 -- default
 
 UTGame.Ui.Associate.Avatars = 
@@ -41,6 +43,7 @@ UTGame.Ui.Associate.Avatars =
 	[10] = "puma.tga",
 	[11] = "shark.tga",
 	[12] = "snake.tga",
+	
 }
 
 -- __ctor -------------------------------------------------------------------
@@ -52,93 +55,159 @@ function UTGame.Ui.Associate:__ctor(player, ...)
 	self.player = player
 	self.iconIndex = 1
 	for i = 1, #UTGame.Ui.Associate.Avatars do
-
 		if (UTGame.Ui.Associate.Avatars[i] == self.player.profile.icon) then
 			self.iconIndex = i
 			break
 		end
-
 	end
+	
+	self.offset = 60
+	
+	self.teamIndex = self.player.profile.team or 0
 	
     --  editBox
 
-			self.uiPanel1 = self:AddComponent(UIPanel:New(), "uiPanel1")
-			self.uiPanel1.background = "base:texture/ui/Components/UIPanel02.tga"
-			self.uiPanel1.rectangle = {
-				self.clientRectangle[1] + 20,
-				self.clientRectangle[2] + 20,
-				self.clientRectangle[3] - 20,
-				self.clientRectangle[2] + 20 + 50,
-			}        
+		self.uiPanel1 = self:AddComponent(UIPanel:New(), "uiPanel1")
+		self.uiPanel1.background = "base:texture/ui/Components/UIPanel02.tga"
+		self.uiPanel1.rectangle = {
+			self.clientRectangle[1] + 20,
+			self.clientRectangle[2] + 20,
+			self.clientRectangle[3] - 20,
+			self.clientRectangle[2] + 20 + 50,
+		}        
     
-		    self.uiEditBox = self:AddComponent(UIEditBox:New(self.player.profile.name), "editBox")
-		    self.uiEditBox:Activate()
-		    self.uiEditBox.tip = l"tip061"
-			self.uiEditBox:MoveTo(self.clientRectangle[1] + 130, self.clientRectangle[2] + 30)
+		self.uiEditBox = self:AddComponent(UIEditBox:New(self.player.profile.name), "editBox")
+		self.uiEditBox:Activate()
+		self.uiEditBox.tip = l"tip061"
+		self.uiEditBox:MoveTo(self.clientRectangle[1] + 130, self.clientRectangle[2] + 30)
 
-			if (self.player.rfGunDevice) then
+		if (self.player.rfGunDevice) then
 
-				self.uiHudPicture = self:AddComponent(UIPicture:New(), "uiHudPicture")
-				self.uiHudPicture.texture = "base:texture/ui/pictograms/128x/Hud_" .. self.player.rfGunDevice.classId .. ".tga"
-				self.uiHudPicture.rectangle = {
-					self.clientRectangle[1] + 30,
-					self.clientRectangle[2] + 20,
-					self.clientRectangle[1] + 30 + 50,
-					self.clientRectangle[2] + 20 + 50,
-				}  
+			self.uiHudPicture = self:AddComponent(UIPicture:New(), "uiHudPicture")
+			self.uiHudPicture.texture = "base:texture/ui/pictograms/128x/Hud_" .. self.player.rfGunDevice.classId .. ".tga"
+			self.uiHudPicture.rectangle = {
+				self.clientRectangle[1] + 30,
+				self.clientRectangle[2] + 20,
+				self.clientRectangle[1] + 30 + 50,
+				self.clientRectangle[2] + 20 + 50,
+			}  
 
-				self.playerHasDevice = true
+			self.playerHasDevice = true
 
-			else
-				self.playerHasDevice = false
-			end
+		else
+			self.playerHasDevice = false
+		end
 
-    --  progress bar
+		--  progress bar
 
-			self.uiPanel3 = self:AddComponent(UIPanel:New(), "uiPanel3")
-			self.uiPanel3.background = "base:texture/ui/Components/UIPanel02.tga"
-			self.uiPanel3.rectangle = {
+		self.uiPanel3 = self:AddComponent(UIPanel:New(), "uiPanel3")
+		self.uiPanel3.background = "base:texture/ui/Components/UIPanel02.tga"
+		self.uiPanel3.rectangle = {
+			self.clientRectangle[1] + 20,
+			self.clientRectangle[2] + 270,
+			self.clientRectangle[3] - 20,
+			self.clientRectangle[2] + 330,
+		}        
+
+		self.uiProgress = self:AddComponent(UIProgress:New(), "uiProgress")
+		self.uiProgress.rectangle = {
+			self.clientRectangle[1] + 40,
+			self.clientRectangle[2] + 290,
+			self.clientRectangle[3] - 40,
+			self.clientRectangle[2] + 310,
+		}
+		self.uiProgress.minimum = 0
+		self.uiProgress.maximum = 100
+		self.uiProgress.progress = 0
+			
+			--  team icon 
+	
+			self.uiPanel4 = self:AddComponent(UIPanel:New(), "uiPanel4")
+			self.uiPanel4.background = "base:texture/ui/Components/UIPanel02.tga"
+			self.uiPanel4.rectangle = {
 				self.clientRectangle[1] + 20,
-				self.clientRectangle[2] + 270,
+				self.clientRectangle[2] + 80,
 				self.clientRectangle[3] - 20,
-				self.clientRectangle[2] + 270 + 60,
-			}        
+				self.clientRectangle[2] + 130,
+			}   
+				
+			self.uiPicture2 = self:AddComponent(UIPicture:New(), "uiPicture2")
+			self.uiPicture2.texture = "base:texture/ui/Team_" .. self.teamIndex .. ".tga"
+			self.uiPicture2.rectangle = {
+				self.clientRectangle[1] + 175,
+				self.clientRectangle[2] + 90,
+				self.clientRectangle[1] + 295,
+				self.clientRectangle[2] + 120,
+			}   						
+				
+			--  uiTeamDecrease
+				
+			self.uiTeamDecrease = self:AddComponent(UIArrowLeft:New(), "uiTeamDecrease")
+			self.uiTeamDecrease:MoveTo(self.clientRectangle[1] + 40, self.clientRectangle[2] + 87)
+			self.uiTeamDecrease.tip = l"Set the default team."
+				
+				
+			self.uiTeamDecrease.OnAction = function (_self) 
+				
+				quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
+				quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
+				quartz.framework.audio.playsound()
+					
+				self.teamIndex = self.teamIndex - 1
+					
+				if (self.teamIndex < 0) then
+					self.teamIndex = 6
+				end
+				self.uiPicture2.texture = "base:texture/ui/Team_" .. self.teamIndex .. ".tga"
 
-			self.uiProgress = self:AddComponent(UIProgress:New(), "uiProgress")
-			self.uiProgress.rectangle = {
-				self.clientRectangle[1] + 40,
-				self.clientRectangle[2] + 290,
-				self.clientRectangle[3] - 40,
-				self.clientRectangle[2] + 290 + 20,
-			}
-			self.uiProgress.minimum = 0
-			self.uiProgress.maximum = 100
-			self.uiProgress.progress = 0
+			end
+			
+			
+			--  uiTeamIncrease
 
-    --  icon
+			self.uiTeamIncrease = self:AddComponent(UIArrowRight:New(), "uiTeamIncrease")
+			self.uiTeamIncrease:MoveTo(self.clientRectangle[3] - 40 - 32, self.clientRectangle[2] + 87)
+			self.uiTeamIncrease.tip = l"tip214"
 
+			
+			self.uiTeamIncrease.OnAction = function (_self) 
+		    
+				quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
+				quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
+				quartz.framework.audio.playsound()
+				
+				self.teamIndex = self.teamIndex + 1
+				
+				if (self.teamIndex > 6) then
+					self.teamIndex = 0
+				end
+				self.uiPicture2.texture = "base:texture/ui/Team_" .. self.teamIndex .. ".tga"
+
+			end
+	
+			--  icon
 			self.uiPanel2 = self:AddComponent(UIPanel:New(), "uiPanel2")
 			self.uiPanel2.background = "base:texture/ui/Components/UIPanel02.tga"
 			self.uiPanel2.rectangle = {
 				self.clientRectangle[1] + 20,
-				self.clientRectangle[2] + 80,
+				self.clientRectangle[2] + 80 + self.offset,
 				self.clientRectangle[3] - 20,
-				self.clientRectangle[2] + 80 + 180,
+				self.clientRectangle[2] + 80 + self.offset + 180,
 			}   
 
 			self.uiPicture = self:AddComponent(UIPicture:New(), "uiPicture")
 			self.uiPicture.texture = "base:texture/avatars/256x/" .. UTGame.Ui.Associate.Avatars[self.iconIndex]
 			self.uiPicture.rectangle = {
 				self.clientRectangle[1] + 110,
-				self.clientRectangle[2] + 40,
+				self.clientRectangle[2] + 40 + self.offset,
 				self.clientRectangle[1] + 110 + 240,
-				self.clientRectangle[2] + 40 + 240,
+				self.clientRectangle[2] + 40 + self.offset + 240,
 			}   						
     
 			--  uiButtonleft
 		    
 			self.uiButtonleft = self:AddComponent(UIArrowLeft:New(), "uiButtonleft")
-			self.uiButtonleft:MoveTo(self.clientRectangle[1] + 40, self.clientRectangle[2] + 160)
+			self.uiButtonleft:MoveTo(self.clientRectangle[1] + 40, self.clientRectangle[2] + 160 + self.offset)
 		    self.uiButtonleft.tip = l"tip107"
 			self.uiButtonleft.OnAction = function (_self) 
 		    
@@ -158,7 +227,7 @@ function UTGame.Ui.Associate:__ctor(player, ...)
 			--  uiButtonright
 
 			self.uiButtonright = self:AddComponent(UIArrowRight:New(), "uiButtonright")
-			self.uiButtonright:MoveTo(self.clientRectangle[3] - 40 - 32, self.clientRectangle[2] + 160)
+			self.uiButtonright:MoveTo(self.clientRectangle[3] - 40 - 32, self.clientRectangle[2] + 160 + self.offset)
 		    self.uiButtonright.tip = l"tip107"
 
 
@@ -180,7 +249,7 @@ function UTGame.Ui.Associate:__ctor(player, ...)
 	-- uiButton1: back
 
 		self.uiButton1 = self:AddComponent(UIButton:New(), "uiButton1")
-		self.uiButton1.rectangle = self.buttonRectangles[1]
+		self.uiButton1.rectangle = { 62, 454, 199, 484 }
 		self.uiButton1.text = l"but004"
 		self.uiButton1.tip = l"tip006"
 
@@ -189,40 +258,134 @@ function UTGame.Ui.Associate:__ctor(player, ...)
 	-- uiButton2: confirm
 
 		self.uiButton2 = self:AddComponent(UIButton:New(), "uiButton2")
-		self.uiButton2.rectangle = self.buttonRectangles[2]
+		self.uiButton2.rectangle = { 356, 454, 493, 484 }
 		self.uiButton2.text = l"but005"
 		self.uiButton2.tip = l"tip108"
-		self.uiButton2.enabled = false
 
-		self.uiButton2.OnAction = function (_self) 
+		self.uiButton2.OnAction = function () 
 
-			-- save info
+			self:Confirm()
+		end
 
-			self.player.profile.name = self.uiEditBox.editText
-			self.player.profile.icon = UTGame.Ui.Associate.Avatars[self.iconIndex]
+	-- uiButton3: batch
 
-			if (self.player.rfGunDevice) then
+		self.uiButton3 = self:AddComponent(UIButton:New(), "uiButton3")
+		self.uiButton3.rectangle = { 62, 489, 199, 519 }
+		self.uiButton3.text = l"oth117"
+		self.uiButton3.tip = l"tip259"
 
-				-- disable button
-
-				self.uiButton1.enabled = false
-				self.uiButton2.enabled = false
-
-				-- create msg
-
-				self:Initialize()
-				self.processFinished = false
-				self.message = {0x01, self.player.rfGunDevice.radioProtocolId, 0x86, 0x00}
-
+		self.uiButton3.OnAction = function (_self)
+		
+			if (self.uiButton3.text == l"oth117") then
+				self.uiEditBox2:MoveTo(self.clientRectangle[1] + 130, self.clientRectangle[2] + 30)
+				self.uiEditBox:MoveTo(self.clientRectangle[1] + 130, self.clientRectangle[2] - 10)
+				self.uiEditBox2.tip = l"tip061"
+				self.uiEditBox.tip = l"tip261"
+				self.uiButton6.visible = true
+				self.uiEditBox.editText = ""
+				self.profilenamesindex = self.profilenamesindex + 1
+				self.uiButton3.text = l"oth083"
+				self.uiButton3.tip = l"tip260"
+				self.uiEditBox2.visible = true
+				if (not next(profilenames)) then
+					profilenames[self.profilenamesindex] = {}
+				else
+					self.uiEditBox2.editText = profilenames[self.profilenamesindex][1]
+					if (profilenames[self.profilenamesindex][2]) then
+						self.batchready = true
+					end
+				end
 			else
-
-				-- no device 
-
-				UIManager.stack:Pop()
-				
+				self.profilenamesindex = 0
+				self.uiButton3.text = l"oth117"
+				self.uiButton3.tip = l"tip259"
+				self.uiButton6.visible = false
+				self.uiEditBox2.editText = ""
+				self.uiEditBox2.visible = false
+				self.uiEditBox.editText = self.player.profile.name
+				self.uiEditBox.cursorPos = 15
 			end
+		end
+
+	-- uiButton4: Save
+
+		self.uiButton4 = self:AddComponent(UIButton:New(), "uiButton4")
+		self.uiButton4.rectangle = { 209, 454, 346, 484 }
+		self.uiButton4.text = l"but013"
+		self.uiButton4.tip = l"tip248"
+
+		self.uiButton4.OnAction = function ()
+		
+			self:Save()
+		end
+
+	-- uiButton5: clear
+
+		self.uiButton5 = self:AddComponent(UIButton:New(), "uiButton4")
+		self.uiButton5.rectangle = { 209, 489, 346, 519 }
+		self.uiButton5.text = l"but032"
+		self.uiButton5.tip = l"tip249"
+
+		self.uiButton5.OnAction = function (_self)
+			profilenames[self.profilenamesindex] = {}
+			self.profilenamesindex = self.profilenamesindex - 1
+			self.uiEditBox.editText = ""
+		end
+
+	-- uiButton6: add team
+
+		self.uiButton6 = self:AddComponent(UIButton:New(), "uiButton6")
+		self.uiButton6.rectangle = { 356, 489, 493, 519 }
+		self.uiButton6.text = l"oth087"
+		self.uiButton6.tip = l"tip247"
+		self.uiButton6.visible = false
+
+		self.uiButton6.OnAction = function (_self)
+		
+			self.profilenamesindex = #profilenames + 1
+			profilenames[self.profilenamesindex] = {}
+			self.uiEditBox.editText = ""
+			self.uiEditBox2.editText = ""
+			self.batchready = false
 
 		end
+
+		self.uiEditBox2 = self:AddComponent(UIEditBox:New(), "editBox")
+		self.uiEditBox2.tip = l"tip261"
+		self.uiEditBox2:MoveTo(self.clientRectangle[1] + 130, self.clientRectangle[2] - 10)
+		self.uiEditBox2.visible = false
+
+		--  uiButtonleft
+		    
+		self.uiButtonleft2 = self:AddComponent(UIArrowLeft:New(), "uiButtonleft")
+		self.uiButtonleft2:MoveTo(self.clientRectangle[3] - 100, self.clientRectangle[2] + 28)
+		self.uiButtonleft2.tip = l""
+		self.uiButtonleft2.OnAction = function (_self) 
+		    
+			self.profilenamesindex = self.profilenamesindex - 1
+			self.uiEditBox2.editText = profilenames[self.profilenamesindex][1]
+			if (profilenames[self.profilenamesindex][2]) then
+				self.batchready = true
+			end
+		end
+    
+		--  uiButtonright
+
+		self.uiButtonright2 = self:AddComponent(UIArrowRight:New(), "uiButtonright")
+		self.uiButtonright2:MoveTo(self.clientRectangle[3] - 60, self.clientRectangle[2] + 28)
+		self.uiButtonright2.tip = l""
+
+
+		self.uiButtonright2.OnAction = function (_self) 
+		    
+			self.profilenamesindex = self.profilenamesindex + 1
+			self.uiEditBox2.editText = profilenames[self.profilenamesindex][1]
+			self.uiEditBox.tip = l"tip061"
+			self.uiEditBox2.tip = l"tip261"
+			if (profilenames[self.profilenamesindex][2]) then
+				self.batchready = true
+			end
+		end 
 
 	-- message
 
@@ -236,7 +399,7 @@ function UTGame.Ui.Associate:Initialize()
 
 	-- get profile info
 
-	local length = 2 + string.len(self.player.profile.name) + string.len(self.player.profile.icon) - 4
+	local length = 2 + string.len(self.player.profile.name) + string.len(self.player.profile.team .. "_" .. self.player.profile.icon) - 4
 
 	-- TOC for flash mem : header(4 o) number(1 o) revision (4 o) entry(4 o) offset(2 o) size(2 o)
 
@@ -256,11 +419,11 @@ function UTGame.Ui.Associate:Initialize()
 		offset = offset + 1
 
 	end
-	self.data[offset] = string.len(self.player.profile.icon) - 4
+	self.data[offset] = string.len(self.player.profile.team .. "_" .. self.player.profile.icon) - 4
 	offset = offset + 1
-	for i = 1, string.len(self.player.profile.icon) do
+	for i = 1, string.len(self.player.profile.team .. "_" .. self.player.profile.icon) do
 
-		self.data[offset] = string.byte(self.player.profile.icon, i)
+		self.data[offset] = string.byte(self.player.profile.team .. "_" .. self.player.profile.icon, i)
 		offset = offset + 1
 
 	end
@@ -272,11 +435,14 @@ end
 function UTGame.Ui.Associate:OnClose()
 
 	self.uiEditBox:Deactivate()
+	self:Deactivate()
+	UTActivity.Ui.PlayersManagement.hasPopup = false
 
-    if (engine.libraries.usb.proxy) then
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do	
+		if (proxy) then
 
-		engine.libraries.usb.proxy._DispatchMessage:Remove(self, self.OnDispatchMessage)
-		
+			proxy._DispatchMessage:Remove(self, self.OnDispatchMessage)
+		end
 	end
 
 end
@@ -295,7 +461,11 @@ function UTGame.Ui.Associate:OnDispatchMessage(device, addressee, command, arg)
 				self.message = nil
 				self.uiProgress.progress = 100
 				device.playerProfile = self.player.profile
-				UIManager.stack:Pop()
+				if (self.batchcount == 0 or self.batchcount == #self.player.team.players) then
+					UIManager.stack:Pop()
+				end
+				self.batchcount = self.batchcount + 1
+				self:Batch()
 			else
 				self.uiProgress.progress = 20
 				self.message = {0x04, self.player.rfGunDevice.radioProtocolId, 0x81, 0x00, 0x00, 0x00, 0x00}
@@ -336,10 +506,16 @@ function UTGame.Ui.Associate:OnOpen()
 	-- father
 
 	UIPopupLargeWindow.OnOpen(self)
+	self:Activate()
+	UTActivity.Ui.PlayersManagement.hasPopup = true
+	self.profilenamesindex = 0
 
 	-- register	to proxy message received
 
-	engine.libraries.usb.proxy._DispatchMessage:Add(self, self.OnDispatchMessage)	
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		proxy._DispatchMessage:Add(self, self.OnDispatchMessage)
+	end
+	self.batchcount = 0
 
 end
 
@@ -357,17 +533,37 @@ function UTGame.Ui.Associate:Update()
 
 			self.msgTimer = 0
 			if (self.player.rfGunDevice) then
-				quartz.system.usb.sendmessage(engine.libraries.usb.proxy.handle, self.message)
+				for index, proxy in ipairs(engine.libraries.usb.proxies) do
+					if (self.player.rfGunDevice.host == proxy) then
+						quartz.system.usb.sendmessage(proxy.handle, self.message)
+					end
+				end
 			end
 
 		end
 
 	end
 
-	-- edit box
-
 	self.uiEditBox:Update()
-	if (not self.message and self.uiEditBox.editText and self.uiEditBox.editText ~= "") then
+
+	if (self.profilenamesindex == 1) then
+		self.uiButtonleft2.enabled = false
+	else
+		self.uiButtonleft2.enabled = true
+	end
+	if (#profilenames == self.profilenamesindex) then
+		self.uiButtonright2.enabled = false
+	else
+		self.uiButtonright2.enabled = true
+	end
+	if (self.profilenamesindex == 0) then
+		self.uiButtonleft2.visible = false
+		self.uiButtonright2.visible = false
+	else
+		self.uiButtonleft2.visible = true
+		self.uiButtonright2.visible = true
+	end
+	if ((not self.message and self.uiEditBox.editText and self.uiEditBox.editText ~= "" and self.profilenamesindex == 0) or (not self.message and self.batchready and self.profilenamesindex > 0)) then
 		self.uiButton2.enabled = true
 	else
 		self.uiButton2.enabled = false
@@ -396,6 +592,119 @@ function UTGame.Ui.Associate:Update()
 
 		UIManager.stack:Push(self.uiPopup)			
 
+	end
+
+end
+
+function UTGame.Ui.Associate:Batch()
+
+	for i, player in ipairs(self.player.team.players) do
+		for j, profilename in ipairs(profilenames[self.profilenamesindex]) do
+			if (i == j - 1 and i == self.batchcount) then
+				player.profile.name = profilename
+				player.profile.team = self.teamIndex
+				self.uiButton1.enabled = false
+				self.uiButton2.enabled = false
+				self.player = player
+
+				-- create msg
+
+				self:Initialize()
+				self.processFinished = false
+				self.message = {0x01, self.player.rfGunDevice.radioProtocolId, 0x86, 0x00}
+			end
+		end
+	end
+
+end
+
+function UTGame.Ui.Associate:Confirm()
+
+	-- save info
+
+	if (next(profilenames) and self.profilenamesindex ~= 0) then
+		self.batchcount = 1
+		self:Batch()
+	else
+		self.player.profile.name = self.uiEditBox.editText
+		self.player.profile.team = self.teamIndex
+		self.player.profile.icon = UTGame.Ui.Associate.Avatars[self.iconIndex]
+
+		if (self.player.rfGunDevice) then
+
+			-- disable button
+
+			self.uiButton1.enabled = false
+			self.uiButton2.enabled = false
+
+			-- create msg
+
+			self:Initialize()
+			self.processFinished = false
+			self.message = {0x01, self.player.rfGunDevice.radioProtocolId, 0x86, 0x00}
+
+		else
+
+			-- no device 
+
+			UIManager.stack:Pop()
+				
+		end
+	end
+end
+
+function UTGame.Ui.Associate:Save()
+
+	if (not next(profilenames[self.profilenamesindex])) then
+		self.uiEditBox2.editText = self.uiEditBox.editText
+	end
+	table.insert(profilenames[self.profilenamesindex], self.uiEditBox.editText)
+	self.uiEditBox.editText = ""
+	if (profilenames[self.profilenamesindex][2]) then
+		self.batchready = true
+	end
+	if (profilenames[self.profilenamesindex][1]) then
+		self.uiEditBox:MoveTo(self.clientRectangle[1] + 130, self.clientRectangle[2] + 30)
+		self.uiEditBox2:MoveTo(self.clientRectangle[1] + 130, self.clientRectangle[2] - 10)
+		self.uiEditBox.tip = l"tip061"
+		self.uiEditBox2.tip = l"tip261"
+	end
+end
+
+function UTGame.Ui.Associate:Activate()
+
+    if (not self.keyboardActive) then
+
+        --game._Char:Add(self, self.Char)
+        game._KeyDown:Add(self, self.KeyDown)
+        self.keyboardActive = true
+
+    end
+
+end
+
+function UTGame.Ui.Associate:Deactivate()
+
+    if (self.keyboardActive) then 
+    
+        --game._Char:Remove(self, self.Char)
+        game._KeyDown:Remove(self, self.KeyDown)
+        self.keyboardActive = false
+
+    end
+
+end
+
+function UTGame.Ui.Associate:KeyDown(virtualKeyCode, scanCode)
+		
+	if (13 == virtualKeyCode) then
+		if (self.uiButton2.enabled) then
+
+			self:Confirm()
+		elseif (self.uiButton4.enabled) then
+		
+			self:Save()
+		end
 	end
 
 end

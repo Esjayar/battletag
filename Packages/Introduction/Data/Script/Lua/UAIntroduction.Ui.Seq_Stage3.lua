@@ -126,18 +126,18 @@ function UAIntroduction.Ui.Seq_Stage3:__ctor(state)
 
 	end
 
-	-- uiButton4: next
+	-- uiButton5: next
 
-    self.uiButton4 = self:AddComponent(UIButton:New(), "uiButton4")
-    self.uiButton4.rectangle = UIMenuWindow.buttonRectangles[4]
-	self.uiButton4.text = l"but006"
-	self.uiButton4.tip = l"tip005"
+    self.uiButton5 = self:AddComponent(UIButton:New(), "uiButton5")
+    self.uiButton5.rectangle = UIMenuWindow.buttonRectangles[5]
+	self.uiButton5.text = l"but006"
+	self.uiButton5.tip = l"tip005"
 
-	self.uiButton4.OnAction = function ()
+	self.uiButton5.OnAction = function ()
         state:Next()
 	end
 
-    self.uiButton4.enabled = false
+    self.uiButton5.enabled = false
 
     local delegate = function ()
 
@@ -148,22 +148,22 @@ function UAIntroduction.Ui.Seq_Stage3:__ctor(state)
 
 	self.Update = function ()
 
-	    self.uiButton4.enabled = true
+	    self.uiButton5.enabled = true
 
         for _, player in ipairs(activity.match.players) do
-            self.uiButton4.enabled = self.uiButton4.enabled and player.data.heap.harnessOn
+            self.uiButton5.enabled = self.uiButton5.enabled and player.data.heap.harnessOn
         end
 
         -- gm lock
 
-        if (self.uiButton4.enabled and not self.gmLockedLocked) then
+        if (self.uiButton5.enabled and not self.gmLockedLocked) then
             self.gmLocked = true
             self.gmLockedLocked = true
-            self.uiButton4.enabled = false
+            self.uiButton5.enabled = false
             game.gameMaster:Play("base:audio/gamemaster/dlg_gm_init_14.wav", delegate)
         end
 
-        self.uiButton4.enabled = self.uiButton4.enabled and not self.gmLocked
+        self.uiButton5.enabled = self.uiButton5.enabled and not self.gmLocked
 
 	end
 

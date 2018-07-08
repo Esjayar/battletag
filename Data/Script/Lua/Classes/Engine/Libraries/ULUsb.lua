@@ -23,7 +23,7 @@ UTClass.ULUsb(UELibrary)
 
 -- defaults
 
-ULUsb.updateFrameRate = 4
+ULUsb.updateFrameRate = 15
 
 -- dependencies
 
@@ -144,30 +144,32 @@ end
 
 -- Connect -------------------------------------------------------------------
 
-function ULUsb:Connect(device)
+function ULUsb:Connect(proxy)
 
     -- make sure we have a proxy there
 
-    assert(device and device:IsKindOf(ULUsbProxy))
+    assert(proxy and proxy:IsKindOf(ULUsbProxy))
 
-    assert(not self.proxy); self.proxy = device; self.connected = true
+    --assert(not self.proxy); self.proxy = device; self.connected = true
+	
+	self.connected = true
 
     -- we assume we are connected,
     -- while the proxy exists and is up and running ...
 
     self:PostStateChange("connected")
-    self:OnConnected()
+    self:OnConnected(proxy)
 
 end
 
 -- Disconnect ----------------------------------------------------------------
 
-function ULUsb:Disconnect()
+function ULUsb:Disconnect(proxy)
 
-    if (self.proxy) then
+    if (proxy) then
 
-        self:OnDisconnected()
-        self.proxy:Delete(); self.proxy = nil; self.connected = false
+        self:OnDisconnected(proxy)
+        proxy:Delete(); proxy = nil; self.connected = false
 
         -- restart the state machine
 
@@ -190,10 +192,10 @@ end
 
 -- OnConnected ---------------------------------------------------------------
 
-function ULUsb:OnConnected()
+function ULUsb:OnConnected(proxy)
 
     print("ULUsb:OnConnected")
-    self._Connected:Invoke(self.proxy)
+    self._Connected:Invoke(proxy)
 
 end
 
@@ -217,10 +219,10 @@ end
 
 -- OnDisconnected ------------------------------------------------------------
 
-function ULUsb:OnDisconnected()
+function ULUsb:OnDisconnected(proxy)
 
     print("ULUsb:OnDisconnected")
-    self._Disconnected:Invoke(self.proxy)
+    self._Disconnected:Invoke(proxy)
 
 end
 
@@ -263,5 +265,11 @@ end
 function ULUsb:Reset()
 
     self:Disconnect()
+
+end
+
+function ULUsb:ProxyLookup()
+
+
 
 end

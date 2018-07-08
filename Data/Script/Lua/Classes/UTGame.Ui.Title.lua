@@ -104,6 +104,7 @@ function UTGame.Ui.Title:__ctor(...)
 		quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
 		quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
 		quartz.framework.audio.playsound()
+		uiSettingprev = 1
 		
         game:PostStateChange("settings")
 
@@ -140,14 +141,9 @@ function UTGame.Ui.Title:__ctor(...)
     self.uiButtonSelector.text = l "menu02"
     self.uiButtonSelector.tip = l "tip010"
 
-    self.uiButtonSelector.OnAction = function (self) 
+    self.uiButtonSelector.OnAction = function () 
 
-		quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
-		quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
-		quartz.framework.audio.playsound()
-
-		game:PostStateChange("selector")
-
+		self:Confirm()
     end
 
     -- Play!   
@@ -157,17 +153,16 @@ function UTGame.Ui.Title:__ctor(...)
     self.uiButtonPlay.text = l "menu01"
     self.uiButtonPlay.tip = l "tip009"
 
-    self.uiButtonPlay.OnAction = function ()
+    self.uiButtonPlay.OnAction = function (self)
 
 		quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
 		quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
 		quartz.framework.audio.playsound()
 
-        -- launch the starter frag game
+		-- launch the starter frag game
 
-        local nfo = { __directory = "StarterFrag", class = "UAStarterFrag", }
-        game:PostStateChange("session", nfo, "advertised")
-
+		local nfo = { __directory = "StarterFrag", class = "UAStarterFrag", }
+		game:PostStateChange("session", nfo, "advertised")
     end
 
     -- basics
@@ -194,40 +189,9 @@ function UTGame.Ui.Title:__ctor(...)
     self.uiButtonQuit.text = l "menu06"
     self.uiButtonQuit.tip = l "tip013"
 
-    self.uiButtonQuit.OnAction = function (self) 
+    self.uiButtonQuit.OnAction = function () 
 
-		quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
-		quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
-		quartz.framework.audio.playsound()
-		
-		local uiPopup = UIPopupWindow:New()
-		uiPopup.icon = "base:/video/uianimatedbutton_quit.avi"
-
-        uiPopup.title = l "menu06"
-        uiPopup.text = string.format(l "menu06pop")
-        
-        local uiButtonYes = uiPopup:AddComponent(UIButton:New(), "uiButtonYes")
-        uiButtonYes.text = l "but001"
-		uiButtonYes.tip = l "tip013"
-        uiButtonYes.rectangle = uiPopup.buttonRectangles[1]
-        uiButtonYes.OnAction = function (self) 
-			
-		UTGame.Ui.Title.hasPopup = false
-        application.postbreakexecution() 
-        end
-
-        local uiButtonNo = uiPopup:AddComponent(UIButton:New(), "uiButtonNo")
-        uiButtonNo.text = l "but002"
-		uiButtonNo.tip = l "tip006"
-        uiButtonNo.rectangle = uiPopup.buttonRectangles[2]
-        uiButtonNo.OnAction = function (self) 
-		UTGame.Ui.Title.hasPopup = false
-        UIManager.stack:Pop() 
-        end
-
-		UTGame.Ui.Title.hasPopup = true
-        UIManager.stack:Push(uiPopup)
-
+		self:Back()
     end
 
     self.uiMultiComponent:MoveTo(self.foregroundInit[1], self.foregroundInit[2])
@@ -240,7 +204,7 @@ function UTGame.Ui.Title:__ctor(...)
     label:MoveTo(- self.foregroundRectangle[1], -24)
     label.fontcolor = UIComponent.colors.red
     label.fontJustification = quartz.system.drawing.justification.bottomright
-    label.text = string.format("%d.%d.%03d", IS_MAJORREVISION or 1, IS_MINORREVISION or 0, REG_BUILD or 0)
+    label.text = string.format("%d.%d.%03d %s", IS_MAJORREVISION or 1, IS_MINORREVISION or 0, REG_BUILD or 0, REG_BUILDBETA or "")
 
 end
 
@@ -319,6 +283,7 @@ function UTGame.Ui.Title:OnClose()
 		quartz.system.drawing.stopvideo()
 
     end
+	self:Deactivate()
     
 	UIManager:RemoveFx(self.myFx)
 	UIManager:RemoveFx(self.myFx2)
@@ -335,6 +300,7 @@ function UTGame.Ui.Title:OnOpen()
 		quartz.system.drawing.playvideo(true)
 
     end
+	self:Activate()
 
     UIManager:AddFx("position", { duration = 0.8, __self = self.uiMultiComponent, from = self.foregroundInit, to = { self.foregroundRectangle[1], self.foregroundRectangle[2] }, type = "descelerate" })
 	self.myFx = UIManager:AddFx("value", { timeOffset = 0.8, duration = 0.8, __self = self, value = "blinkPlay", from = 0, to = 1, type = "blink"})
@@ -358,6 +324,97 @@ function UTGame.Ui.Title:Update()
 			self.spotLightX = 1300 + math.random(5000)
 		end
 	
+	end
+
+end
+
+function UTGame.Ui.Title:Back()
+
+	quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
+	quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
+	quartz.framework.audio.playsound()
+		
+	local uiPopup = UIPopupWindow:New()
+	uiPopup.icon = "base:/video/uianimatedbutton_quit.avi"
+
+    uiPopup.title = l "menu06"
+    uiPopup.text = string.format(l "menu06pop")
+        
+    local uiButtonYes = uiPopup:AddComponent(UIButton:New(), "uiButtonYes")
+    uiButtonYes.text = l "but001"
+	uiButtonYes.tip = l "tip013"
+    uiButtonYes.rectangle = uiPopup.buttonRectangles[1]
+    uiButtonYes.OnAction = function (self) 
+			
+	UTGame.Ui.Title.hasPopup = false
+    application.postbreakexecution() 
+    end
+
+    local uiButtonNo = uiPopup:AddComponent(UIButton:New(), "uiButtonNo")
+    uiButtonNo.text = l "but002"
+	uiButtonNo.tip = l "tip006"
+    uiButtonNo.rectangle = uiPopup.buttonRectangles[2]
+    uiButtonNo.OnAction = function (self) 
+	UTGame.Ui.Title.hasPopup = false
+    UIManager.stack:Pop() 
+    end
+
+	UTGame.Ui.Title.hasPopup = true
+    UIManager.stack:Push(uiPopup)
+end
+
+function UTGame.Ui.Title:Confirm()
+
+	quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
+	quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
+	quartz.framework.audio.playsound()
+	uiSettingprev = nil
+
+	game:PostStateChange("selector")
+end
+
+function UTGame.Ui.Title:Activate()
+
+    if (not self.keyboardActive) then
+
+        --game._Char:Add(self, self.Char)
+        game._KeyDown:Add(self, self.KeyDown)
+        self.keyboardActive = true
+
+    end
+
+end
+
+function UTGame.Ui.Title:Deactivate()
+
+    if (self.keyboardActive) then 
+    
+        --game._Char:Remove(self, self.Char)
+        game._KeyDown:Remove(self, self.KeyDown)
+        self.keyboardActive = false
+
+    end
+
+end
+
+function UTGame.Ui.Title:KeyDown(virtualKeyCode, scanCode)
+		
+	if (27 == virtualKeyCode) then
+		if (UTGame.Ui.Title.hasPopup) then
+			UTGame.Ui.Title.hasPopup = false
+			UIManager.stack:Pop()
+		else
+			self:Back()
+		end
+	end
+
+	if (13 == virtualKeyCode) then
+		if (UTGame.Ui.Title.hasPopup) then
+			UTGame.Ui.Title.hasPopup = false
+			application.postbreakexecution()
+		else
+			self:Confirm()
+		end
 	end
 
 end

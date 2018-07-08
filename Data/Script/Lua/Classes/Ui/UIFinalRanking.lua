@@ -101,102 +101,113 @@ function UIFinalRanking:Build(challengers)
 		
 		for i, challenger in pairs(self.challengers) do
 		
-			if (rank <= 3) then
+			if (not challenger.primary) then
+				if (rank <= 3) then
 				
-				if (score == - 1 or score > challenger.data.baked.score) then
-					score = challenger.data.baked.score
-					realRank = realRank + 1
-				end 
+					if (score == - 1 or score > challenger.data.baked.score) then
+						score = challenger.data.baked.score
+						realRank = realRank + 1
+					end 
 				
-				self.uiPodiums[rank] = self:AddComponent(UIPodiumSlot:New(), "uiFinalRanking.Podium" .. rank)				
-				self.uiPodiums[rank]:Build(challenger, self.nbChallenger, rank, realRank)
+					self.uiPodiums[rank] = self:AddComponent(UIPodiumSlot:New(), "uiFinalRanking.Podium" .. rank)				
+					self.uiPodiums[rank]:Build(challenger, self.nbChallenger, rank, realRank)
 			
-			else
+				else
 			
-				-- banner player
+					-- banner player
 			
-				local uiBannerPosition = self.uiBanner:AddComponent(UIPicture:New(), "uiBannerPosition")
-				uiBannerPosition.rectangle = {0, 0, 64, 22}
-				uiBannerPosition.texture = "base:texture/ui/ranking_banner_position.tga"
+					local uiBannerPosition = self.uiBanner:AddComponent(UIPicture:New(), "uiBannerPosition")
+					uiBannerPosition.rectangle = {0, 0, 64, 22}
+					uiBannerPosition.texture = "base:texture/ui/ranking_banner_position.tga"
 				
-				local uiPosition = self.uiBanner:AddComponent(UILabel:New({0, 0, 100, 64}, challenger.profile.name), "uiPosition")
-				uiPosition.fontColor = UIComponent.colors.white
-				uiPosition.font = UIComponent.fonts.header				
-				uiPosition.text = rank .. "th"
+					local uiPosition = self.uiBanner:AddComponent(UILabel:New({0, 0, 100, 64}, challenger.profile.name), "uiPosition")
+					uiPosition.fontColor = UIComponent.colors.white
+					uiPosition.font = UIComponent.fonts.header				
+					uiPosition.text = rank .. "th"
 			
-				local uiBannerName1 = self.uiBanner:AddComponent(UIPicture:New(), "uiBannerLine1")
-				uiBannerName1.rectangle = {0, 0, 70, 22}
-				uiBannerName1.texture = "base:texture/ui/ranking_banner_namebg.tga"
+					local uiBannerName1 = self.uiBanner:AddComponent(UIPicture:New(), "uiBannerLine1")
+					uiBannerName1.rectangle = {0, 0, 70, 22}
+					uiBannerName1.texture = "base:texture/ui/ranking_banner_namebg.tga"
 				
-				local uiBannerName2 = self.uiBanner:AddComponent(UIPicture:New(), "uiBannerLine2")
-				uiBannerName2.rectangle = {0, 0, 70, 22}
-				uiBannerName2.texture = "base:texture/ui/ranking_banner_namebg.tga"
+					local uiBannerName2 = self.uiBanner:AddComponent(UIPicture:New(), "uiBannerLine2")
+					uiBannerName2.rectangle = {0, 0, 70, 22}
+					uiBannerName2.texture = "base:texture/ui/ranking_banner_namebg.tga"
 				
-				local uiBannerName3 = self.uiBanner:AddComponent(UIPicture:New(), "uiBannerLine3")
-				uiBannerName3.rectangle = {0, 0, 70, 22}
-				uiBannerName3.texture = "base:texture/ui/ranking_banner_namebg.tga"
+					local uiBannerName3 = self.uiBanner:AddComponent(UIPicture:New(), "uiBannerLine3")
+					uiBannerName3.rectangle = {0, 0, 70, 22}
+					uiBannerName3.texture = "base:texture/ui/ranking_banner_namebg.tga"
 				
-				local uiBannerName4 = self.uiBanner:AddComponent(UIPicture:New(), "uiBannerLine4")
-				uiBannerName4.rectangle = {0, 0, 70, 22}
-				uiBannerName4.texture = "base:texture/ui/ranking_banner_namebg.tga"
+					local uiBannerName4 = self.uiBanner:AddComponent(UIPicture:New(), "uiBannerLine4")
+					uiBannerName4.rectangle = {0, 0, 70, 22}
+					uiBannerName4.texture = "base:texture/ui/ranking_banner_namebg.tga"
 				
-				local uiBannerName5 = self.uiBanner:AddComponent(UIPicture:New(), "uiBannerLine5")
-				uiBannerName5.rectangle = {0, 0, 70, 22}
-				uiBannerName5.texture = "base:texture/ui/ranking_banner_namebg.tga"
-				
-				
-				local uiBannerIcon = self.uiBanner:AddComponent(UIPicture:New(), "uiBannerIcon")
-				uiBannerIcon.rectangle = {0, 0, 60, 22}
-				uiBannerIcon.texture = "base:texture/ui/ranking_banner_arrow.tga"
-				
-				local uiIcon = self.uiBanner:AddComponent(UIPicture:New(), "uiIcon")
-				uiIcon.rectangle = {0, 0, 32, 32}
-				uiIcon.texture = "base:texture/avatars/32x/" .. challenger.profile.icon			
+					local uiBannerName5 = self.uiBanner:AddComponent(UIPicture:New(), "uiBannerLine5")
+					uiBannerName5.rectangle = {0, 0, 70, 22}
+					uiBannerName5.texture = "base:texture/ui/ranking_banner_namebg.tga"
 				
 				
-				if (challenger.rfGunDevice and challenger.rfGunDevice.classId) then
+					local uiBannerIcon = self.uiBanner:AddComponent(UIPicture:New(), "uiBannerIcon")
+					uiBannerIcon.rectangle = {0, 0, 60, 22}
+					uiBannerIcon.texture = "base:texture/ui/ranking_banner_arrow.tga"
 				
-					local uiIconGun = self.uiBanner:AddComponent(UIPicture:New(), "uiIconGun")
-					uiIconGun.rectangle = {0, 0, 32, 32}
-					uiIconGun.texture = "base:texture/ui/pictograms/64x/Hud_" .. challenger.rfGunDevice.classId .. ".tga"
-					uiIconGun:MoveTo(bannerOffset + 105, 15)
+					local uiIconbackground = self.uiBanner:AddComponent(UIPicture:New(), "uiIconbackground")
+					uiIconbackground.texture = "base:texture/ui/pictograms/48x/Team_" .. challenger.profile.team .. "_Circle.tga"
+					if (game.settings.UiSettings.teamribbon == 2 and challenger.profile.team > 0) then
+						uiIconbackground.rectangle = {0, 0, 32, 32}
+					else
+						uiIconbackground.rectangle = nil
+					end
 					
-				end
+					local uiIcon = self.uiBanner:AddComponent(UIPicture:New(), "uiIcon")
+					uiIcon.rectangle = {0, 0, 32, 32}
+					uiIcon.texture = "base:texture/avatars/32x/" .. challenger.profile.icon			
 				
-				local uiName = self.uiBanner:AddComponent(UILabel:New({0, 0, 140, 64}, challenger.profile.name), "uiName")
-				uiName.fontColor = UIComponent.colors.darkgray
-				uiName.font = UIComponent.fonts.header
 				
-				local uiScore = nil
+					if (challenger.rfGunDevice and challenger.rfGunDevice.classId) then
 				
-				-- pas de score pour le survivant
+						local uiIconGun = self.uiBanner:AddComponent(UIPicture:New(), "uiIconGun")
+						uiIconGun.rectangle = {0, 0, 32, 32}
+						uiIconGun.texture = "base:texture/ui/pictograms/64x/Hud_" .. challenger.rfGunDevice.classId .. ".tga"
+						uiIconGun:MoveTo(bannerOffset + 105, 15)
+					
+					end
 				
-				if (activity.dontDisplayScore == nil) then
-					uiScore = self.uiBanner:AddComponent(UILabel:New({0, 0, 100, 64}, challenger.data.baked.score), "uiScore")
-					uiScore.fontColor = UIComponent.colors.orange
-					uiScore.font = UIComponent.fonts.header
-				end
+					local uiName = self.uiBanner:AddComponent(UILabel:New({0, 0, 140, 64}, challenger.profile.name), "uiName")
+					uiName.fontColor = UIComponent.colors.darkgray
+					uiName.font = UIComponent.fonts.header
 				
-				uiBannerPosition:MoveTo(bannerOffset - 10, 20)
-				uiBannerName1:MoveTo(bannerOffset + 80, 20)
-				uiBannerName2:MoveTo(bannerOffset + 130, 20)
-				uiBannerName3:MoveTo(bannerOffset + 180, 20)
-				uiBannerName4:MoveTo(bannerOffset + 230, 20)
-				uiBannerName5:MoveTo(bannerOffset + 280, 20)
-				uiBannerIcon:MoveTo(bannerOffset + 55, 20)
-				uiPosition:MoveTo(bannerOffset, 20)
-				uiIcon:MoveTo(bannerOffset + 65, 15)
-				uiName:MoveTo(bannerOffset + 140, 20)
+					local uiScore = nil
 				
-				if (uiScore ~= nil) then
-					uiScore:MoveTo(bannerOffset + 280, 20)
-				end
+					-- pas de score pour le survivant
+				
+					if (activity.dontDisplayScore == nil) then
+						uiScore = self.uiBanner:AddComponent(UILabel:New({0, 0, 100, 64}, challenger.data.baked.score), "uiScore")
+						uiScore.fontColor = UIComponent.colors.orange
+						uiScore.font = UIComponent.fonts.header
+					end
+				
+					uiBannerPosition:MoveTo(bannerOffset - 10, 20)
+					uiBannerName1:MoveTo(bannerOffset + 80, 20)
+					uiBannerName2:MoveTo(bannerOffset + 130, 20)
+					uiBannerName3:MoveTo(bannerOffset + 180, 20)
+					uiBannerName4:MoveTo(bannerOffset + 230, 20)
+					uiBannerName5:MoveTo(bannerOffset + 280, 20)
+					uiBannerIcon:MoveTo(bannerOffset + 55, 20)
+					uiPosition:MoveTo(bannerOffset, 20)
+					uiIconbackground:MoveTo(bannerOffset + 65, 14)
+					uiIcon:MoveTo(bannerOffset + 65, 15)
+					uiName:MoveTo(bannerOffset + 140, 20)
+				
+					if (uiScore ~= nil) then
+						uiScore:MoveTo(bannerOffset + 280, 20)
+					end
 		    
-				bannerOffset = bannerOffset + self.width
+					bannerOffset = bannerOffset + self.width
 				
+				end
+				
+				rank = rank + 1
 			end
-				
-			rank = rank + 1
 			
 		end
 
@@ -205,16 +216,22 @@ function UIFinalRanking:Build(challengers)
 		local teamPosition = 10
 		for i, challenger in pairs(self.challengers) do
 								
-			if (score == -1 or score > challenger.data.baked.score) then
-				score = challenger.data.baked.score
-				realRank = realRank + 1
-			end 
+			if (#challenger.players > 0) then
+				if (score == -1 or score > challenger.data.baked.score) then
+					score = challenger.data.baked.score
+					realRank = realRank + 1
+				end 
 			
-			self.uiPodiums[rank] = self:AddComponent(UIPodiumSlot:New(), "uiFinalRanking.Podium" .. rank)
-			self.uiPodiums[rank]:Build(challenger, self.nbChallenger, rank, realRank, teamPosition, challenger.data.baked.score)
-			teamPosition = teamPosition + self.uiPodiums[rank].height
+				self.uiPodiums[rank] = self:AddComponent(UIPodiumSlot:New(), "uiFinalRanking.Podium" .. rank)
+				self.uiPodiums[rank]:Build(challenger, self.nbChallenger, rank, realRank, teamPosition, challenger.data.baked.score)
+                if (game.settings.UiSettings.finalranking == 1 and #activity.teams == 2) then
+				    teamPosition = teamPosition + 50
+                else
+                    teamPosition = teamPosition + self.uiPodiums[rank].height
+                end
 				
-			rank = rank + 1
+				rank = rank + 1
+			end
 		end
 					
 	end

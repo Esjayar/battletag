@@ -75,7 +75,7 @@ function UTActivity.State.Matchmaking:Fill()
 	if (not activity.matches) then
 
         assert(0 < #activity.players)
-        assert((0 <= #activity.teams) and (#activity.teams <= 4))
+        assert((0 <= #activity.teams) and (#activity.teams <= 6))
 
 		--- init challenger final data : for team or players if no team
 
@@ -126,17 +126,50 @@ function UTActivity.State.Matchmaking:Fill()
 
 		elseif (activity.category == UTActivity.categories.single) then
 
-			-- single game : no harness 1 player per match 
+			if (0 < #activity.teams) then
 
-			for i, player in ipairs(activity.players) do
+				local rounds = 0
+				for _, team in ipairs(activity.teams) do
 
-				local match = { challengers = {}, players = {}}
+					rounds = math.max(#team.players, rounds)
 
-				table.insert(match.challengers, player)
-				table.insert(match.players, player)
+				end
 
-				table.insert(activity.matches, match)
+				for i = 1, rounds do
 
+					local match = { challengers = {}, players = {}}
+					for j, team in ipairs(activity.teams) do
+
+						for k, player in ipairs(team.players) do
+
+							if (k == i) then
+								table.insert(match.challengers, team)
+								table.insert(match.players, player)
+
+							end
+
+						end
+
+					end
+
+					table.insert(activity.matches, match)
+
+				end
+
+			else
+
+				-- single game : no harness 1 player per match 
+
+				for i, player in ipairs(activity.players) do
+
+					local match = { challengers = {}, players = {}}
+
+					table.insert(match.challengers, player)
+					table.insert(match.players, player)
+
+					table.insert(activity.matches, match)
+
+				end
 			end
 
 		elseif (activity.category == UTActivity.categories.open) then
@@ -213,6 +246,14 @@ function UTActivity.State.Matchmaking:Fill()
 		end
 		
 	end
+	
+	function sortProxies(p1,p2)
+		if #p1.devices.byRadioProtocolId > #p2.devices.byRadioProtocolId then
+			return true
+		end
+	end
+	
+	table.sort(engine.libraries.usb.proxies, sortProxies)
 
 	print("MATCH CREATED ---------------------")
 

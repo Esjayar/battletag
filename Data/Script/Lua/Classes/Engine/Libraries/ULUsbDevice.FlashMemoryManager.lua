@@ -92,24 +92,26 @@ function ULUsbDevice.FlashMemoryManager:NextStage(stage)
 
     --
 
-	if (#self.task.clients == 1) then 
-		self.usbUpdateFrameRate = 14
-	else
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		if (#self.task.clients == 1) then 
+			self.usbUpdateFrameRate = 14
+		else
 
-		-- !! device number may be used ... not task client
-		-- self.usbUpdateFrameRate = 14 - #self.task.clients
+			-- !! device number may be used ... not task client
+			-- self.usbUpdateFrameRate = 14 - #self.task.clients
 
-		local devices = engine.libraries.usb.proxy.devices.byClass[0x02000020]
-		if (not devices) then
-		    return self:Pop("fail") -- disconnected devices
+			local devices = proxy.devices.byClass[0x02000020]
+			if (not devices) then
+				return self:Pop("fail") -- disconnected devices
+			end
+			self.usbUpdateFrameRate = 14 - #devices
+
 		end
-		self.usbUpdateFrameRate = 14 - #devices
+		self.pingInterval = self.usbUpdateFrameRate * 5
 
+		assert(engine.libraries.usb)
+		engine.libraries.usb:SetUpdateFrameRate(self.usbUpdateFrameRate)
 	end
-	self.pingInterval = self.usbUpdateFrameRate * 5
-
-    assert(engine.libraries.usb)
-    engine.libraries.usb:SetUpdateFrameRate(self.usbUpdateFrameRate)
 
 end
 
@@ -173,10 +175,12 @@ function ULUsbDevice.FlashMemoryManager:OnResumed()
 
         self.dispatchMessage = true
 
-        assert(engine.libraries.usb.proxy and (engine.libraries.usb.proxy == self.proxy))
+        for index, proxy in ipairs(engine.libraries.usb.proxies) do
+			assert(proxy and (proxy == self.proxy))
 
-        engine.libraries.usb.proxy._DispatchMessage:Add(self, ULUsbDevice.FlashMemoryManager.OnDispatchMessage)
-        engine.libraries.usb.proxy._DeviceRemoved:Add(self, ULUsbDevice.FlashMemoryManager.OnDeviceRemoved)
+			proxy._DispatchMessage:Add(self, ULUsbDevice.FlashMemoryManager.OnDispatchMessage)
+			proxy._DeviceRemoved:Add(self, ULUsbDevice.FlashMemoryManager.OnDeviceRemoved)
+		end
 
     end
 
@@ -195,10 +199,12 @@ function ULUsbDevice.FlashMemoryManager:OnSuspended()
         
         self.dispatchMessage = false
 
-        assert(engine.libraries.usb.proxy and (engine.libraries.usb.proxy == self.proxy))
+		for index, proxy in ipairs(engine.libraries.usb.proxies) do
+			assert(proxy and (proxy == self.proxy))
 
-        engine.libraries.usb.proxy._DispatchMessage:Remove(self, ULUsbDevice.FlashMemoryManager.OnDispatchMessage)
-        engine.libraries.usb.proxy._DeviceRemoved:Remove(self, ULUsbDevice.FlashMemoryManager.OnDeviceRemoved)
+			proxy._DispatchMessage:Remove(self, ULUsbDevice.FlashMemoryManager.OnDispatchMessage)
+			proxy._DeviceRemoved:Remove(self, ULUsbDevice.FlashMemoryManager.OnDeviceRemoved)
+		end
 
     end
 
@@ -208,8 +214,10 @@ end
 
 function ULUsbDevice.FlashMemoryManager:OnUpdate()
 
-    assert(engine.libraries.usb.proxy)
-    assert(engine.libraries.usb.proxy.handle)
+    for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		assert(proxy)
+		assert(proxy.handle)
+	end
 
     --self.time = self.time or quartz.system.time.gettimemicroseconds()
     --local time = quartz.system.time.gettimemicroseconds()

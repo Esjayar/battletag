@@ -39,9 +39,11 @@ function UTGame.State.Title:Begin()
 
     -- dependencies
 
-    assert(engine.libraries.usb.proxy)
-    assert(engine.libraries.usb.proxy.initialized)
-    assert(not engine.libraries.usb.proxy.revisionUpdate)
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		assert(proxy)
+		assert(proxy.initialized)
+		assert(not proxy.revisionUpdate)
+	end
 
     UIManager.stack:Push(UTGame.Ui.Title)
 

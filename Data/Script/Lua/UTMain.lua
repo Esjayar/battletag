@@ -19,10 +19,11 @@ REG_TRACKING = true
 
 REG_MAJORREVISION = 2 -- firmware revision, updates are forced when major revision is changed
 REG_MINORREVISION = 0
-REG_BUILD = 354 -- 101220
+REG_BUILD = 458 -- 101354
+REG_BUILDBETA = "a"
 
 IS_MAJORREVISION = 1 -- installshield revision
-IS_MINORREVISION = 1
+IS_MINORREVISION = 2
 
 print("appdata: " .. REG_USERAPPFOLDER)
 print("installshield revision: " .. IS_MAJORREVISION .. "." .. IS_MINORREVISION)

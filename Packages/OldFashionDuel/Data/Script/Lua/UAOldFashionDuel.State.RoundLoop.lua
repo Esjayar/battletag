@@ -40,7 +40,9 @@ function UAOldFashionDuel.State.RoundLoop:Begin()
 
 	-- register	to proxy message received
 
-	engine.libraries.usb.proxy._DispatchMessage:Add(self, self.OnDispatchMessage)	
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		proxy._DispatchMessage:Add(self, self.OnDispatchMessage)
+	end
 
 	self.time = quartz.system.time.gettimemicroseconds()
     activity.timer = 0
@@ -53,7 +55,9 @@ function UAOldFashionDuel.State.RoundLoop:Begin()
 	
 	-- deconnection
 
-	engine.libraries.usb.proxy.processes.devicePinger:Reset(2000000, 8000000, 500000)
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		proxy.processes.devicePinger:Reset(2000000, 8000000, 500000)
+	end
 	self.canBeStopped = true
 
     UIManager:StartBackgroundBanner()
@@ -83,8 +87,10 @@ function UAOldFashionDuel.State.RoundLoop:Begin()
     self.protectedMode = true
 	self.canBeStopped = true
 	
-	engine.libraries.usb.proxy.processes.devicePinger:Reset(2000000, 10000000, 500000, self.protectedMode)
-    engine.libraries.usb.proxy._DeviceRemoved:Add(self, self.OnDeviceRemoved)
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		proxy.processes.devicePinger:Reset(2000000, 10000000, 500000, self.protectedMode)
+		proxy._DeviceRemoved:Add(self, self.OnDeviceRemoved)
+	end
 
 end
 
@@ -181,8 +187,8 @@ function UAOldFashionDuel.State.RoundLoop:OnDispatchMessage(device, addressee, c
 			self.ui:UpdateState()
 
 			-- this player has been hit : give points !
-
-			local shooterDevice = engine.libraries.usb.proxy.devices.byRadioProtocolId[arg[6]]
+			local shooter = activity.players[arg[6] - 1]
+			local shooterDevice = shooter.rfGunDevice
 			if (shooterDevice) then
 
 				local player = shooterDevice.owner

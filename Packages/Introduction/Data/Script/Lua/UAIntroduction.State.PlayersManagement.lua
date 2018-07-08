@@ -49,11 +49,13 @@ function UAIntroduction.State.PlayersManagement:End()
 
 	-- stop pairing
 
-    if (engine.libraries.usb.proxy) then
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		if (proxy) then
 
-        assert(engine.libraries.usb.proxy.handle)
-        quartz.system.usb.sendmessage(engine.libraries.usb.proxy.handle, { 0x01, 0x00, 0x13, 0x00 })
-    
-    end
+			assert(proxy.handle)
+			quartz.system.usb.sendmessage(proxy.handle, { 0x01, 0x00, 0x13, 0x00 })
+		
+		end
+	end
 
 end

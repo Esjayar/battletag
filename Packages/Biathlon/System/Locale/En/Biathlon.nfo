@@ -1,0 +1,18 @@
+
+local nfo = {
+
+    class = "UABiathlon",
+
+    ["name"] = "Biathlon",
+    ["description"] = "Players compete to shoot the most targets",
+    ["pictogram"] = "TagNShoot.tga",
+    ["category"] = 1,
+
+
+    ["difficulty"] = 220,
+    ["flags"] = { "1-120 players",},
+    ["materials"] = { 0x03000050, 0x03000051, 0x03000052, 0x03000053, },
+
+}
+
+return nfo

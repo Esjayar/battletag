@@ -28,7 +28,7 @@ UIEditBox.font = UIComponent.fonts.header
 
 -- !! NEED LOCALISATION !!
 
-UIEditBox.allowedChars = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZéèêâôïöä \b"
+UIEditBox.allowedChars = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ \b"
 
 UIEditBox.rectangle = { 0, 0, 220, 34 }
 
@@ -39,7 +39,7 @@ function UIEditBox:__ctor(text, ...)
 	self.editText = ""
 	self.cursorText = ""
 	self.cursorPos = 1
-    self.maxChars = 8
+    self.maxChars = 11
     self.rectangle = UIEditBox.rectangle
 
 	if (text) then
@@ -81,7 +81,7 @@ function UIEditBox:Char(char)
 
 			-- delete
 
-			if (self.editTex ~= "") then 
+			if (self.editText ~= "") then 
 
 				if (1 < self.cursorPos) then
 
@@ -204,6 +204,10 @@ function UIEditBox:KeyDown(virtualKeyCode, scanCode)
 
 		-- right
 		self.cursorPos = self.cursorPos + 1
+		
+	elseif (27 == virtualKeyCode) then
+
+		UIManager.stack:Pop()
 
 	end
 

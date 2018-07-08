@@ -8,7 +8,7 @@ local nfo = {
     ["pictogram"] = "FreeFrag.tga",
 
     ["difficulty"] = 10,
-    ["flags"] = { "2-8 joueurs", },
+    ["flags"] = { "2-32 joueurs", },
     ["category"] = 3,
 }
 

@@ -43,15 +43,17 @@ end
 function UTActivity.State.PlayersSetup:Begin()
 
     assert(activity.match)
-    assert(activity.match.challengers and (0 < #activity.match.challengers))
-    assert(activity.match.players and (0 < #activity.match.players))
+    assert(activity.match.challengers and 0 < #activity.match.challengers)
+    assert(activity.match.players and 0 < #activity.match.players)
 
 
     -- decrease the timings on the device pinger,
     -- so that we can detect device deconnections a little bit faster
 
-    assert(engine.libraries.usb.proxy.processes.devicePinger)
-    engine.libraries.usb.proxy.processes.devicePinger:Reset(2000000, 4000000, 500000)
+	--[[for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		assert(proxy.processes.devicePinger)
+		proxy.processes.devicePinger:Reset(2000000, 4000000, 500000)
+	end]]
 
     -- heap data are intermediate ones,
     -- they live throughout the duration of a single match (cf. "matchmaking"),
@@ -150,7 +152,9 @@ function UTActivity.State.PlayersSetup:Begin()
 		end
 
 	    -- register	to proxy message received
-	    engine.libraries.usb.proxy._DispatchMessage:Add(self, UTActivity.State.PlayersSetup.OnDispatchMessage)	
+		for index, proxy in ipairs(engine.libraries.usb.proxies) do
+			proxy._DispatchMessage:Add(self, UTActivity.State.PlayersSetup.OnDispatchMessage)
+		end
 
         -- ui depending from game category
 
@@ -159,6 +163,8 @@ function UTActivity.State.PlayersSetup:Begin()
 		end
 
     end
+    
+    uploadbytecode = false
 
 end
 
@@ -168,18 +174,20 @@ function UTActivity.State.PlayersSetup:End()
 
     -- reset the timings on the device pinger,
 
-    if (engine.libraries.usb.proxy) then
-    
-		assert(engine.libraries.usb.proxy.processes.devicePinger)
-		engine.libraries.usb.proxy.processes.devicePinger:Reset()
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		if (proxy) then
+			-- removed comments to test for isolated connection lost issues Dec 2015
+			assert(proxy.processes.devicePinger)
+			proxy.processes.devicePinger:Reset()
 
-		if (self.messaging) then
+			if (self.messaging) then
 
-			-- unregister to proxy message received
-			engine.libraries.usb.proxy._DispatchMessage:Remove(self, UTActivity.State.PlayersSetup.OnDispatchMessage)	
+				-- unregister to proxy message received
+				proxy._DispatchMessage:Remove(self, UTActivity.State.PlayersSetup.OnDispatchMessage)	
 
+			end
+			
 		end
-		
 	end
 
 	-- warning: do not pop the ui page ever,
@@ -217,16 +225,26 @@ end
 
 function UTActivity.State.PlayersSetup:Update()
 
-    if (not self.messaging or not engine.libraries.usb.proxy) then return
-    end
+	for _, player in ipairs(activity.match.players) do
+		if (player.rfGunDevice.timedout) then
+			self.configDone = false
+			player.rfGunDevice.acknowledge = false
+		end
+	end
+    
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		if (not self.messaging or not proxy) then return
+		end
+	end
 
 	-- send some message every 250 ms
 
 	local elapsedTime = quartz.system.time.gettimemicroseconds() - (self.timer or quartz.system.time.gettimemicroseconds())
+	local intervalx = 550000 + math.max(0, #activity.players - 16 )* 11000
 	self.timer = quartz.system.time.gettimemicroseconds()
 
 	self.msgTimer = (self.msgTimer or 0) + elapsedTime
-	if (self.msgTimer > 250000) then
+	if (self.msgTimer > intervalx) then
 
 		self.msgTimer = 0
 
@@ -237,17 +255,19 @@ function UTActivity.State.PlayersSetup:Update()
 			if not (activity.category == UTActivity.categories.single) then
 
 				self.message = {0x00, 0xff, 0xc1, }
-				quartz.system.usb.sendmessage(engine.libraries.usb.proxy.handle, self.message)
+				for index, proxy in ipairs(engine.libraries.usb.proxies) do
+					quartz.system.usb.sendmessage(proxy.handle, self.message)
+				end
 
 			end
 
 		else
 
-			self.configDone  = true
+			self.configDone = true
 
 			for _, player in ipairs(activity.match.players) do
 
-				if (player.rfGunDevice and not (player.rfGunDevice.acknowledge)) then
+				if (player.rfGunDevice and not player.rfGunDevice.acknowledge) then
 
 					self.configDone = false
 
@@ -256,17 +276,23 @@ function UTActivity.State.PlayersSetup:Update()
 
 					-- full message data = sound volume + beam power + configuration data 
 
-					self.message = { 3 + (#activity.configData * 2), player.rfGunDevice.radioProtocolId, 0x92, game.settings.audio["volume:blaster"], activity.settings.beamPower, #activity.configData}
+					if (activity.advancedsettings.classes) then
+						self.message = { 3 + #activity.configData * 2, player.rfGunDevice.radioProtocolId, 0x92, player.data.heap.audio, player.data.heap.beamPower, #activity.configData}
+					else
+						self.message = { 3 + #activity.configData * 2, player.rfGunDevice.radioProtocolId, 0x92, game.settings.audio["volume:blaster"], game.settings.ActivitySettings.beamPower, #activity.configData}
+					end
 					for i = 1, #activity.configData do
 
-						self.message[(2 * i) + 5] = quartz.system.bitwise.bitwiseand(player.data.heap[activity.configData[i]], 0xff00) / 256
-						self.message[(2 * i) + 6] = quartz.system.bitwise.bitwiseand(player.data.heap[activity.configData[i]], 0x00ff)
+						self.message[2 * i + 5] = quartz.system.bitwise.bitwiseand(player.data.heap[activity.configData[i]], 0xff00) / 256
+						self.message[2 * i + 6] = quartz.system.bitwise.bitwiseand(player.data.heap[activity.configData[i]], 0x00ff)
 
 					end
 
 				end
 
-				quartz.system.usb.sendmessage(engine.libraries.usb.proxy.handle, self.message)
+				for index, proxy in ipairs(engine.libraries.usb.proxies) do
+					quartz.system.usb.sendmessage(proxy.handle, self.message)
+				end
 
 			end
 
@@ -275,3 +301,11 @@ function UTActivity.State.PlayersSetup:Update()
 	end
 
 end
+
+--[[ Amendments List
+2 Nov 2015	DYL  
+Added Line 235: Local Intervalx - original Intervalx was fixed at 250000. This caused false timeouts on the PS screen, when one blaster was switched off, 
+other blasters recorded false timeouts. Experimented with intervals and found that this works generally for up to 32 blasters with no falsies.
+7 Dec 2015  DYL
+Line 175/6 - removed comments to reset device pinger after experiencing isolated connection lost.
+]]

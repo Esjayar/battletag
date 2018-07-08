@@ -45,7 +45,9 @@ function UTActivity.State.EndMatch:Begin()
 	end
 	self.isReady = false
 
-	engine.libraries.usb.proxy._DispatchMessage:Add(self, UTActivity.State.EndMatch.OnDispatchMessage)	
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		proxy._DispatchMessage:Add(self, UTActivity.State.EndMatch.OnDispatchMessage)
+	end
 
 	-- intermediate or final ranking ?
 	
@@ -86,12 +88,14 @@ function UTActivity.State.EndMatch:End()
     
 	game.gameMaster:End()
 	
-    if (engine.libraries.usb.proxy) then
-    
-		-- no longer respond to proxy message
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		if (proxy) then
+		
+			-- no longer respond to proxy message
 
-		engine.libraries.usb.proxy._DispatchMessage:Remove(self, UTActivity.State.EndMatch.OnDispatchMessage)	
-	
+			proxy._DispatchMessage:Remove(self, UTActivity.State.EndMatch.OnDispatchMessage)	
+		
+		end
 	end
 
 end
@@ -122,7 +126,7 @@ function UTActivity.State.EndMatch:Update()
 		self.isReady = true
 		for _, player in ipairs(activity.match.players) do
 
-			if (player.rfGunDevice and not (player.rfGunDevice.acknowledge)) then
+			if (player.rfGunDevice and not player.rfGunDevice.acknowledge and not player.rfGunDevice.timedout) then
 
 				-- need to check winners/looser
 
@@ -136,7 +140,9 @@ function UTActivity.State.EndMatch:Update()
 				end
 
 				local msg = { 0x06, player.rfGunDevice.radioProtocolId, 0x94, 0x01, color, unpack(activity.gameoverSnd) }
-				quartz.system.usb.sendmessage(engine.libraries.usb.proxy.handle, msg)
+				for index, proxy in ipairs(engine.libraries.usb.proxies) do
+					quartz.system.usb.sendmessage(proxy.handle, msg)
+				end
 				self.isReady = false
 
 			end

@@ -60,10 +60,6 @@ end
 
 function UTGame.State.Ignition:Update()
 
-    if not (GEAR_CFG_COMPILE == GEAR_COMPILE_RETAIL) then
-        self:PostStateChange("connection")
-    else
-        self:PostStateChange("video")
-    end
+    self:PostStateChange("connection")
 
 end

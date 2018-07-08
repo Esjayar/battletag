@@ -194,7 +194,7 @@ function ULUsbDevice:ProcessMessage0x04(arg)
 
                         -- we have a revision candidate here
 
-                        if (not self.revisionCandidate or (self.revisionCandidate.revision < revision)) then
+                        if (not self.revisionCandidate or self.revisionCandidate.revision < revision) then
                             self.revisionCandidate = { revision = revision, path = path }
                             print("we have a revision candidate here " .. self.revisionCandidate.revision)
                             print(self.revisionCandidate.path)
@@ -202,7 +202,7 @@ function ULUsbDevice:ProcessMessage0x04(arg)
 
                     elseif REG_FORCEREVISION and (class == 0x02000020) then
 
-                        if (not self.revisionCandidate or (self.revisionCandidate.revision < revision)) then
+                        if (not self.revisionCandidate or self.revisionCandidate.revision < revision) then
                             self.revisionCandidate = { revision = revision, path = path }
                             print("we have a *FORCED* revision candidate here " .. self.revisionCandidate.revision)
                             print(self.revisionCandidate.path)
@@ -238,7 +238,7 @@ end
 
 function ULUsbDevice:ProcessMessage0x84(arg)
 	
-    if (arg and (5 <= #arg)) then
+    if (arg and 5 <= #arg) then
 
         local address = quartz.system.bitwise.bitwiseor(quartz.system.bitwise.lshift(arg[1], 24), quartz.system.bitwise.lshift(arg[2], 16), quartz.system.bitwise.lshift(arg[3], 8), arg[4])
         local size = arg[5]
@@ -252,7 +252,7 @@ function ULUsbDevice:ProcessMessage0x84(arg)
             local playerNameLength = arg[6]
             local playerIconLength = arg[6 + playerNameLength + 1]
 
-            if (playerNameLength and (0 < playerNameLength and playerNameLength < 0x80)) then
+            if (playerNameLength and 0 < playerNameLength and playerNameLength < 0x80) then
                 profile.name = ""
                 for i = 1, playerNameLength do
 					if (arg[6 + i]) then profile.name = profile.name .. string.char(arg[6 + i])
@@ -260,20 +260,25 @@ function ULUsbDevice:ProcessMessage0x84(arg)
                 end
             end
 
-            if (playerIconLength and (0 < playerIconLength and playerIconLength < 0x80)) then
+            if (playerIconLength and 0 < playerIconLength and playerIconLength < 0x80) then
                 profile.icon = ""
                 for i = 1, playerIconLength do
 					if (arg[6 + playerNameLength + i + 1]) then profile.icon = profile.icon .. string.char(arg[6 + playerNameLength + i + 1])
 					end
-                end            
-                profile.icon = profile.icon .. ".tga"
+                end
+				if (profile.icon:sub(2, 2) == "_") then
+					profile.team = tonumber(profile.icon:sub(1, 1))
+					profile.icon = profile.icon:sub(3, string.len(profile.icon)) .. ".tga"
+				else
+					profile.icon = profile.icon .. ".tga"
+				end
             end
 
             if (profile.name and profile.icon) then
                 self.playerProfile = profile
             end
 
-            print("profile", profile.name, profile.icon)
+			print("profile", profile.name, profile.icon)
             self._PlayerProfileUpdated:Invoke(self, self.playerProfile)
 
         else

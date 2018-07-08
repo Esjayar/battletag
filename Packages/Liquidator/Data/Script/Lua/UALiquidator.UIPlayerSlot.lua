@@ -39,17 +39,20 @@ function UALiquidator.UIPlayerSlot:DisplayButton()
 		-- contextual menu 
 		local mouse = UIManager.stack.mouse.cursor
 		local menu =  UIMenuManager.stack.top:AddComponent(UIContextualMenu:New(mouse.x - 40, mouse.y), "uiContextualMenu")
-		local item = {
-			text = l"pop001",
-			tip = l"tip053",
-			action = function (_self)
 
-				local ui = UTGame.Ui.Associate:New(self.player)
-				UIManager.stack:Push(ui)
-
-			end
-		}
-		menu:AddItem(item)
+		if (not self.player.rfGunDevice.timedout) then
+			local item = {
+				text = l"pop001",
+				tip = l"tip053",
+				action = function (_self)
+	
+					local ui = UTGame.Ui.Associate:New(self.player)
+					UIManager.stack:Push(ui)
+	
+				end
+			}
+			menu:AddItem(item)
+		end
 
 		-- liquidator/survivors
 
@@ -67,7 +70,7 @@ function UALiquidator.UIPlayerSlot:DisplayButton()
 		else
 
 			local numberOfLiquidator = activity:GetLiquidatorNumber()
-			if (((#activity.players < 6) and (numberOfLiquidator < 1)) or ((#activity.players >= 6) and (numberOfLiquidator < 2))) then
+			if (numberOfLiquidator < math.floor(#activity.players / 6 + 1)) then
 
 				item = {
 					text = l"oth073",
@@ -80,7 +83,18 @@ function UALiquidator.UIPlayerSlot:DisplayButton()
 
 			end
 
-		end	
+		end
+		
+		-- unregister
+		
+		item = {
+			text = l"pop005",
+			tip = l"",
+			action = function (_self) 
+				engine.libraries.usb.proxy:Unregister(self.player.rfGunDevice, "user deleted")
+			end
+		}
+		menu:AddItem(item)
 
 		-- profils
 
@@ -91,7 +105,7 @@ function UALiquidator.UIPlayerSlot:DisplayButton()
 				action = function (_self) activity.states["playersmanagement"]:DeletePlayer(self.player) end
 			}
 			menu:AddItem(item)
-		end	
+		end
 	
 	end
 
@@ -128,10 +142,8 @@ function UALiquidator.UIPlayerSlot:SetPlayer(player, button)
 
 	UIPlayerSlot.SetPlayer(self, player, button)
 
-	-- the 1st/6rd player ... then it's a liquidator !
-
 	local numberOfLiquidator = activity:GetLiquidatorNumber()
-	if ((#activity.players == 1 and numberOfLiquidator < 1) or (#activity.players == 6 and numberOfLiquidator < 2)) then
+	if (numberOfLiquidator < math.floor(#activity.players / 5 + 1)) then
 		player.liquidator = true
 	end	
 

@@ -39,11 +39,12 @@ function UTActivity.Ui.BeginMatch:__ctor(...)
 		self.countdownDuration = 2
 	else
 
-		if ((activity.category ~= UTActivity.categories.single) and activity.settings and (1 == activity.settings.gameLaunch)) then
-			self.countdownDuration = activity.countdownDuration * 0.5
+		if (activity.category ~= UTActivity.categories.single) then
+			self.countdownDuration = game.settings.ActivitySettings.countdown
 		else
 			self.countdownDuration = activity.countdownDuration
 		end
+		manuallylaunched = false
 
 	end
 
@@ -100,7 +101,7 @@ function UTActivity.Ui.BeginMatch:__ctor(...)
                 local entry = self.numbers[i]
                 if (entry) then
 
-                    local offset = self.numbers.position[1] + ((self.timer / 1000000) - i) * self.numbers.speed
+                    local offset = self.numbers.position[1] + (self.timer / 1000000 - i) * self.numbers.speed
 
                     quartz.system.drawing.loadcolor4f(1.00, 0.73, 0.00, 0.80)
                     quartz.system.drawing.loadfont(self.numbers.font)
@@ -150,6 +151,9 @@ function UTActivity.Ui.BeginMatch:Draw()
 
         quartz.system.drawing.loadtexture("base:texture/ui/Countdown_" .. (self.countdown%10) .. ".tga")
         quartz.system.drawing.drawtexture(self.countDownPosition[1] + offset, self.countDownPosition[2])
+        if (self.countdown == 1) then
+        	self.uiButton1.visible = false
+        end
 
 	end
 
@@ -161,7 +165,9 @@ function UTActivity.Ui.BeginMatch:OnClose()
 
 	self.countdownWindows._WindowClosed:Remove(self, UTActivity.Ui.BeginMatch.OnWindowClosed)
 	self.countdownWindows._WindowOpened:Remove(self, UTActivity.Ui.BeginMatch.OnWindowOpened)
-	engine.libraries.usb.proxy._DispatchMessage:Remove(self, UTActivity.Ui.BeginMatch.OnDispatchMessage)
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		proxy._DispatchMessage:Remove(self, UTActivity.Ui.BeginMatch.OnDispatchMessage)
+	end
 
 end
 
@@ -189,7 +195,9 @@ function UTActivity.Ui.BeginMatch:OnOpen()
 
 	self.countdownWindows._WindowClosed:Add(self, UTActivity.Ui.BeginMatch.OnWindowClosed)
 	self.countdownWindows._WindowOpened:Add(self, UTActivity.Ui.BeginMatch.OnWindowOpened)
-	engine.libraries.usb.proxy._DispatchMessage:Add(self, UTActivity.Ui.BeginMatch.OnDispatchMessage)
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		proxy._DispatchMessage:Add(self, UTActivity.Ui.BeginMatch.OnDispatchMessage)
+	end
 
 end
 
@@ -197,6 +205,29 @@ end
 
 function UTActivity.Ui.BeginMatch:OnWindowClosed()
 
+	-- button
+
+	if (not self.displayCountdown) then
+		self.uiButton1 = self:AddComponent(UIButton:New(), "uiButton1")
+		self.uiButton1.rectangle = { 410, 680, 547, 714 }
+		self.uiButton1.text = l"but004"
+		self.uiButton1.visible = true
+
+    	self.uiButton1.OnAction = function (_self)
+    		UIManager.stack:Pop()
+    		-- gameover msg
+	
+			for _, player in ipairs(activity.players) do
+
+				local msg = { 0x06, player.rfGunDevice.radioProtocolId, 0x94, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
+				for index, proxy in ipairs(engine.libraries.usb.proxies) do
+					quartz.system.usb.sendmessage(proxy.handle, msg)
+				end
+
+			end
+			activity:PostStateChange("end") 
+    	end
+    end
 	self.displayCountdown = true
 
 end
@@ -240,8 +271,11 @@ function UTActivity.Ui.BeginMatch:Update()
 				if (player.rfGunDevice and	not player.rfGunDevice.acknowledge) then
 
 					local msg = {0x01, player.rfGunDevice.radioProtocolId, 0x93, self.countdown}
-					quartz.system.usb.sendmessage(engine.libraries.usb.proxy.handle, msg)
-
+					for index, proxy in ipairs(engine.libraries.usb.proxies) do
+						quartz.system.usb.sendmessage(proxy.handle, msg)
+						quartz.system.usb.sendmessage(proxy.handle, msg)
+					end
+		
 				end
 
 			end
@@ -254,9 +288,6 @@ function UTActivity.Ui.BeginMatch:Update()
 
 			self.displayCountdown = false
 			self.countdownWindows:OpenWindow()
-			if (activity.settings and (1 == activity.settings.gameLaunch)) then
-				UIManager.stack:Pop(-1)
-			end			
 			UIMenuManager.stack:Pop() 
 			activity:PostStateChange("roundloop")
 

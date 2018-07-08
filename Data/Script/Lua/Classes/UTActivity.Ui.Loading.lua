@@ -30,8 +30,8 @@ function UTActivity.Ui.Loading:__ctor(...)
 
 	-- animate	
 	
-	self.slideBegin = true
-	self.slideEnd = true
+	self.slideBegin = game.settings.UiSettings.slideBegin
+	self.slideEnd = game.settings.UiSettings.slideEnd
 	
 
 end

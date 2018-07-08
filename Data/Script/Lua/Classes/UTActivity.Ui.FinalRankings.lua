@@ -45,7 +45,6 @@ function UTActivity.Ui.FinalRankings:__ctor(...)
     self.uiButton1.rectangle = UIMenuWindow.buttonRectangles[1]
 	self.uiButton1.text = l"menu02"
 	self.uiButton1.tip = l"tip065"
-	self.uiButton1.enabled = false
 
 	self.uiButton1.OnAction = function (self) 
 
@@ -57,6 +56,19 @@ function UTActivity.Ui.FinalRankings:__ctor(...)
 
 		game:PostStateChange("selector")
 
+	end
+	
+	self.uiButton2 = self:AddComponent(UIButton:New(), "uiButton2")
+	self.uiButton2.rectangle = UIMenuWindow.buttonRectangles[2]
+	self.uiButton2.text = l"but009"
+	self.uiButton2.tip = l"tip016"
+	self.uiButton2.enabled = false
+	self.uiButton2.OnAction = function (self)
+
+		quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
+		quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
+		quartz.framework.audio.playsound()
+		activity:PostStateChange("settings")
 	end
 
 	-- uiButton3: debrief details button only if present in activity
@@ -72,15 +84,15 @@ function UTActivity.Ui.FinalRankings:__ctor(...)
 
 	end
 
-	-- uiButton4: replay button 
+	-- uiButton5: replay button 
 	
-    self.uiButton4 = self:AddComponent(UIButton:New(), "uiButton4")
-	self.uiButton4.rectangle = UIMenuWindow.buttonRectangles[4]
-	self.uiButton4.text = l"but022"
-	self.uiButton4.tip = l"tip067"
-	self.uiButton4.enabled = false
+    self.uiButton5 = self:AddComponent(UIButton:New(), "uiButton5")
+	self.uiButton5.rectangle = UIMenuWindow.buttonRectangles[5]
+	self.uiButton5.text = l"but022"
+	self.uiButton5.tip = l"tip067"
+	self.uiButton5.enabled = false
 
-	self.uiButton4.OnAction = function (self) 
+	self.uiButton5.OnAction = function (self) 
 
 		-- save team information
 
@@ -112,7 +124,13 @@ function UTActivity.Ui.FinalRankings:OnClose()
 	if (self.uiLeaderboard) then
 		self.uiLeaderboard:RemoveDataChangedEvents()
 	end
+	self:Deactivate()
 
+end
+
+function UTActivity.Ui.FinalRankings:OnOpen()
+
+	self:Activate()
 end
 
 -- Update -------------------------------------------------------------------
@@ -124,11 +142,71 @@ function UTActivity.Ui.FinalRankings:Update()
 		self.uiFinalRanking:Update() 
 	end
 
-	if (activity.states["finalrankings"].isReady) then 
+	if ((activity.states["finalrankings"].isReady) or (game.settings.GameSettings.unregister == 0)) then 
 
-		self.uiButton1.enabled = true
-		self.uiButton4.enabled = true
+		self.uiButton2.enabled = true
+		self.uiButton5.enabled = true
 
 	end
 
+end
+
+function UTActivity.Ui.FinalRankings:Activate()
+
+    if (not self.keyboardActive) then
+
+        --game._Char:Add(self, self.Char)
+        game._KeyDown:Add(self, self.KeyDown)
+        self.keyboardActive = true
+
+    end
+
+end
+
+function UTActivity.Ui.FinalRankings:Deactivate()
+
+    if (self.keyboardActive) then 
+    
+        --game._Char:Remove(self, self.Char)
+        game._KeyDown:Remove(self, self.KeyDown)
+        self.keyboardActive = false
+
+    end
+
+end
+
+function UTActivity.Ui.FinalRankings:KeyDown(virtualKeyCode, scanCode)
+		
+	if (not self.hasPopup) then
+		if (13 == virtualKeyCode or 53 == virtualKeyCode) then
+
+			activity:SaveTeamInformation()	
+
+			quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
+			quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
+			quartz.framework.audio.playsound()
+			activity:PostStateChange("playersmanagement") 
+		end
+		if (27 == virtualKeyCode or 49 == virtualKeyCode) then
+
+			activity:PostStateChange("end") 
+		
+			quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
+			quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
+			quartz.framework.audio.playsound()
+
+			game:PostStateChange("selector")
+		end
+		if (50 == virtualKeyCode) then
+
+			quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
+			quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
+			quartz.framework.audio.playsound()
+			activity:PostStateChange("settings")
+		end
+		if (51 == virtualKeyCode) then
+
+			UIMenuManager.stack:Push(UTActivity.Ui.Details)
+		end
+	end
 end

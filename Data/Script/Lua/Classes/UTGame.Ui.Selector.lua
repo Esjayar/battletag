@@ -36,6 +36,9 @@ UTGame.Ui.Selector.Materials = {
 	[0x03000053] = "rf06.tga",
 	[0x03000030] = "rf07.tga",
 	[0x03000031] = "rf08.tga",
+	[0x03000054] = "rf11.tga",
+	[0x03000055] = "rf12.tga",
+	[0x03000056] = "rf13.tga",
 
 }
 
@@ -45,8 +48,8 @@ function UTGame.Ui.Selector:__ctor(...)
 
 	-- animate	
 	
-	self.slideBegin = true
-	self.slideEnd   = true
+	self.slideBegin = game.settings.UiSettings.slideBegin
+	self.slideEnd = game.settings.UiSettings.slideEnd
 	
 	-- window settings
 
@@ -55,7 +58,7 @@ function UTGame.Ui.Selector:__ctor(...)
 
     -- contents,
 
-    self:Reserve(8, --[[ --?? SCROLLBAR ]] true)
+    self:Reserve(9, --[[ --?? SCROLLBAR ]] true)
 
     -- activity description on the right side,
 
@@ -76,29 +79,29 @@ function UTGame.Ui.Selector:__ctor(...)
     self.uiButton1.text = l"but003"
 	self.uiButton1.tip = l"tip006"
 
-    self.uiButton1.OnAction = function (self) 
-		quartz.framework.audio.loadsound("base:audio/ui/back.wav")
-		quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
-		quartz.framework.audio.playsound()
-		game:PostStateChange("title") 
+    self.uiButton1.OnAction = function () 
+		self:Back()
     end
 
-    -- uiButton3: select, play
+    -- uiButton3: select, settings
 
     self.uiButton3 = self:AddComponent(UIButton:New(), "uiButton3")
     self.uiButton3.rectangle = UIMenuWindow.buttonRectangles[3]
-    self.uiButton3.text = l"but023"
+    self.uiButton3.text = l"but009"
 	self.uiButton3.tip = l"tip015"
 
     self.uiButton3.OnAction = function ()
     
         assert(self.nfo)
         assert(self.nfo.class)
+        activityclass = self.nfo.class
 
 		quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
 		quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
 		quartz.framework.audio.playsound()
-        game:PostStateChange("session", self.nfo, "playersmanagement")
+		game.settings.UiSettings.lastgame = game.settings.UiSettings.lastgame or self.currentSelectedIndex
+		game:SaveSettings()
+        game:PostStateChange("session", self.nfo, "settings")
     
     end
 
@@ -106,22 +109,38 @@ function UTGame.Ui.Selector:__ctor(...)
 
     self.uiButton4 = self:AddComponent(UIButton:New(), "uiButton4")
     self.uiButton4.rectangle = UIMenuWindow.buttonRectangles[4]
-    self.uiButton4.text = l"but024"
-	self.uiButton4.tip = l"tip014"
+    self.uiButton4.text = l"but023"
+	self.uiButton4.tip = l"tip015"
 
     self.uiButton4.OnAction = function ()
     
+		self:Confirm()
+    end
+
+    -- uiButton5: select, play
+
+    self.uiButton5 = self:AddComponent(UIButton:New(), "uiButton5")
+    self.uiButton5.rectangle = UIMenuWindow.buttonRectangles[5]
+    self.uiButton5.text = l"but024"
+	self.uiButton5.tip = l"tip014"
+
+    self.uiButton5.OnAction = function ()
+    
         assert(self.nfo)
         assert(self.nfo.class)
+        activityclass = self.nfo.class
 
 		quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
 		quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
 		quartz.framework.audio.playsound()
+		game.settings.UiSettings.lastgame = game.settings.UiSettings.lastgame or self.currentSelectedIndex
+		game:SaveSettings()
         game:PostStateChange("session", self.nfo)
     
     end
 
-    self.uiButton4.enabled = false
+    self.uiButton5.enabled = false
+    slideanimation = true
 
 end
 
@@ -131,7 +150,7 @@ function UTGame.Ui.Selector:DisplaySelectedNfo(nfo)
 
     assert(nfo)
 
-    self.uiButton4.enabled = true
+    self.uiButton5.enabled = true
     self.nfo = nfo
 
     self.uiDetails.visible = true
@@ -222,7 +241,7 @@ function UTGame.Ui.Selector:Draw()
 		
 			for index = 1, 12 do
 			
-				local rectMaterial = {12 + (index % 6) * 60, 285 + math.floor((index - 1) / 6) * 70, 62 + (index%6) * 60, 335 + math.floor((index - 1) / 6) * 70}
+				local rectMaterial = {12 + (index % 6) * 60, 285 + math.floor((index - 1) / 6) * 70, 62 + (index % 6) * 60, 335 + math.floor((index - 1) / 6) * 70}
 				
 				quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
 				quartz.system.drawing.loadtexture("base:texture/ui/components/UIPanel11.tga")
@@ -236,7 +255,7 @@ function UTGame.Ui.Selector:Draw()
             
 				local vectMaterial = {rectangle[1] + ((position - 1) % 6) * 60 - 15, rectangle[2] + 109 + math.floor((position - 1) / 6) * 70}
 				
-				if (UTGame.Ui.Selector.Materials[material] and (game.settings.addons.medkitPack == 1 or (material ~= 0x03000030 and material ~= 0x03000031 and material ~= 0x03000052 and material ~= 0x03000053))) then
+				if (UTGame.Ui.Selector.Materials[material] and (game.settings.addons.medkitPack == 1 or (material ~= 0x03000030 and material ~= 0x03000031 and material ~= 0x03000052 and material ~= 0x03000053)) and (game.settings.addons.customPack == 1 or (material ~= 0x03000054 and material ~= 0x03000055 and material ~= 0x03000056))) then
 				
 					quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
 					quartz.system.drawing.loadtexture("base:texture/ui/pictograms/64x/" .. UTGame.Ui.Selector.Materials[material])
@@ -261,7 +280,7 @@ function UTGame.Ui.Selector:Open()
 	
 	UIPage.Open(self)
 
-    if (not game.nfos or (0 == #game.nfos)) then
+    if (not game.nfos or 0 == #game.nfos) then
 
         -- !! PUSH ERROR MESSAGE, CANNOT LOCATE ACTIVITIES,
         -- !! BACK TO TITLE
@@ -277,7 +296,7 @@ function UTGame.Ui.Selector:Open()
         local sortByDifficulty = function (left, right)
 
             if (left.difficulty  and right.difficulty) then
-                if (left.difficulty  == right.difficulty) then return left.name < right.name
+                if (left.difficulty == right.difficulty) then return left.name < right.name
                 else return left.difficulty < right.difficulty
                 end
             elseif (left.difficulty) then
@@ -301,17 +320,83 @@ function UTGame.Ui.Selector:Open()
 
                 if (item.userData) then
 					self.currentSelectedIndex = i
+					game.settings.UiSettings.lastgame = self.currentSelectedIndex or 1
                     self:DisplaySelectedNfo(item.userData)
                 end
             end
 
         end
 
-        self.index = 1
-        self:Scroll(0)
+        self.index = game.settings.UiSettings.lastgame or 1
+		self:Scroll(self.index - 15 or 0)
 
-        self:DisplaySelectedNfo(game.nfos[1])
+        self:DisplaySelectedNfo(game.nfos[game.settings.UiSettings.lastgame or 1])
+
+    end
+	self:Activate()
+
+end
+
+function UTGame.Ui.Selector:Close()
+
+	self:Deactivate()
+end
+
+function UTGame.Ui.Selector:Back()
+
+	quartz.framework.audio.loadsound("base:audio/ui/back.wav")
+	quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
+	quartz.framework.audio.playsound()
+	game:PostStateChange("title") 
+end
+
+function UTGame.Ui.Selector:Confirm()
+
+    assert(self.nfo)
+    assert(self.nfo.class)
+    activityclass = self.nfo.class
+
+	quartz.framework.audio.loadsound("base:audio/ui/validation.wav")
+	quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
+	quartz.framework.audio.playsound()
+	game.settings.UiSettings.lastgame = game.settings.UiSettings.lastgame or self.currentSelectedIndex
+	game:SaveSettings()
+    game:PostStateChange("session", self.nfo, "playersmanagement")
+end
+
+function UTGame.Ui.Selector:Activate()
+
+    if (not self.keyboardActive) then
+
+        --game._Char:Add(self, self.Char)
+        game._KeyDown:Add(self, self.KeyDown)
+        self.keyboardActive = true
 
     end
 
+end
+
+function UTGame.Ui.Selector:Deactivate()
+
+    if (self.keyboardActive) then 
+    
+        --game._Char:Remove(self, self.Char)
+        game._KeyDown:Remove(self, self.KeyDown)
+        self.keyboardActive = false
+
+    end
+
+end
+
+function UTGame.Ui.Selector:KeyDown(virtualKeyCode, scanCode)
+		
+	if (13 == virtualKeyCode) then
+
+		self:Confirm()
+	end
+
+	if (27 == virtualKeyCode) then
+
+		self:Back()
+	end
 end

@@ -38,6 +38,8 @@ UILeaderboard.TeamColor =
 	["blue"] = 2,
 	["yellow"] = 3,
 	["green"] = 4,	
+	["silver"] = 5,
+	["purple"] = 6,
 }
 
 -- __ctor --------------------------------------------------------------------
@@ -70,7 +72,7 @@ function UILeaderboard:Build(challengers, data)
 	self.uiRankingbitmap = {}
     table.foreachi(challengers, function(index, challenger) 
 
-		if (self.showRanking  and (index <= 3)) then
+		if (self.showRanking and index <= 6) then
 
 			self.uiRankingbitmap[index] = self:AddComponent(UIPicture:New(), "uiRankingbitmap" .. index)
 			self.uiRankingbitmap[index].color = UIComponent.colors.white
@@ -88,11 +90,13 @@ function UILeaderboard:Build(challengers, data)
 
     self.rankedList = {}
     table.foreachi(challengers, function (index, challenger) 
-
-        local uiLeaderboardItem = self:AddComponent(self.uiItem:New(self, challenger), "uiLeaderboardItem" .. #self.rankedList + 1)
-        uiLeaderboardItem.ranking = index
-        uiLeaderboardItem:BuildItem()
-		table.insert(self.rankedList, uiLeaderboardItem)
+		if (challenger:IsKindOf(UTPlayer) or challenger:IsKindOf(UTTeam) and #challenger.players > 0) then
+        
+			local uiLeaderboardItem = self:AddComponent(self.uiItem:New(self, challenger), "uiLeaderboardItem" .. #self.rankedList + 1)
+			uiLeaderboardItem.ranking = index
+			uiLeaderboardItem:BuildItem()
+			table.insert(self.rankedList, uiLeaderboardItem)
+		end
 
 	end )
 
@@ -178,7 +182,7 @@ function UILeaderboard:Sort(init)
 	function sorting(item1, item2)
 		if (item1.challenger.data[self.data][self.itemsSortField] > item2.challenger.data[self.data][self.itemsSortField]) then 
 			return true
-		elseif ((item1.challenger.data[self.data][self.itemsSortField] == item2.challenger.data[self.data][self.itemsSortField]) and (item1.ranking < item2.ranking)) then 
+		elseif (item1.challenger.data[self.data][self.itemsSortField] == item2.challenger.data[self.data][self.itemsSortField] and item1.ranking < item2.ranking) then 
 			return true
 		end
 	end
@@ -188,6 +192,13 @@ function UILeaderboard:Sort(init)
 	-- then compute new position
 
 	local itemOffset = 0
+	if (game.settings.UiSettings.aspectratio == 2) then
+		if (#activity.teams == 2 and #activity.players > 16) then
+			itemOffset = -270
+		elseif (#activity.teams < 2 and #activity.players > 8) then
+			itemOffset = -30
+		end
+	end
     for index, item in ipairs(self.rankedList) do
 
 		-- make a move ...
@@ -195,12 +206,27 @@ function UILeaderboard:Sort(init)
 		if (init) then
 
 	        item.ranking = index
-			item:MoveTo(0, itemOffset)
+			if (game.settings.UiSettings.aspectratio == 2) then
+				if (#activity.teams == 2 and #activity.players > 16) then
+					item:MoveTo(itemOffset, 0)
+				elseif (#activity.teams < 2 and #activity.players > 8) then
+					if (index <= 12) then
+						item:MoveTo(-220, itemOffset)
+					else
+						item:MoveTo(165, itemOffset - 708)
+					end
+				else
+					item:MoveTo(0, itemOffset)
+				end
+			else
+				item:MoveTo(0, itemOffset)
+			end
 
 		else
 
 			if (item.ranking ~= index) then
 
+				local currank = item.ranking
 				item.ranking = index
 
 				if (item.mvtFx) then
@@ -210,21 +236,27 @@ function UILeaderboard:Sort(init)
 
 				end
 
-				if (activity.uiAFP and (#activity.teams <= 0) and (itemOffset == 0) and (item.rectangle[2] ~= 0)) then
+				if (activity.uiAFP and #activity.teams <= 0 and itemOffset <= 0) then
 
 					activity.uiAFP:PushLine(item.challenger.profile.name .. " " .. l"ingame001", UIComponent.colors.orange, "base:texture/Ui/Icons/16x/Star.tga")
 
 				end
 
-				if (activity.uiAFP and item.challenger:IsKindOf(UTTeam) and game and game.gameMaster and (game.gameMaster.ingame == true) and (itemOffset == 0) and (item.rectangle[2] ~= 0)) then
+				if (activity.uiAFP and item.challenger:IsKindOf(UTTeam) and game and game.gameMaster and game.gameMaster.ingame and not activity.dontDisplayScore and itemOffset <= 0) then
 
-					activity.uiAFP:PushLine(l("ingame0" .. (15 + UILeaderboard.TeamColor[item.challenger.profile.teamColor])), UIComponent.colors[item.challenger.profile.teamColor], "base:texture/Ui/Icons/16x/Star" .. item.challenger.profile.teamColor .. ".tga")
+					activity.uiAFP:PushLine(l("ingame0" .. 55 + UILeaderboard.TeamColor[item.challenger.profile.teamColor]), UIComponent.colors[item.challenger.profile.teamColor], "base:texture/Ui/Icons/16x/Star" .. item.challenger.profile.teamColor .. ".tga")
 					game.gameMaster:RegisterSound({ paths = {"base:audio/gamemaster/DLG_GM_FRAG_TEAM_0" .. UILeaderboard.TeamColor[item.challenger.profile.teamColor] ..".wav"}, priority = 2})
 					self:UpdateLeadership(item.challenger)
 
 				end
 
-				item.mvtFx = UIManager:AddFx("position", { duration = 0.8, __self = item, from = {0, item.rectangle[2]}, to = { 0, itemOffset }, type = "descelerate" })
+				if (#activity.teams == 2 and #activity.players > 16 and game.settings.UiSettings.aspectratio == 2) then
+					item.mvtFx = UIManager:AddFx("position", { duration = 0.8, __self = item, from = {item.rectangle[1], 0}, to = { itemOffset, 0 }, type = "descelerate" })
+				elseif (#activity.teams < 2 and #activity.players > 8 and game.settings.UiSettings.aspectratio == 2) then
+					item.mvtFx = UIManager:AddFx("position", { duration = 0.8, __self = item, from = {-220 + math.floor(currank / 13) * 385, item.rectangle[2] - math.floor(currank / 13) * 708}, to = {-220 + math.floor(index / 13) * 385, itemOffset - math.floor(index / 13) * 708}, type = "descelerate" })
+				else
+					item.mvtFx = UIManager:AddFx("position", { duration = 0.8, __self = item, from = {0, item.rectangle[2]}, to = { 0, itemOffset }, type = "descelerate" })
+				end
 
 			end
 
@@ -232,43 +264,76 @@ function UILeaderboard:Sort(init)
 		
         -- ranking
 
-		if (self.showRanking and (index <= 3)) then
+		if (self.showRanking and index <= 3) then
 
 			if (item.challenger:IsKindOf(UTTeam)) then
 				self.uiRankingbitmap[index].rectangle = {
 					-140,
 					itemOffset,
-					-140 + 50,
+					-90,
 					itemOffset + 50,
-				}	
+				}
 			else
 				self.uiRankingbitmap[index].rectangle = {
 					-60,
 					itemOffset,
-					-60 + 50,
+					-10,
 					itemOffset + 50,
-				}				
+				}
+			end
+			if (game.settings.UiSettings.aspectratio == 2 and (#activity.players > 16 and #activity.teams == 2 or #activity.players > 8 and #activity.teams < 2)) then
+				self.uiRankingbitmap[index].rectangle = nil
 			end
 
 		end
 
 		-- next one
 
-        if (item.challenger:IsKindOf(UTTeam)) then
-			if (#activity.players > 8) then
-				if (#activity.teams <= 2) then
-					itemOffset = itemOffset + 45 + (35 * #item.challenger.players)
-				else
-					itemOffset = itemOffset + 18 + (35 * #item.challenger.players)
+		item.numplayers = 0
+		if (item.challenger:IsKindOf(UTTeam)) then
+			for i, player in ipairs(item.challenger.players) do
+				if (not player.primary) then
+					item.numplayers = item.numplayers + 1
 				end
-			else
-				itemOffset = itemOffset + 30 + (64 * #item.challenger.players)
 			end
 		else
-			if (self.largePanel) then
-				itemOffset = itemOffset + 80
+			for i, player in ipairs(item.challenger) do
+				if (not player.primary) then
+					item.numplayers = item.numplayers + 1
+				end
+			end
+		end
+		if (item.challenger:IsKindOf(UTTeam)) then
+			if (#activity.players > 8) then
+				if (#activity.players > 16) then
+					if (#activity.teams <= 2 and game.settings.UiSettings.aspectratio == 2) then
+						itemOffset = itemOffset + 440
+					else
+						itemOffset = itemOffset + 45 + (22 * item.numplayers)
+					end
+				else
+					if (#activity.teams <= 2) then
+						itemOffset = itemOffset + 45 + (35 * item.numplayers)
+					else
+						itemOffset = itemOffset + 18 + (35 * item.numplayers)
+					end
+				end
 			else
-				itemOffset = itemOffset + 65
+				itemOffset = itemOffset + 30 + (64 * item.numplayers)
+			end
+		elseif (not item.challenger.primary) then
+			if (#activity.players > 8 and game.settings.UiSettings.aspectratio == 2) then
+				if (self.largePanel) then
+					itemOffset = itemOffset + 59
+				else
+					itemOffset = itemOffset + 45
+				end
+			else
+				if (self.largePanel) then
+					itemOffset = itemOffset + 80
+				else
+					itemOffset = itemOffset + 65
+				end
 			end
 		end
 
@@ -289,10 +354,13 @@ function UILeaderboard:UpdateLeadership(challenger)
             local viewportAspectRatio = viewportHeight / viewportWidth
 
 	        local textureAspectRatio = 720 / 960
-	        if (viewportAspectRatio > textureAspectRatio) then inverseScale = viewportWidth / 960
-	        else inverseScale = viewportHeight / 720 end
+	        if (viewportAspectRatio > textureAspectRatio) then
+				inverseScale = viewportWidth / 960
+	        else
+				inverseScale = viewportHeight / 720
+			end
 
-            --print("ççççççççççççççççççççççççççççççççççççççççççççççççççç")
+            --print("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½")
             --print("viewportWidth", viewportWidth)
             --print("viewportHeight", viewportHeight)
             --print("viewportAspectRatio", viewportAspectRatio)

@@ -50,11 +50,11 @@ function UATagThenShoot.Ui.RoundLoop:__ctor(...)
 
 	self.uiBestScorePanel = self:AddComponent(UIPanel:New(), "uiBestScorePanel")
 	self.uiBestScorePanel.background = "base:texture/ui/components/uipanel05.tga"
-	self.uiBestScorePanel.rectangle = { 520, 460, 520 + 400, 460 + 200 }
+	self.uiBestScorePanel.rectangle = { 520, 460, 920, 660 }
 
 		self.uiBestScorePanel.uiTitlePanel = self.uiBestScorePanel:AddComponent(UIPanel:New(), "uiTitlePanel")
 		self.uiBestScorePanel.uiTitlePanel.background = "base:texture/ui/components/uipanel08.tga"
-		self.uiBestScorePanel.uiTitlePanel.rectangle = { 0, 0, 0 + 400, 0 + 30 }
+		self.uiBestScorePanel.uiTitlePanel.rectangle = { 0, 0, 400, 30 }
 		self.uiBestScorePanel.uiTitlePanel.color = UIComponent.colors.white
 
 		self.uiBestScorePanel.uiTitleLabel = self.uiBestScorePanel:AddComponent(UILabel:New(), "uiTitleLabel")
@@ -68,7 +68,7 @@ function UATagThenShoot.Ui.RoundLoop:__ctor(...)
 		local index = 1
 		for i, player in ipairs(activity.players) do
 
-			if ((index <= 3) and (player.data.baked.score > 0)) then
+			if (index <= 3 and player.data.baked.score > 0) then
 
 				local slot = self.uiBestScorePanel:AddComponent(UIPlayerSlot:New(), "uiPlayerSlot" .. index)
 				slot:SetPlayer(player)
@@ -92,11 +92,11 @@ function UATagThenShoot.Ui.RoundLoop:__ctor(...)
 
 	self.uiPlayerPanel = self:AddComponent(UIPanel:New(), "uiPlayerPanel")
 	self.uiPlayerPanel.background = "base:texture/ui/components/uipanel05.tga"
-	self.uiPlayerPanel.rectangle = { 520, 50, 520 + 400, 50 + 120 }
+	self.uiPlayerPanel.rectangle = { 520, 50, 920, 170 }
 
 		self.uiPlayerPanel.uiTitlePanel = self.uiPlayerPanel:AddComponent(UIPanel:New(), "uiTitlePanel")
 		self.uiPlayerPanel.uiTitlePanel.background = "base:texture/ui/components/uipanel08.tga"
-		self.uiPlayerPanel.uiTitlePanel.rectangle = { 0, 0, 0 + 400, 0 + 30 }
+		self.uiPlayerPanel.uiTitlePanel.rectangle = { 0, 0, 400, 30 }
 
 		self.uiPlayerPanel.uiTitleLabel = self.uiPlayerPanel:AddComponent(UILabel:New(), "uiTitleLabel")
 		self.uiPlayerPanel.uiTitleLabel.fontColor = UIComponent.colors.orange
@@ -106,17 +106,17 @@ function UATagThenShoot.Ui.RoundLoop:__ctor(...)
 				
 		self.uiPlayerPanel.uiPlayerPanel = self.uiPlayerPanel:AddComponent(UIPanel:New(), "uiPlayerPanel")
 		self.uiPlayerPanel.uiPlayerPanel.background = "base:texture/ui/components/UIGridLine_Background01.tga"
-		self.uiPlayerPanel.uiPlayerPanel.rectangle = { 80, 60, 380, 60 + 24 }
+		self.uiPlayerPanel.uiPlayerPanel.rectangle = { 80, 60, 380, 84 }
 
 			self.uiPlayerPanel.uiPlayerHud = self.uiPlayerPanel.uiPlayerPanel:AddComponent(UIPicture:New(), "uiPlayerHud")
 			self.uiPlayerPanel.uiPlayerHud.texture = "base:texture/ui/icons/32x/gunhud.tga"
-			self.uiPlayerPanel.uiPlayerHud.rectangle = { 50, -5, 50 + 32, -5 + 32 }
+			self.uiPlayerPanel.uiPlayerHud.rectangle = { 50, -5, 82, 27 }
 
 			if (self.player.rfGunDevice) then
 
 				self.uiPlayerPanel.uiPlayerClassId = self.uiPlayerPanel.uiPlayerPanel:AddComponent(UILabel:New(), "uiPlayerClassId")
 				self.uiPlayerPanel.uiPlayerClassId.fontJustification = quartz.system.drawing.justification.center + quartz.system.drawing.justification.singlelineverticalcenter
-				self.uiPlayerPanel.uiPlayerClassId.rectangle = { 50, -5, 50 + 32, -5 + 32 }
+				self.uiPlayerPanel.uiPlayerClassId.rectangle = { 50, -5, 82, 27 }
 				self.uiPlayerPanel.uiPlayerClassId.font = UIComponent.fonts.default
 				self.uiPlayerPanel.uiPlayerClassId.fontColor = UIComponent.colors.orange
 				self.uiPlayerPanel.uiPlayerClassId.text = self.player.rfGunDevice.classId
@@ -128,6 +128,12 @@ function UATagThenShoot.Ui.RoundLoop:__ctor(...)
 			self.uiPlayerPanel.uiPlayerLabel.font = UIComponent.fonts.header
 			self.uiPlayerPanel.uiPlayerLabel.text = self.player.profile.name
 			self.uiPlayerPanel.uiPlayerLabel.rectangle = { 100, 0 }
+
+			if (game.settings.UiSettings.teamribbon == 2 and self.player.profile.team > 0) then
+				self.uiPlayerPanel.uiPlayerPanelbackground = self.uiPlayerPanel.uiPlayerPanel:AddComponent(UIPicture:New(), "uiTitleLabel")
+				self.uiPlayerPanel.uiPlayerPanelbackground.texture = "base:texture/ui/pictograms/48x/Team_" .. self.player.profile.team .. "_Circle.tga"
+				self.uiPlayerPanel.uiPlayerPanelbackground.rectangle = { -49, -39, 49, 59 }
+			end
 
 			self.uiPlayerPanel.uiPlayerIcon = self.uiPlayerPanel.uiPlayerPanel:AddComponent(UIPicture:New(), "uiTitleLabel")
 			self.uiPlayerPanel.uiPlayerIcon.texture = "base:texture/Avatars/256x/" .. self.player.profile.icon
@@ -145,23 +151,23 @@ function UATagThenShoot.Ui.RoundLoop:__ctor(...)
 	if (4 == activity.settings.numberOfBase) then
 
 		self.baseRectangle = {
-			{ 520, 180, 520 + 190, 180 + 80 },
-			{ 730, 180, 730 + 190, 180 + 80 },
-			{ 520, 360, 520 + 190, 360 + 80 },
-			{ 730, 360, 730 + 190, 360 + 80 },
+			{ 520, 180, 710, 260 },
+			{ 730, 180, 920, 260 },
+			{ 520, 360, 710, 440 },
+			{ 730, 360, 920, 440 },
 		}
 		self.ubiconnectRectangle = {
-			{ 520, 270, 920, 270 + 80 },
+			{ 520, 270, 920, 350 },
 		}
 
 	else
 	
 		self.baseRectangle = {
-			{ 520, 220, 520 + 190, 220 + 80 },
-			{ 730, 220, 730 + 190, 220 + 80 },
+			{ 520, 220, 710, 300 },
+			{ 730, 220, 920, 300 },
 		}
 		self.ubiconnectRectangle = {
-			{ 520, 330, 920, 330 + 80 },
+			{ 520, 330, 920, 410 },
 		}
 	
 	end
@@ -174,7 +180,7 @@ function UATagThenShoot.Ui.RoundLoop:__ctor(...)
 
 			self.uiBasePanel[i].uiTitlePanel = self.uiBasePanel[i]:AddComponent(UIPanel:New(), "uiTitlePanel")
 			self.uiBasePanel[i].uiTitlePanel.background = "base:texture/ui/components/uipanel07.tga"
-			self.uiBasePanel[i].uiTitlePanel.rectangle = { 0, 30, 0 + 190, 30 + 20 }
+			self.uiBasePanel[i].uiTitlePanel.rectangle = { 0, 30, 190, 50 }
 
 			self.uiBasePanel[i].uiBaseName = self.uiBasePanel[i]:AddComponent(UILabel:New(), "uiTitleLabel")
 			self.uiBasePanel[i].uiBaseName.fontColor = UIComponent.colors.darkgray
@@ -196,7 +202,7 @@ function UATagThenShoot.Ui.RoundLoop:__ctor(...)
 
 		self.uiUbiConnectPanel.uiTitlePanel = self.uiUbiConnectPanel:AddComponent(UIPanel:New(), "uiTitlePanel")
 		self.uiUbiConnectPanel.uiTitlePanel.background = "base:texture/ui/components/uipanel07.tga"
-		self.uiUbiConnectPanel.uiTitlePanel.rectangle = { 0, 30, 0 + 400, 30 + 20 }
+		self.uiUbiConnectPanel.uiTitlePanel.rectangle = { 0, 30, 400, 50 }
 
 		self.uiUbiConnectPanel.uiBaseName = self.uiUbiConnectPanel:AddComponent(UILabel:New(), "uiTitleLabel")
 		self.uiUbiConnectPanel.uiBaseName.fontColor = UIComponent.colors.darkgray
@@ -241,7 +247,7 @@ function UATagThenShoot.Ui.RoundLoop:OnDataChanged(_entity, _key, _value)
 
 		for i = 1, activity.settings.numberOfBase do
 
-			if (_value and (self.player.data.heap.state == (i - 1))) then
+			if (_value and self.player.data.heap.state == i - 1) then
 				self.uiBasePanel[i].uiBaseIcon.texture = "base:texture/ui/pictograms/128x/RF0" .. (i + 2) .. ".tga"
 			else
 				self.uiBasePanel[i].uiBaseIcon.texture = "base:texture/ui/pictograms/128x/RF0" .. (i + 2) .. "_White.tga"		

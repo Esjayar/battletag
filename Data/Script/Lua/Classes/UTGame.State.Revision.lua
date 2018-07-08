@@ -34,9 +34,11 @@ end
 function UTGame.State.Revision:Begin()
 
     assert(engine.libraries.usb)
-    assert(engine.libraries.usb.proxy)
-    assert(engine.libraries.usb.proxy.revisionUpdate)
-    assert(not engine.libraries.usb.proxy.initialized)
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		assert(proxy)
+		assert(proxy.revisionUpdate)
+		assert(not proxy.initialized)
+	end
 
     print("UTGame.State.Revision:Begin()")
 
@@ -47,7 +49,9 @@ function UTGame.State.Revision:Begin()
 
     -- wait for process completion ...
 
-    engine.libraries.usb.proxy:PostStateChange("upload")
+    for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		proxy:PostStateChange("upload")
+	end
 
 end
 
@@ -68,24 +72,26 @@ end
 
 function UTGame.State.Revision:Update()
 
-    if (engine.libraries.usb.proxy and engine.libraries.usb.proxy.revisionCandidate) then
+    for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		if (proxy and proxy.revisionCandidate) then
 
-        -- notification when the upload is complete
+			-- notification when the upload is complete
 
-        if (engine.libraries.usb.proxy.revisionCandidate.checked == engine.libraries.usb.proxy.revisionUpdate) then
+			if (proxy.revisionCandidate.checked == proxy.revisionUpdate) then
 
-            if (not self.uiPopup) then
+				if (not self.uiPopup) then
 
-                self.uiPopup = UIPopupWindow:New()
+					self.uiPopup = UIPopupWindow:New()
 
-                self.uiPopup.title = l "con041"
-                self.uiPopup.text = l "con042"
+					self.uiPopup.title = l "con041"
+					self.uiPopup.text = l "con042"
 
-                UIManager.stack:Push(self.uiPopup)
-                game.gameMaster:Play("base:audio/gamemaster/dlg_gm_init_03.wav")
+					UIManager.stack:Push(self.uiPopup)
+					game.gameMaster:Play("base:audio/gamemaster/dlg_gm_init_03.wav")
 
-            end
-        end
-    end
+				end
+			end
+		end
+	end
 
 end

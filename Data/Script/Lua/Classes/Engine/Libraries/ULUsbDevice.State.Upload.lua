@@ -35,10 +35,12 @@ function ULUsbDevice.State.Upload:Begin(arg)
     print("ULUsbDevice.State.Upload:Begin")
 
     assert(engine.libraries.usb)
-    assert(engine.libraries.usb.proxy)
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		assert(proxy)
 
-    self.proxy = engine.libraries.usb.proxy
-    self.handle = self.proxy.handle
+		self.proxy = proxy
+		self.handle = proxy.handle
+	end
 
     -- retrieve arguments 
 

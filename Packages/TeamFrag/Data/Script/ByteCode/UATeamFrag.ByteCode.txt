@@ -3,33 +3,45 @@
 VAR nb_lifepoint	SEND
 VAR nb_ammo		SEND	
 VAR nb_clip		SEND
-VAR nb_shoot		SEND
+VAR gunseconds		SEND
+VAR bonus		RECEIVE
+VAR alter		RECEIVE
 VAR display
 VAR max_lifepoint	CONFIG
 VAR max_ammo	CONFIG
 VAR max_clip		CONFIG
 VAR swap_on		CONFIG
 VAR respawn_time	CONFIG
-VAR team		CONFIG
+VAR team_base		CONFIG
 VAR team_frag		CONFIG
-VAR assist		CONFIG
-VAR medic		CONFIG
-VAR team_base
-VAR lastrfid_type	
+VAR lastrfid_type
 VAR last_ammo_rfid	
 VAR last_medikit_rfid	
 VAR scan_ok
-VAR local
 VAR timer
-VAR assist_timer
-VAR auto_reload
+VAR invulnerability
+VAR max_lives	CONFIG
+VAR respawnmode		CONFIG
+VAR lives
+
+
 
 
 FUNCTION hud
-IF	display 	COMP		1
+
+HUD_ICON_OFF	GOAL
+IF	display 	DIFF		0
+	HUD_ICON_ON	LIFE
+	HUD_ICON_OFF	BULLET
+	IF lives INF 6
+		HUD_JAUGE	lives
+	ELSE
+		HUD_JAUGE_BLINK	1
+	END_IF
+	HUD_DIGIT	nb_lifepoint
+ELSE
 	HUD_ICON_ON	BULLET
 	HUD_ICON_OFF	LIFE
-	
 	IF	max_ammo	DIFF	20
 		IF	nb_ammo		SUP	0
 			HUD_DIGIT	nb_ammo
@@ -42,1578 +54,417 @@ IF	display 	COMP		1
 		HUD_DIGIT_OFF
 		HUD_JAUGE_BLINK	1
 	END_IF
-ELSE
-	HUD_ICON_ON	LIFE
-	HUD_ICON_OFF	BULLET
-
-	IF	nb_lifepoint COMP 0
-		HUD_DIGIT_BLINK	nb_lifepoint
-	ELSE	
-		HUD_DIGIT		nb_lifepoint
-	END_IF
-
-	HUD_JAUGE	0
-
 END_IF
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 END_FUNCTION
 
-FUNCTION respawn
-HUD_ICON_OFF		GOAL
-SET	nb_lifepoint	max_lifepoint
+
+
+FUNCTION reload
+
 SET	nb_clip		max_clip
 SET	nb_ammo		max_ammo
 DEC 	nb_clip
-
-SET 	display		1
-hud
-
+IF swap_on COMP 2
+	SET 	last_ammo_rfid 	lastrfid_type
+END_IF
+SET	display		0
 GOTO	game
 
 
+END_FUNCTION
 
 
 
+FUNCTION medikit
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+SET	nb_lifepoint	max_lifepoint
+IF swap_on SUP 0
+	SET 	last_medikit_rfid 	lastrfid_type
+END_IF
+SET	display		1
+GOTO	game
 
 
 END_FUNCTION
 
+
+
+FUNCTION respawn
+
+DEC lives
+reload
+medikit
+SET 	last_ammo_rfid 	50
+SET 	last_medikit_rfid 	50
+
+
+END_FUNCTION
+
+
+
 FUNCTION get_hit
-MOTOR	30
-IF nb_lifepoint SUP	0
-	DEC nb_lifepoint
-END_IF
 
 SND	HURT
 LED_ON		30	1
-
-IF nb_lifepoint COMP	0
+IF	nb_lifepoint	SUP	0
+	DEC	nb_lifepoint
+	MOTOR	30
+	SET display 1
+END_IF
+IF nb_lifepoint COMP 0
 	GOTO	death
 END_IF
-
-SET display 0
 hud
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 END_FUNCTION
 
-FUNCTION reload
-SET	nb_clip		max_clip
-SET 	last_ammo_rfid 	lastrfid_type
-SET	display		1
 
 
+STATE init
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-END_FUNCTION
-
-FUNCTION medikit
-SET	nb_lifepoint	max_lifepoint
-SET 	last_medikit_rfid 	lastrfid_type
-SET	display		0
-hud
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-END_FUNCTION
-
-STATE init 
 
 FIRST_STATE
 
+
+
 EVENT ENTER_STATE
+
 TIMER		100
-SET_HARNESS	1
-SET	nb_shoot		0
-SET 	local 		0
-SET	assist_timer	0
-
-
+SET	gunseconds	0
+SET	invulnerability	0
 IF team_frag COMP 0
-	SET_TEAM	team	
+	SET_TEAM	team_base
 END_IF
-
-SET team_base	team
+SET lives max_lives
 DEC team_base
 SND START
 respawn
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 END_EVENT
+
+
 
 END_STATE
 
-STATE game 
+
+
+STATE game
 
 EVENT BUTTON_2_JUST_PRESSED
-SET	display		1
-IF	nb_ammo		SUP	0
-	IF	max_ammo	DIFF	20	
-		DEC		nb_ammo
-	ELSE
-		ANIM		ASHT
-	END_IF
-	SND		SHOOT
-	FLASH_ORANGE	1
-	IR
-	INC	nb_shoot
 
-	IF	nb_ammo		COMP	0
-		IF nb_clip SUP 0
-			SET	auto_reload	1
-		END_IF
-	END_IF
-ELSE
-	IF nb_clip COMP 0
-		IF assist	COMP 1
-			INC local 
-			IF	local	SUP	5
-				SND_PRIO	ASSIST_SCANAMMO
-				SET local 0
-			ELSE
-				SND		EMPTY
-			END_IF
+IF alter INF 7
+	SET	display		0
+	IF	nb_ammo		SUP	0
+		IF	max_ammo	DIFF	20	
+			DEC		nb_ammo
 		ELSE
-			SND		EMPTY
+			ANIM		ASHT
 		END_IF
+		SND_PRIO	SHOOT
+		FLASH_ORANGE	1
+		IR
 	END_IF
+	hud
+	SND		EMPTY
 END_IF
-hud
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 END_EVENT
+
+
 
 EVENT BUTTON_3_JUST_PRESSED
+
 RFID_SCAN	scan_ok
-SET local 0
-IF	scan_ok		COMP	1
-
+IF scan_ok COMP 1
 	RFID_TYPE_MAJOR	lastrfid_type
-
 	IF lastrfid_type COMP RFID_AMMO_PACK
-		SET local 1
 		RFID_TYPE_MINOR lastrfid_type
-		GOTO	reload
+		IF lastrfid_type DIFF last_ammo_rfid
+			GOTO	reload
+		END_IF
 	END_IF
-
-	IF	medic	COMP	1
+	IF alter INF 1
 		IF lastrfid_type COMP RFID_LIFE_PACK
-			SET local 1
 			RFID_TYPE_MINOR lastrfid_type
-			GOTO	medikit
+			IF lastrfid_type DIFF last_medikit_rfid
+				GOTO	medikit
+			END_IF
 		END_IF
 	END_IF
 END_IF
+SND	SCAN_BAD
 
-IF local COMP	0
-	SND	SCAN_BAD
+
+END_EVENT
+
+
+
+EVENT HIT
+
+IF invulnerability	COMP 	0
+	get_hit
 END_IF
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 END_EVENT
 
-EVENT HIT
-get_hit
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-END_EVENT
 
 EVENT BUTTON_1_JUST_PRESSED
-SND	BIP
-IF display COMP 1
-	SET display 0
-ELSE
-	SET display 1
-END_IF
-hud
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-END_EVENT
-
-EVENT TIMER
-IF assist COMP	1
-	IF medic	COMP 1
-		IF nb_lifepoint COMP	1
-			IF	assist_timer	COMP	0
-				SND_PRIO	ASSIST_SCANLIFE
-				SET	assist_timer	5
-			END_IF
-			DEC	assist_timer
-		END_IF
-	END_IF	
-END_IF
-
-IF 	auto_reload	COMP	1
-	DEC 	nb_clip
-	SND	RELOAD
-	SET	nb_ammo		max_ammo
-	hud
-	SET	auto_reload	0
-END_IF
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-END_EVENT
-
-EVENT ENTER_STATE
-SET	auto_reload	0
-
-
-
-
-
-
-END_EVENT
-
-EVENT ANIM_FINISHED
-HUD_JAUGE_BLINK	1
-HUD_ICON_ON	BULLET
-
-
-
-
-END_EVENT
-
-END_STATE
-
-STATE reload 
-
-EVENT ENTER_STATE
-IF swap_on COMP 1
-	IF lastrfid_type COMP last_ammo_rfid
-		SND	SCAN_BAD
-		GOTO game
-	ELSE
-		SND	RELOAD_CLIP
-		FLASH_GREEN	1
-		ANIM	ARAM
-	END_IF	
-ELSE	
-	SND	RELOAD_CLIP
-	FLASH_GREEN	1
-	ANIM	ARAM
-END_IF
-
-	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-END_EVENT
-
-EVENT ANIM_FINISHED
-reload
-SET	nb_ammo		max_ammo
-DEC 	nb_clip
-hud
-IF assist COMP	1
-	SND_PRIO	OK
-END_IF
-GOTO	game
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-END_EVENT
-
-EVENT HIT
-reload
-DEC 	nb_clip
-SET	nb_ammo		max_ammo
-ANIM_OFF
-get_hit
-GOTO	game
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-END_EVENT
-
-END_STATE
-
-STATE medikit 
-
-EVENT ENTER_STATE
-IF swap_on COMP 1
-	IF lastrfid_type COMP last_medikit_rfid
-		SND	SCAN_BAD
-		GOTO game
-	ELSE
-		SND	SCAN_GOOD
-		FLASH_GREEN	1
-		ANIM	AMED
-	END_IF	
-ELSE	
-	SND	SCAN_GOOD
-	FLASH_GREEN	1	
-	ANIM	AMED
-END_IF
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-END_EVENT
-
-EVENT ANIM_FINISHED
-medikit
-IF assist COMP	1
-	SND_PRIO	OK
-END_IF
-GOTO	game
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-END_EVENT
-
-EVENT HIT
-medikit
-ANIM_OFF
-get_hit
-GOTO	game
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-END_EVENT
-
-END_STATE
-
-STATE respawn 
-
-EVENT ENTER_STATE
-TIMER	200
-SND	SCAN_GOOD
-SET 	local 	0
-ANIM_OFF
-HUD_DIGIT	respawn_time
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-END_EVENT
-
-EVENT TIMER
-IF	local	COMP 0
-
-	SET	local	1
-	SET	timer	respawn_time
-	TIMER	100
-
-ELSE
-
-	IF	timer	COMP	0
-
-		IF assist	COMP 1
-			SND_PRIO	ASSIST_BACKINGAME
-		ELSE
-			SND_PRIO	RESPAWN
-		END_IF
-		LED_OFF
-		FLASH_RED	0
-		respawn	
-
-	ELSE
-	
-		DEC		timer	
-		HUD_DIGIT	timer	
-		SND	BIP
-
+IF alter INF 6
+	SND	BIP
+	INC display
+	IF display SUP 1
+		SET display 0
 	END_IF
-
 END_IF
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+hud
 
 
 END_EVENT
+
+
+
+EVENT TIMER
+
+IF	nb_ammo		COMP	0
+	IF nb_clip SUP 0
+		DEC 	nb_clip
+		SND	RELOAD
+		SET	nb_ammo		max_ammo
+		hud
+	END_IF
+END_IF
+IF	invulnerability	SUP	0
+	DEC	invulnerability
+	IF	invulnerability	COMP	0
+		LED_OFF
+	END_IF
+END_IF
+IF	bonus	COMP	1
+	SND_PRIO SC01
+	LED_INFINITE	30
+	SET	invulnerability	respawn_time
+END_IF
+INC gunseconds
+
+
+END_EVENT
+
+
+
+EVENT ENTER_STATE
+
+hud
+
+
+END_EVENT
+
+
+
+EVENT ANIM_FINISHED
+
+HUD_JAUGE_BLINK	1
+
+
+END_EVENT
+
+EVENT DATA_CHANGE
+IF alter COMP 0
+	SET_HARNESS	1
+END_IF
+
+END_EVENT
+
+
 
 END_STATE
 
-STATE death 
+
+
+STATE reload
 
 EVENT ENTER_STATE
-TIMER	100
-SET 	assist_timer	0
-SND_PRIO		DEAD
-LED_INFINITE	30
-FLASH_RED	255
-IF 	team_base	COMP	0
-	ANIM_LOOP	AGB1
-END_IF
-IF 	team_base	COMP	1
-	ANIM_LOOP	AGB2
-END_IF
-IF 	team_base	COMP	2
-	ANIM_LOOP	AGB3
-END_IF
-IF 	team_base	COMP	3
-	ANIM_LOOP	AGB4
-END_IF
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+SND	RELOAD_CLIP
+FLASH_GREEN	1
+ANIM	ARAM
 
 
 END_EVENT
+
+
+
+EVENT ANIM_FINISHED
+
+reload
+SND_PRIO	OK
+
+
+END_EVENT
+
+
+
+EVENT HIT
+
+get_hit
+
+
+END_EVENT
+
+
+
+END_STATE
+
+
+
+STATE medikit
+
+
+
+EVENT ENTER_STATE
+
+SND	SCAN_GOOD
+FLASH_GREEN	1	
+ANIM	AMED
+
+
+END_EVENT
+
+
+
+EVENT ANIM_FINISHED
+
+medikit
+SND_PRIO	OK
+
+
+END_EVENT
+
+
+
+EVENT HIT
+
+medikit
+ANIM_OFF
+get_hit
+
+
+END_EVENT
+
+
+
+END_STATE
+
+
+
+STATE respawn
+
+
+
+EVENT ENTER_STATE
+
+SND	SCAN_GOOD
+ANIM_OFF
+SET	timer	respawn_time
+
+
+END_EVENT
+
+
+
+EVENT TIMER
+
+IF	timer	INF	2
+	SND_PRIO	RESPAWN
+	LED_OFF
+	FLASH_RED	0
+	respawn	
+ELSE
+	DEC		timer	
+	HUD_DIGIT	timer	
+	SND	BIP
+END_IF
+
+
+END_EVENT
+
+
+
+END_STATE
+
+
+
+STATE death
+
+
+
+EVENT ENTER_STATE
+
+SND_PRIO	DEAD
+IF lives COMP 0
+	ANIM_LOOP AOUT
+ELSE
+	LED_INFINITE	30
+	FLASH_RED	255
+	IF respawnmode COMP 1
+		GOTO respawn
+	END_IF
+	IF 	team_base	COMP	0
+		ANIM_LOOP	AGB1
+	ELSE
+		IF 	team_base	COMP	1
+			ANIM_LOOP	AGB2
+		ELSE
+			IF 	team_base	COMP	2
+				ANIM_LOOP	AGB3
+			ELSE
+				IF 	team_base	COMP	3
+					ANIM_LOOP	AGB4
+				ELSE
+					ANIM_OFF
+					HUD_ICON_ON	GOAL
+					INC team_base
+					HUD_DIGIT_BLINK	team_base
+					DEC team_base
+				END_IF
+			END_IF
+		END_IF
+	END_IF
+END_IF
+
+
+END_EVENT
+
+
 
 EVENT BUTTON_3_JUST_PRESSED
+
 RFID_SCAN	scan_ok
-IF	scan_ok		COMP	1
-
+IF scan_ok COMP 1
 	RFID_TYPE_MAJOR	lastrfid_type
-	IF lastrfid_type COMP RFID_BASE_PACK
-		RFID_TYPE_MINOR	lastrfid_type	
-		IF lastrfid_type COMP team_base
-			FLASH_GREEN	10
-			GOTO respawn
-			SET 	scan_ok		0
+	IF lives SUP 0
+		IF lastrfid_type COMP RFID_BASE_PACK
+			RFID_TYPE_MINOR	lastrfid_type	
+			IF lastrfid_type COMP team_base
+				FLASH_GREEN	10
+				GOTO respawn
+			END_IF
 		END_IF
 	END_IF
-
-	IF	scan_ok		COMP	1
-		SND	SCAN_BAD
-	END
-
-ELSE
-	SND	SCAN_BAD
 END_IF
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+SND	SCAN_BAD
 
 
 END_EVENT
 
-EVENT TIMER
-IF	assist	COMP 1
-	INC	assist_timer
-	IF	assist_timer 	SUP	5
-		SET	assist_timer	0
-		IF 	team_base	COMP	0
-			SND_PRIO	ASSIST_BASE1
-		END_IF
-		IF 	team_base	COMP	1
-			SND_PRIO	ASSIST_BASE2
-		END_IF
-		IF 	team_base	COMP	2
-			SND_PRIO	ASSIST_BASE3
-		END_IF
-		IF 	team_base	COMP	3
-			SND_PRIO	ASSIST_BASE4
-		END_IF
-	END_IF
-END_IF
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-END_EVENT
 
 END_STATE

@@ -48,7 +48,9 @@ function UTActivity.State.IntermediateRankings:Begin()
 
 	-- respond to proxy message
 
-	engine.libraries.usb.proxy._DispatchMessage:Add(self, UTActivity.State.FinalRankings.OnDispatchMessage)	
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		proxy._DispatchMessage:Add(self, UTActivity.State.FinalRankings.OnDispatchMessage)
+	end
 	
 end
 
@@ -60,7 +62,9 @@ function UTActivity.State.IntermediateRankings:End()
 
 	-- no longer respond to proxy message
 
-	engine.libraries.usb.proxy._DispatchMessage:Remove(self, UTActivity.State.FinalRankings.OnDispatchMessage)	
+	for index, proxy in ipairs(engine.libraries.usb.proxies) do
+		proxy._DispatchMessage:Remove(self, UTActivity.State.FinalRankings.OnDispatchMessage)
+	end
 
 end
 
@@ -85,7 +89,7 @@ function UTActivity.State.IntermediateRankings:Update()
 	self.time = quartz.system.time.gettimemicroseconds()
 	
 	self.msgTimer = (self.msgTimer or 0) + elapsedTime
-	if (not self.isReady and (self.msgTimer > 250000)) then
+	if (not self.isReady and self.msgTimer > 250000) then
 
 		-- gameover msg
 
@@ -93,10 +97,12 @@ function UTActivity.State.IntermediateRankings:Update()
 		self.isReady = true
 		for _, player in ipairs(activity.match.players) do
 
-			if (player.rfGunDevice and not (player.rfGunDevice.acknowledge)) then
+			if (player.rfGunDevice and not player.rfGunDevice.acknowledge) then
 
 				local msg = { 0x06, player.rfGunDevice.radioProtocolId, 0x94, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
-				quartz.system.usb.sendmessage(engine.libraries.usb.proxy.handle, msg)
+				for index, proxy in ipairs(engine.libraries.usb.proxies) do
+					quartz.system.usb.sendmessage(proxy.handle, msg)
+				end
 				self.isReady = false
 
 			end

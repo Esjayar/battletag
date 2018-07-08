@@ -25,25 +25,34 @@ UTClass.UIPlayerSlotGrid(UIMultiComponent)
 
 UIPlayerSlotGrid.horizontalPadding = 50
 
-UIPlayerSlotGrid.maxSlot = 8
+UIPlayerSlotGrid.maxSlot = game.settings.UiSettings.nbplayerslot + (game.settings.UiSettings.nbplayerslot * game.settings.UiSettings.playerslotgrid)
+local horizPadding = {50, 50, 50, 50, 50, 50, 50, 52, 47, 43, 40, 36, 33, 31, 28, 26, 25, 25, 24, 24, 23, 22, 21, 20, 18, 18, 18, 16, 16, 16, 16, 16}
 
 UIPlayerSlotGrid.teamColor = {
 	{ "UIRedSlot_01.tga", "UIRedSlot_02.tga" },
 	{ "UIBlueSlot_01.tga", "UIBlueSlot_02.tga" },	
 	{ "UIYellowSlot_01.tga", "UIYellowSlot_02.tga" },	
-	{ "UIGreenSlot_01.tga", "UIGreenSlot_02.tga" },		
+	{ "UIGreenSlot_01.tga", "UIGreenSlot_02.tga" },
+	{ "UISilverSlot_01.tga", "UISilverSlot_02.tga" },
+	{ "UIPurpleSlot_01.tga", "UIPurpleSlot_02.tga" },		
 }
 
 -- __ctor -------------------------------------------------------------------
 
 function UIPlayerSlotGrid:__ctor( numberOfSlot, numberOfTeam ) 
 
+	UIPlayerSlotGrid.horizontalPadding = horizPadding[game.settings.UiSettings.nbplayerslot]
+    UIPlayerSlotGrid.slots = game.settings.UiSettings.nbplayerslot
+    UIPlayerSlotGrid.playeroffset = 0
+	
 	-- team panel ...
 
 	self.uiTeamSlots = {}
+	self.uiTeamSlots2 = {}
 	for i = 1, numberOfTeam do
 
 		self.uiTeamSlots[i] = {}
+		self.uiTeamSlots2[i] = {}
 
 		self.uiTeamSlots[i].left = self:AddComponent(UIPanel:New(), "uiTeamPanelLeft" .. i)
 		self.uiTeamSlots[i].left.color = UIComponent.colors.white
@@ -51,7 +60,15 @@ function UIPlayerSlotGrid:__ctor( numberOfSlot, numberOfTeam )
 
 		self.uiTeamSlots[i].right = self:AddComponent(UIPanel:New(), "uiTeamPanelRight" .. i)
 		self.uiTeamSlots[i].right.color = UIComponent.colors.white
-		self.uiTeamSlots[i].right.background = "base:texture/ui/components/" .. self.teamColor[i][2]	
+		self.uiTeamSlots[i].right.background = "base:texture/ui/components/" .. self.teamColor[i][2]
+
+		self.uiTeamSlots2[i].left = self:AddComponent(UIPanel:New(), "uiTeamPanelLeft" .. i)
+		self.uiTeamSlots2[i].left.color = UIComponent.colors.white
+		self.uiTeamSlots2[i].left.background = "base:texture/ui/components/" .. self.teamColor[i][1]
+
+		self.uiTeamSlots2[i].right = self:AddComponent(UIPanel:New(), "uiTeamPanelRight" .. i)
+		self.uiTeamSlots2[i].right.color = UIComponent.colors.white
+		self.uiTeamSlots2[i].right.background = "base:texture/ui/components/" .. self.teamColor[i][2]
 
 	end
 
@@ -79,7 +96,11 @@ function UIPlayerSlotGrid:__ctor( numberOfSlot, numberOfTeam )
 
 	-- a scroll bar may be necessary ...
 
-	self.uiScrollBar = self:AddComponent(UIScrollBar:New({ 308, 0 }, 360), "uiScrollBar")
+	if (game.settings.UiSettings.playerslotgrid == 0) then
+		self.uiScrollBar = self:AddComponent(UIScrollBar:New({ 308, 0 }, 410), "uiScrollBar")
+	else
+		self.uiScrollBar = self:AddComponent(UIScrollBar:New({ 690, 0 }, 410), "uiScrollBar")
+	end
 
 	self.uiScrollBar.OnActionUp = function(_self)  self:Scroll(-1) end
 	self.uiScrollBar.OnActionDown = function(_self)	self:Scroll(1) end
@@ -163,6 +184,8 @@ function UIPlayerSlotGrid:Rearrange()
 			teams[i] = {}
 			self.uiTeamSlots[i].left.visible = false
 			self.uiTeamSlots[i].right.visible = false
+			self.uiTeamSlots2[i].left.visible = false
+			self.uiTeamSlots2[i].right.visible = false
 		end
 
 		-- add slot
@@ -170,7 +193,9 @@ function UIPlayerSlotGrid:Rearrange()
 		for i, slot in ipairs(self.uiPlayerSlots) do
 
 			if (slot.player) then
-				table.insert(teams[slot.player.team.index], slot)
+				if (not slot.player.primary) then
+					table.insert(teams[slot.player.team.index], slot)
+				end
 			else
 
 				-- take for an empty team
@@ -191,11 +216,12 @@ function UIPlayerSlotGrid:Rearrange()
 		-- change display
 
 		local teamOffset = 0
+		local teamOffset2 = 0
 		self.uiVisibleSlots = {}
 		local index = 1
 		for _, team in ipairs(teams) do
 			for _, slot in ipairs(team) do
-				if ((index <= (self.maxSlot + self.curIndex)) and ((1 + self.curIndex) <= index)) then
+				if (index <= self.maxSlot + self.curIndex and 1 + self.curIndex <= index) then
 					table.insert(self.uiVisibleSlots, slot)
 					team.nbSlot = (team.nbSlot or 0) + 1
 				end
@@ -210,21 +236,47 @@ function UIPlayerSlotGrid:Rearrange()
 
 		for i, slot in ipairs(self.uiVisibleSlots) do
 			slot.visible = true
-			slot:MoveTo( 0, self.horizontalPadding * (i - 1) )
+			if (game.settings.UiSettings.playerslotgrid == 1 and i > self.maxSlot / 2) then
+				slot:MoveTo( 390, self.horizontalPadding * (i - 1 - self.maxSlot / 2) )
+			else
+				slot:MoveTo( 0, self.horizontalPadding * (i - 1) )
+			end
 		end
 
 		-- borders
 
+		local totalsize = 0
+		local priortotalsize = 0
+		local columnsize2 = 0
+		local curPadding = horizPadding[self.slots]
 		for i, team in ipairs(teams) do
 			if (team.nbSlot) then
-				local size = math.min(self.maxSlot, team.nbSlot)
+				local teamsize = math.min(self.maxSlot, team.nbSlot)
+				local size = math.min(teamsize, self.slots - totalsize)
+				totalsize = totalsize + teamsize
+				local teamsize2 = teamsize - size
 				self.uiTeamSlots[i].left.visible = true
+				self.uiTeamSlots2[i].left.visible = true
 				if (self.maxSlot >= self.maxIndex) then
 					self.uiTeamSlots[i].right.visible = true
+					self.uiTeamSlots2[i].right.visible = true
 				end
-				self.uiTeamSlots[i].left.rectangle = { -50, teamOffset, -10, teamOffset + 35 + (50 * (size - 1)) }
-				self.uiTeamSlots[i].right.rectangle = { 310, teamOffset, 330, teamOffset + 35 + (50 * (size - 1))  }
-				teamOffset = teamOffset + (50 * size)
+				if (priortotalsize >= self.slots) then
+					self.uiTeamSlots[i].left.rectangle = nil
+					self.uiTeamSlots[i].right.rectangle = nil
+				else
+					self.uiTeamSlots[i].left.rectangle = { -50, teamOffset, -10, teamOffset + curPadding + self.horizontalPadding * (size - 1) }
+					self.uiTeamSlots[i].right.rectangle = { 310, teamOffset, 330, teamOffset + curPadding + self.horizontalPadding * (size - 1) }
+					teamOffset = teamOffset + (self.horizontalPadding * size)
+				end
+				if (totalsize > self.slots) then
+					self.uiTeamSlots2[i].left.rectangle = { 340, teamOffset2, 380, teamOffset2 + curPadding + self.horizontalPadding * (teamsize2 - columnsize2 - 1) }
+					self.uiTeamSlots2[i].right.rectangle = { 700, teamOffset2, 720, teamOffset2 + curPadding + self.horizontalPadding * (teamsize2 - columnsize2 - 1) }
+					teamOffset2 = teamOffset2 + (self.horizontalPadding * teamsize2)
+				end
+				local colteamsize2 = team.nbSlot - size
+				priortotalsize = teamsize + priortotalsize
+				columnsize2 = columnsize2 + colteamsize2
 			end
 		end
 
@@ -235,7 +287,11 @@ function UIPlayerSlotGrid:Rearrange()
 		for i, slot in ipairs(self.uiVisibleSlots) do
 			slot = self.uiPlayerSlots[i + self.curIndex]
 			slot.visible = true
-			slot:MoveTo( 0, self.horizontalPadding * (i - 1) )
+			if (game.settings.UiSettings.playerslotgrid == 1 and i > self.maxSlot / 2) then
+				slot:MoveTo( 385, self.horizontalPadding * (i - 1 - self.maxSlot / 2) )
+			else
+				slot:MoveTo( 0, self.horizontalPadding * (i - 1) )
+			end
 		end
 
 	end
@@ -304,5 +360,7 @@ function UIPlayerSlotGrid:Update()
 
 	if (self.uiScrollBar) then self.uiScrollBar:Update()
 	end
+	
+	UIPlayerSlotGrid.maxSlot = self.slots + (self.slots * game.settings.UiSettings.playerslotgrid)
 
 end

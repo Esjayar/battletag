@@ -35,12 +35,12 @@ function UTActivity.Ui.Matchmaking:__ctor(...)
 
     -- buttons,
 
-	-- uiButton4: accept 
+	-- uiButton5: accept 
 
-    self.uiButton4 = self:AddComponent(UIButton:New(), "uiButton4")
-    self.uiButton4.rectangle = UIMenuWindow.buttonRectangles[4]
-	self.uiButton4.text = ""
+    self.uiButton5 = self:AddComponent(UIButton:New(), "uiButton5")
+    self.uiButton5.rectangle = UIMenuWindow.buttonRectangles[5]
+	self.uiButton5.text = ""
 
-	self.uiButton4.OnAction = function (self) activity:PostStateChange("playerssetup") end
+	self.uiButton5.OnAction = function (self) activity:PostStateChange("playerssetup") end
 
 end
