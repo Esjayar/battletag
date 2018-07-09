@@ -291,17 +291,17 @@ function UTGame.Ui.Selector:Open()
 
     else
 
-        -- sort nfos by difficulty
+        -- sort nfos by category
 
-        local sortByDifficulty = function (left, right)
+        local sortByCategory = function (left, right)
 
-            if (left.difficulty  and right.difficulty) then
-                if (left.difficulty == right.difficulty) then return left.name < right.name
-                else return left.difficulty < right.difficulty
+            if (left.category  and right.category) then
+                if (left.category == right.category) then return left.name < right.name
+                else return left.category < right.category
                 end
-            elseif (left.difficulty) then
+            elseif (left.category) then
                 return true
-            elseif (right.difficulty) then
+            elseif (right.category) then
                 return false
             else
                 return left.name < right.name
@@ -309,7 +309,7 @@ function UTGame.Ui.Selector:Open()
 
         end
 
-        table.sort(game.nfos, sortByDifficulty)
+        table.sort(game.nfos, sortByCategory)
 
         for i, nfo in ipairs(game.nfos) do
 

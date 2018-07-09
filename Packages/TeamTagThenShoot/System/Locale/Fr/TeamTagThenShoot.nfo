@@ -6,7 +6,7 @@ local nfo = {
     ["name"] = "Équipe Tag et Tire !",
     ["description"] = "Équipe Scanne et tire !",
     ["pictogram"] = "TagNShoot.tga",
-    ["category"] = 1,
+    ["category"] = 3,
 
     ["difficulty"] = 30,
     ["flags"] = { "1-32 joueurs", "2-6 équipes",},
