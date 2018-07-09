@@ -133,7 +133,7 @@ function UISelector:AddItem(properties)
 	-- scroll bar
 
 	self.uiScrollBar:SetSize(#self.items, #self.uiItems)
-	self.uiScrollBar.offset = self.uiScrollBar.height * (1/(#self.items - 3))
+	--self.uiScrollBar.offset = self.uiScrollBar.height * (1/(#self.items - 3))
 
     return item
 
@@ -219,7 +219,10 @@ function UISelector:Scroll(number)
 
     assert(self.uiItems and 0 < #self.uiItems)
 
+	--set new index
     self.index = self.index + number
+	
+	--crop the index
     if (self.index < 1) then
 
         self.index = 1
@@ -232,7 +235,6 @@ function UISelector:Scroll(number)
 
 	-- no selection yet ? so give one
 
-	local selectedIndex = nil
 	if (not self.selectedItem) then
 		if (activity) then
 			self.selectedItem = self.items[uiSettingprev or 1]

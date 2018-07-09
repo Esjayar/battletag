@@ -326,11 +326,12 @@ function UTGame.Ui.Selector:Open()
             end
 
         end
+		
+		--scroll the selector and move the scrollbar to the initial index
+		self:Scroll(game.settings.UiSettings.lastgame - (self.index or 0))
+		self.uiScrollBar:SetIndex(game.settings.UiSettings.lastgame - 1)
 
-        self.index = game.settings.UiSettings.lastgame or 1
-		self:Scroll(self.index - 15 or 0)
-
-        self:DisplaySelectedNfo(game.nfos[game.settings.UiSettings.lastgame or 1])
+        self:DisplaySelectedNfo(game.nfos[self.index])
 
     end
 	self:Activate()

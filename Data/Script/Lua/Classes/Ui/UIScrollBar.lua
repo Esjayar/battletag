@@ -225,6 +225,22 @@ function UIScrollBar:SetSize(number, max)
 
 end
 
+
+-- update the current index of the scrollbar------------------------------------
+function UIScrollBar:SetIndex(index)
+
+	--crop to lower bounds
+	self.currentIndex = math.max(0, index)
+	
+	--crop to upper bounds
+	self.currentIndex = math.min(self.maxIndex, index)
+	
+	--update the scrollbar position
+	self:SetLift(self.arrowHeight + self.currentIndex * self.scrollPerIndex)
+
+end
+
+
 -- update --------------------------------------------------------------------
 
 function UIScrollBar:Update()
