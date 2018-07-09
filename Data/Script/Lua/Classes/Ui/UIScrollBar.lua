@@ -25,14 +25,18 @@ UTClass.UIScrollBar(UIMultiComponent)
 
 -- default
 
-UIScrollBar.defaultOffset = 24
+UIScrollBar.defaultScrollPerIndex = 24  --default movement of scrollbar per slot
 
 -- __ctor -------------------------------------------------------------------
-
+--location: x,y pair
+--height: height of the element
 function UIScrollBar:__ctor(location, height)
 
 	self.location = location or { 0, 0 }
 	self.height = height or 100
+	self.width = 24
+	self.arrowHeight = 24
+	self.minBarHeight = 48
 
 	-- up button
 
@@ -45,10 +49,9 @@ function UIScrollBar:__ctor(location, height)
 			quartz.framework.audio.loadvolume(game.settings.audio["volume:sfx"])
 			quartz.framework.audio.playsound()
 
-			-- lift
-
+			--update the scrollbar
 			self.currentIndex = math.max(0, self.currentIndex - 1)
-			self:SetLift(24 + self.currentIndex * self.offset)			
+			self:SetLift(self.arrowHeight + self.currentIndex * self.scrollPerIndex)			
 
 			if (self.OnActionUp) then self:OnActionUp()
 			end
@@ -69,7 +72,7 @@ function UIScrollBar:__ctor(location, height)
 
 	}
 
-	self.uiButtonUp.rectangle = { self.location[1], self.location[2], self.location[1] + 24, self.location[2] + 24 }
+	self.uiButtonUp.rectangle = { self.location[1], self.location[2], self.location[1] + self.width, self.location[2] + self.arrowHeight }
 	self.uiButtonUp.opaque = true
 	self.uiButtonUp.sensitive = true
 
@@ -86,7 +89,7 @@ function UIScrollBar:__ctor(location, height)
 			-- lift
 
 			self.currentIndex = math.min(self.maxIndex, self.currentIndex + 1)
-			self:SetLift(24 + self.currentIndex * self.offset)			
+			self:SetLift(self.arrowHeight + self.currentIndex * self.scrollPerIndex)			
 
 			if (self.OnActionDown) then self:OnActionDown()
 			end
@@ -106,28 +109,19 @@ function UIScrollBar:__ctor(location, height)
 
 	}
 
-	self.uiButtonDown.rectangle = { self.location[1], self.location[2] + self.height, self.location[1] + 24, self.location[2] + self.height + 24 }
+	self.uiButtonDown.rectangle = { self.location[1], self.location[2] + self.height, self.location[1] + self.width, self.location[2] + self.height + self.arrowHeight }
 	self.uiButtonDown.opaque = true
 	self.uiButtonDown.sensitive = true
 
 	-- lift button
 
-	self.height = self.height - 24
+	self.height = self.height - self.arrowHeight
 	self.uiButtonLift = self:AddComponent(UIButton:New(), "uiButtonLift")
     self.uiButtonLift.OnAction = function ()
 
     end
 
 	self.uiButtonLift.states = {
-
---[[
-		[ST_DISABLED] = { texture = "base:texture/ui/components/UIButton_ScrollBar_Focused.tga" },
-		[ST_DISABLED + ST_FOCUSED] = { texture = "base:texture/ui/components/UIButton_ScrollBar_Focused.tga" },
-		[ST_ENABLED] = { texture = "base:texture/ui/components/UIButton_ScrollBar_Focused.tga" },
-		[ST_ENABLED + ST_FOCUSED] = { texture = "base:texture/ui/components/UIButton_ScrollBar_Focused.tga" },
-		[ST_ENABLED + ST_CLICKED] = { texture = "base:texture/ui/components/UIButton_ScrollBar.tga" },
-		[ST_ENABLED + ST_FOCUSED + ST_CLICKED] = { texture = "base:texture/ui/components/UIButton_ScrollBar.tga" },
---]]
 
 		[ST_DISABLED] = { texture = "base:texture/ui/components/UIButton_ScrollBar.tga" },
 		[ST_DISABLED + ST_FOCUSED] = { texture = "base:texture/ui/components/UIButton_ScrollBar.tga" },
@@ -137,13 +131,14 @@ function UIScrollBar:__ctor(location, height)
 		[ST_ENABLED + ST_FOCUSED + ST_CLICKED] = { texture = "base:texture/ui/components/UIButton_ScrollBar_Focused.tga" },
 
 	}
-
+	
+	--placeholder values until the index is populated.
 	self.refY = nil
-	self.offset = self.defaultOffset
+	self.scrollPerIndex = self.defaultScrollPerIndex  --set movement of scrollbar per slot
 	self.currentIndex = 0
 	self.maxIndex = 0
 	self.liftSize = 64
-	self:SetLift(24)
+	self:SetLift(self.arrowHeight)
 	self.uiButtonLift.opaque = true
 	self.uiButtonLift.sensitive = true
 	self.uiButtonLift.direction = DIR_VERTICAL
@@ -163,14 +158,9 @@ function UIScrollBar:Draw()
 
 		-- draw background
 
-	   -- quartz.system.drawing.pushcontext()
---		quartz.system.drawing.loadtranslation(self.rectangle[1], self.rectangle[2])
---	    quartz.system.drawing.loadtranslation(unpack(self.uiContents.clientRectangle))
---	    quartz.system.drawing.loadtranslation(0, UITitledPanel.headerSize)
-
         quartz.system.drawing.loadcolor3f(unpack(UIComponent.colors.white))
         quartz.system.drawing.loadtexture("base:texture/ui/components/UIButton_ScrollBg.tga")
-        quartz.system.drawing.drawtexture(self.location[1] + 3, self.location[2] + 12, self.location[1] + 3 + 18, self.location[2] + 36 + self.height)
+        quartz.system.drawing.drawtexture(self.location[1] + 3, self.location[2] + 12, self.location[1] + 3 + 18, self.location[2] + self.height  + 36)
 
 		--quartz.system.drawing.pop()
 
@@ -183,31 +173,41 @@ function UIScrollBar:Draw()
 end
 
 -- SetLift -------------------------------------------------------------------
-
+--set the position of the lift bar and draw it.
+--pos: new position of the lift bar
 function UIScrollBar:SetLift(pos)
-
 	self.uiButtonLift.posY = pos
 	self.uiButtonLift.rectangle = { 
 		self.location[1], 
 		self.location[2] + self.uiButtonLift.posY, 
-		self.location[1] + 24, 
+		self.location[1] + self.width, 
 		self.location[2] + self.uiButtonLift.posY + self.liftSize 
 	}
 
 end
 
 -- SetSize -------------------------------------------------------------------
-
+--as the list is populated, this is called to update the size.
+-- number: total number of slots
+-- max: number of visible slots
 function UIScrollBar:SetSize(number, max)
-
-	self.maxIndex = math.max(0, number - max)
-	--self.offset = self.height * 0.1
-	self.offset = self.height * (1/(number - max + 6))
-	self.liftSize = math.max(48 + (self.height * 0.05), self.height - self.maxIndex * self.offset)
+	--max index of scrolling
+	self.maxIndex = math.max(1, number - max)
+	
+	--calculate the size of the lift button
+	self.liftSize = math.max((max / number) * self.height, self.minBarHeight)
+	
+	--calculate movement of scrollbar per slot (bar movement / index movement)
+	--self.scrollPerIndex = self.height * (1/(number - max + 6))
+	self.scrollPerIndex = (self.height - self.liftSize) / (self.maxIndex)
+	
+	
+	
+	
 	self.uiButtonLift.rectangle = { 
 		self.location[1], 
 		self.location[2] + self.uiButtonLift.posY, 
-		self.location[1] + 24, 
+		self.location[1] + self.width, 
 		self.location[2] + self.uiButtonLift.posY + self.liftSize
 	}
 
@@ -229,36 +229,65 @@ end
 
 function UIScrollBar:Update()
 
-	if (self.uiButtonLift and self.uiButtonLift.clicked) then	
-
+	--update position of the scrollbar based on mouse
+	if (self.uiButtonLift and self.uiButtonLift.clicked) then
+		--get the mouse location
 		local mouse = UIManager.stack.mouse.cursor
+		
+		
 		if (self.refY) then
 
-			local pos = mouse.y - self.location[2] - self.refY 
-			pos = math.max(24, pos)
-			pos = math.min(self.height + 24 - self.liftSize, pos)
-
-			-- action
-
-			local index = math.floor((self.uiButtonLift.posY - 24) / (self.offset - 0.5))
-			if (index > self.currentIndex) then 
-				if (self.OnActionDown) then self:OnActionDown()
-				end
-			elseif (index < self.currentIndex) then 
-				if (self.OnActionUp) then self:OnActionUp()
-				end
-			end
-			self.currentIndex = index
+			local pos = mouse.y - self.refY
+			
+			--top scroll limit
+			pos = math.max(self.arrowHeight, pos)
+				
+			--bottom scroll limit
+			pos = math.min((self.height + self.arrowHeight) - self.liftSize, pos)
 
 			-- set new pos
-
 			self:SetLift(pos)	
 
 		else
-			self.refY = mouse.y - self.location[2] - self.uiButtonLift.posY
+			--get the position of the mouse on the button
+			self.refY = mouse.y - self.uiButtonLift.posY
 		end
 	else
 		self.refY = nil
+	end
+	
+	--calculate index position based on scrollbar
+	--local index = math.floor((self.uiButtonLift.posY - 24) / (self.scrollPerIndex - 0.5))
+	--local index = math.min(self.maxIndex, math.floor( (self.uiButtonLift.posY - self.arrowHeight) / self.scrollPerIndex))
+	local index = (self.uiButtonLift.posY - self.arrowHeight) / self.scrollPerIndex
+	
+	--round the index
+	index = math.floor(index + 0.5)
+	
+	--make sure the index is valid
+	index = math.min(self.maxIndex, index)
+	
+	--update list index position if needed
+	if (self.currentIndex < index) then 
+		--loop +1 movements until the current index is correct.
+		for i = self.currentIndex + 1, index, 1 do
+			if (self.OnActionDown) then 
+				self:OnActionDown()
+			end
+		end
+		
+		--update the current index
+		self.currentIndex = index
+	elseif (self.currentIndex > index) then 
+		--loop -1 movements until the current index is correct.
+		for i = self.currentIndex - 1, index, -1 do
+			if (self.OnActionUp) then 
+				self:OnActionUp()
+			end
+		end
+		
+		--update the current index
+		self.currentIndex = index
 	end
 
 end
